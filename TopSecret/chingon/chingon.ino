@@ -1,4 +1,4 @@
-#include <NewPing.h>
+ #include <NewPing.h>
 #define MAX_DISTANCE 200
 
 /////////////
@@ -225,9 +225,22 @@ void Atr30()
   //poner progra para moverse 30 cm hacia atras
 }
 
+void Moverse(int iPos, int iRun)
+{
+  if(iPos == iRun - 1)
+  Der30();
+  else if(iPos == iRun -100)
+  Enf30();
+  else if(iPos == iRun + 1)
+  Izq30();
+  else if(iPos == iRun + 100)
+  Atr30();
+}
+
 ///////////////////////////////////////
 //////////////////////////////////////
 
+//regresa numero de posibles moviemitnos y cambioa direccion[] a true si se puede, va por prioridad
 int Posib(bool Direccion[])
 {
   int iPosWays = 0;
@@ -325,28 +338,102 @@ void GetVariables(int iPass[], int iPos[], int iPossibility[], int iRun[][4], in
     }
 }
 
-//regresa bOldPosition como verdadera en caso de que ya se haya estado en esa coordenada
-void CheckPosition(int iPass[], int iPos[], int iPossibility[], int iRun[][4], bool &bOldPosition, int iI)
+//revisa si la coordenada que le damos que la trabaja como iCheck (se envia un iRun) no ha sido un iPos pasado, si ya la ha visitado regresa el booleano como verdadero, si no como falso.
+bool Check(int iCheck, int iPos[])
 {
-   int GoHere = 9;
-   do{
-   int iC = iI;
-   for int B = 0; B < 4; b++)
-   {
-      for(int A = iI; A >= 0; A--)
-      {
-        iRun[iC][B] != iPos[A]
-        if(A == B && iRun[iC][B] != iPos[A])
-        {
-         GoHere = iRun[iC][B]
+  //booleano que se regresara
+  bool BeenHere = false
+  do{
+    //revisa todos los iPos
+     for(int iJ = 400; iJ >= 0; iJ--)
+     {
+      //revisa el iPos con la coordenada dada
+       if(iCheck == iPos[iJ])
+       {
+        BeenHere = true;
+       }
+     }
+     //sale del ciclo aunque aun sea false
+     if(BeenHere == false)
+     break;
+  }while (BeenHere == false);
+  return BeenHere;
+}
+
+int ReturniPos(int SearchThis; int iPos[])
+{
+  int This;
+  for(int A = 0; A < 400; A++)
+  {
+    if(SearchThis == iPos[A])
+    {
+      This = A;
+    }
+    if(This == A)
+    break;
+  }
+  return This;
+}
+
+//Busca las coordenadas a seguir para llegar a la coordenada que deseamos
+void RobotOfTime(int WeWantHere, int WeAreHere, int iPos[], int iRun[][4], int iPossibility[], int iI, int iL)
+{
+  int ThisWay[] = {0};
+  int Ways;
+  int iZ = iI;
+  bool GotIt = false;
+  int iArr = 0;
+  int iArrZ[400] = {999};
+  iArrZ[0] = iZ
+  int iHelper = iArr;
+  
+  do{
+    iHelper = iArr;
+    iArr = 0;
+    for(int B = 0; B <= iHelper; B++)
+    {
+      iZ = iArrZ[B];
+       for(int A = 0; A < iPossibility[iZ]; A++)
+       {
+          ThisWay[iArr] = (ThisWay * 10000) + iRun[iZ][A];
+         if(iRun[iZ][A] == WeWantHere)
+         {
+           GotIt = true; 
+         }
+         iArrZ[iArr] = ReturnIPos(iRun[iZ][iA], iPos);
+         iArr++;
         }
-      }
-   }
-   }while(GoHere == 9);
-   
+    }
+  }while(GotIt == false)
+}
+
+//principal
+void Laberinto()
+{
+  GetVariables (iPass, iPos, iPossibility, iRun, iI);
+  for(int iM = iI; iM >= 0; iM--)
+  {
+     for (int iL = 0; iL < iPossibility[iI]; iL ++)
+     {
+       int iNext = iRun[iM][iL];
+       bool bCheck = (iNext, iPos);
+       if(bCheck == true)
+       {
+          RobotOfTime(iNext, iPos);
+          break;
+       }
+     }
+     if(bCheck == true)
+     break;
+  }
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  Serial.print("Primero: ");
+  Serial.println(sonarE1.ping_cm());
+  
+  Serial.print("Segundo: ");
+  Serial.println(sonarE2.ping_cm());
 
 }
