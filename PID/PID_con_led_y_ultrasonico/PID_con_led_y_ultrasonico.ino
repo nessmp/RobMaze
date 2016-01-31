@@ -21,7 +21,6 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   Input = sonarE1.ping_cm();
-  Setpoint = 10;
 
   //turn the PID on
   myPID.SetMode(AUTOMATIC);
@@ -30,8 +29,11 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  Setpoint = 10;
+  myPID.SetControllerDirection(REVERSE);
   Serial.print("Ultrasonico: ");
   Serial.println(sonarE1.ping_cm());
+  
   Input = sonarE1.ping_cm();
   myPID.Compute();
   analogWrite(PIN_OUTPUT, Output);
