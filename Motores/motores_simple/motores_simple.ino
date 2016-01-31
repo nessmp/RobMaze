@@ -1,3 +1,19 @@
+/////////////////////////
+//pines de los motores///
+/////////////////////////
+
+byte motDerE1 = 19;
+byte motDerE2 = 20;
+
+byte motDerA1 = 21;
+byte motDerA2 = 22;
+
+byte motIzqE1 = 23;
+byte motIzqE2 = 24;
+
+byte motIzqA1 = 25;
+byte motIzqA2 = 26;
+
 void setup() {
   Serial.begin(9600);
   

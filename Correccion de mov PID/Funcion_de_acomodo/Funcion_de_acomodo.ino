@@ -3,14 +3,32 @@
 
 #define MAX_DISTANCE 200
 
-#define PIN_OUTPUT 11
+/////////////////////////
+//pines de los motores///
+/////////////////////////
 
-//ultrasonicos de enfrente
+byte motDerE1 = 19;
+byte motDerE2 = 20;
+
+byte motDerA1 = 21;
+byte motDerA2 = 22;
+
+byte motIzqE1 = 23;
+byte motIzqE2 = 24;
+
+byte motIzqA1 = 25;
+byte motIzqA2 = 26;
+
+////////////////////////////
+//ultrasonicos de enfrente//
+////////////////////////////
+
 byte bTriggerE1 = 8;
 byte bEchoE1 = 9;
 
 NewPing sonarE1(bTriggerE1, bEchoE1, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonarE1.ping_cm();
 
+double Setpoint, Input, Output;
 
 //Specify the links and initial tuning parameters
 double Kp=2, Ki=5, Kd=1;
@@ -45,7 +63,7 @@ void setup() {
 
 void AcomodarseLejos()
 {
-  Setpoint = 10
+  Setpoint = 10;
   Input = sonarE1.ping_cm();
   myPID.Compute();
   //Movimiento hacia la izquierda
@@ -64,7 +82,7 @@ void AcomodarseLejos()
 
 void AcomodarseCerca()
 {
-  Setpoint = 10
+  Setpoint = 10;
   Input = sonarE1.ping_cm();
   myPID.Compute();
 
