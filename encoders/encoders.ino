@@ -1,7 +1,7 @@
 ///////////////////////
 ///////////////////////
-#define ENCODER_A_PIN 2
-#define ENCODER_B_PIN 3
+#define ENCODER_A_PIN 12
+#define ENCODER_B_PIN 13
 
 long position;
 
@@ -20,7 +20,6 @@ void loop()
 {
    Serial.print("Position: ");
    Serial.println(position, DEC);
-   delay(1000);
 }
 
 void read_quadrature()
