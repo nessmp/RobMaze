@@ -69,19 +69,13 @@ Encoder EncIzqEnf(7, 8);
 Encoder EncIzqAtr(9, 10);
 long oldPosition  = -999;
 
-//////////
-//Sharps//
-//////////
-
-int ir_sensor0 = A0;
-int ir_sensor1 = A1;
-int ir_sensor2 = A2;
-
 /////////
 //Sharp//
 /////////
 
-SharpIR sharp(A0, 25, 93, model);
+SharpIR sharpEnf(A0, 25, 93, model);
+SharpIR sharpDer(A1, 25, 93, model);
+SharpIR sharpIzq(A2, 25, 93, model);
 
 void setup() {
   // put your setup code here, to run once:
@@ -108,6 +102,8 @@ void setup() {
   /////////
 
   pinMode (A0, INPUT);
+  pinMode (A1, INPUT);
+  pinMode (A2, INPUT);
 }
 
 ///////////////////////////
@@ -196,48 +192,160 @@ void Izquierda()
   analogWrite(motIzqA2, 255);
 }
 
-int Encoders()
+void Der30()
 {
-  long newPosition = myEnc.read();
-  if (newPosition != oldPosition) {
-    oldPosition = newPosition;
-    //Serial.println(newPosition);
-  }
-  return newPosition;
-}
+  long EncDE = EncDerEnf.read();
+  long EncDE30 = EncDE + 30;
 
-int Sharps()
-{
-  int lectura, cm;
- 
-  lectura = analogRead(ir_sensor0); // lectura del sensor 0
-  cm = pow(3027.4 / lectura, 1.2134); // conversión a centímetros
-  //Serial.print("Sensor 0: ");
-  //Serial.println(cm); // lectura del sensor 0
-  return cm;
-}
+  long EncDA = EncDerAtr.read();
+  long EncDA30 = EncDA + 30;
 
-void Enf30()
-{
-  long Enc = EncDerEnf;
-  long Enc30 = Enc + 30;
+  long EncIE = EncIzqEnf.read();
+  long EncIE30 = EncIE + 30;
+
+  int EncIA = EncIzqAtr.read();
+  long EncIA30 = EncIA + 30;
   
-  long Ultrasonico = sonarE1.ping_cm();
-  long Ultrasonico30 = ultrasonico - 30;
+  long Ultrasonico1 = sonarD1.ping_cm();
+  long Ultrasonico130 = Ultrasonico1 - 30;
 
-  long Sharp = sharp.distance();
-  long Sharp30 = Sharp - 30;
+  long Ultrasonico2 = sonarD2.ping_cm();
+  long Ultrasonico230 = Ultrasonico2 - 30;
+
+  long Sharp = sharpDer.distance();
+  int Sharp30 = Sharp - 30;
 
   do{
     Adelante();
     
-    Enc = EncDerEnf;
-    Ultrasonico = sonarE1.ping_cm();
-    Sharp = sharp.distance();
-  }while(Enc < Enc 30 && Ultrasonico > Ultrasonico 30 && Sharp > Sharp30)
+    EncDE = EncDerEnf.read();
+    EncDA = EncDerAtr.read();
+    EncIE = EncIzqEnf.read();
+    EncIA = EncIzqAtr.read();
+    
+    Ultrasonico1 = sonarD1.ping_cm();
+    Ultrasonico2 = sonarD2.ping_cm();
+    
+    Sharp = sharpDer.distance();
+  }while(EncDE <= EncDE30 && EncDA <= EncDA30 && EncIE <= EncIE30 && EncIA <= EncIA30 && Ultrasonico1 >= Ultrasonico130 && Ultrasonico2 >= Ultrasonico230 && Sharp >= Sharp30);
 
   Detenerse();
+}
+
+void Enf30()
+{
+  long EncDE = EncDerEnf.read();
+  long EncDE30 = EncDE + 30;
+
+  long EncDA = EncDerAtr.read();
+  long EncDA30 = EncDA + 30;
+
+  long EncIE = EncIzqEnf.read();
+  long EncIE30 = EncIE + 30;
+
+  int EncIA = EncIzqAtr.read();
+  long EncIA30 = EncIA + 30;
   
+  long Ultrasonico1 = sonarE1.ping_cm();
+  long Ultrasonico130 = Ultrasonico1 - 30;
+
+  long Ultrasonico2 = sonarE2.ping_cm();
+  long Ultrasonico230 = Ultrasonico2 - 30;
+
+  long Sharp = sharpEnf.distance();
+  int Sharp30 = Sharp - 30;
+
+  do{
+    Adelante();
+    
+    EncDE = EncDerEnf.read();
+    EncDA = EncDerAtr.read();
+    EncIE = EncIzqEnf.read();
+    EncIA = EncIzqAtr.read();
+    
+    Ultrasonico1 = sonarE1.ping_cm();
+    Ultrasonico2 = sonarE2.ping_cm();
+    
+    Sharp = sharpEnf.distance();
+  }while(EncDE <= EncDE30 && EncDA <= EncDA30 && EncIE <= EncIE30 && EncIA <= EncIA30 && Ultrasonico1 >= Ultrasonico130 && Ultrasonico2 >= Ultrasonico230 && Sharp >= Sharp30);
+
+  Detenerse();
+}
+
+void Izq30()
+{
+  long EncDE = EncDerEnf.read();
+  long EncDE30 = EncDE + 30;
+
+  long EncDA = EncDerAtr.read();
+  long EncDA30 = EncDA + 30;
+
+  long EncIE = EncIzqEnf.read();
+  long EncIE30 = EncIE + 30;
+
+  int EncIA = EncIzqAtr.read();
+  long EncIA30 = EncIA + 30;
+  
+  long Ultrasonico1 = sonarI1.ping_cm();
+  long Ultrasonico130 = Ultrasonico1 - 30;
+
+  long Ultrasonico2 = sonarI2.ping_cm();
+  long Ultrasonico230 = Ultrasonico2 - 30;
+
+  long Sharp = sharpIzq.distance();
+  int Sharp30 = Sharp - 30;
+
+  do{
+    Adelante();
+    
+    EncDE = EncDerEnf.read();
+    EncDA = EncDerAtr.read();
+    EncIE = EncIzqEnf.read();
+    EncIA = EncIzqAtr.read();
+    
+    Ultrasonico1 = sonarI1.ping_cm();
+    Ultrasonico2 = sonarI2.ping_cm();
+    
+    Sharp = sharpIzq.distance();
+  }while(EncDE <= EncDE30 && EncDA <= EncDA30 && EncIE <= EncIE30 && EncIA <= EncIA30 && Ultrasonico1 >= Ultrasonico130 && Ultrasonico2 >= Ultrasonico230 && Sharp >= Sharp30);
+
+  Detenerse();
+}
+
+void Atr30()
+{
+  long EncDE = EncDerEnf.read();
+  long EncDE30 = EncDE + 30;
+
+  long EncDA = EncDerAtr.read();
+  long EncDA30 = EncDA + 30;
+
+  long EncIE = EncIzqEnf.read();
+  long EncIE30 = EncIE + 30;
+
+  int EncIA = EncIzqAtr.read();
+  long EncIA30 = EncIA + 30;
+  
+  long Ultrasonico1 = sonarA1.ping_cm();
+  long Ultrasonico130 = Ultrasonico1 - 30;
+
+  long Ultrasonico2 = sonarA2.ping_cm();
+  long Ultrasonico230 = Ultrasonico2 - 30;
+
+  do{
+    Adelante();
+    
+    EncDE = EncDerEnf.read();
+    EncDA = EncDerAtr.read();
+    EncIE = EncIzqEnf.read();
+    EncIA = EncIzqAtr.read();
+    
+    Ultrasonico1 = sonarA1.ping_cm();
+    Ultrasonico2 = sonarA2.ping_cm();
+    
+  }while(EncDE <= EncDE30 && EncDA <= EncDA30 && EncIE <= EncIE30 && EncIA <= EncIA30 && Ultrasonico1 >= Ultrasonico130 && Ultrasonico2 >= Ultrasonico230);
+
+  Detenerse();
 }
 
 void loop() {
