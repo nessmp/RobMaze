@@ -35,7 +35,7 @@ void loop() {
     Serial.write('°'); // Degree Symbol
     Serial.println("C");
   }
-  lcd.setCursor(1,1); //Start at character 4 on line 0
+  lcd.setCursor(0,0); //Start at character 4 on line 0
   lcd.print("Object: " + String(calor1.object(), 2) + " C");
   delay(2000);
 }
