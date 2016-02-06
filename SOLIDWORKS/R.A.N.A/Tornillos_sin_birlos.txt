@@ -1,0 +1,15 @@
+(22) Tornillos m3 10mm  
+(38) Tuercas m3
+(10) Tornillos m3 para el motor 5mm  
+(4) Tornillos LCD 10mm  
+(4) Tuercas LCD 
+(8) Espaciadores m3 8cm 
+(8) Espaciadores m3 4cm  
+(8) Tornillos puente H 
+(8) Tuercas puente H 
+(12) Tornillos 1.5M  
+(12) Tuercas 1.5M
+(4) Tornillos sevomotor   
+(4) Tuercas servomotor
+(10) Abrazaderas 
+
