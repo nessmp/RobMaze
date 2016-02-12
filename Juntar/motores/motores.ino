@@ -202,10 +202,36 @@ void GiroIsq90()
    Detenerse();
 }
 
+void DerechaAcomodo()
+{
+  analogWrite(motDerE1, 0);
+  analogWrite(motDerE2, 255);
+
+  analogWrite(motDerA1, 0);
+  analogWrite(motDerA2, 0);
+
+  analogWrite(motIzqE1, 255);
+  analogWrite(motIzqE2, 0);
+
+  analogWrite(motIzqA1, 0);
+  analogWrite(motIzqA2, 0);
+}
+
+void IzquierdaAcomodo()
+{
+  analogWrite(motDerE1, 0);
+  analogWrite(motDerE2, 0);
+
+  analogWrite(motDerA1, 255);
+  analogWrite(motDerA2, 0);
+
+  analogWrite(motIzqE1, 0);
+  analogWrite(motIzqE2, 0);
+
+  analogWrite(motIzqA1, 0);
+  analogWrite(motIzqA2, 255);
+}
+
 void loop() {
   // put your main code here, to run repeatedly:
-DerechaM();
-delay(3000);
-IzquierdaM();
-delay(3000);
 }
