@@ -127,7 +127,6 @@ String colon = "";
 //Encoder
 long oldPosition  = -999;
 
-<<<<<<< HEAD
 //Acelerometro
 int estable = 3280;
 
@@ -228,14 +227,6 @@ bool color()
   }
 
   return Negro;
-}
-
-//Acciones al encontrar zona negra
-void Negro()
-{
-  Atras30();
-  GiroIzq90();
-  Adelante30();
 }
 
 ////////////////////
@@ -383,19 +374,7 @@ void GiroIzq90()
 }
 
 //Avances de 30
-void Adelante30()
-{
-  
 
-  EncDerA.write(0);
-
-  while (Encoder1() < const30)
-  {
-    Adelante();
-    Encoder1();
-  }
-   Detenerse();
-}
 
 void Atras30()
 {
@@ -752,15 +731,33 @@ void Detectado()
   }
 }
 
+//Acciones al encontrar zona negra
+void Negro()
+{
+  Atras30();
+  GiroIzq90();
+  Adelante30();
+}
+
+void Adelante30()
+{
+  EncDerA.write(0);
+
+  while (Encoder1() < const30)
+  {
+    Detectado();
+    Adelante();
+    Encoder1();
+  }
+   Detenerse();
+}
+
 void loop() {
   // put your main code here, to run repeatedly:
-<<<<<<< HEAD
   if (ParedDerecha==false)
 {
   GiroDer90();
   Adelante30();
-=======
->>>>>>> origin/master
 }
 
 else if (ParedEnfrente==false)
