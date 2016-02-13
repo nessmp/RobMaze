@@ -633,7 +633,7 @@ void Kit()
 
 void Detectado()
 {
-  if(VictimaAtr || VictimaDer || VictimaEnf || VictimaIzq)
+  if(VictimaAtr() || VictimaDer() || VictimaEnf() || VictimaIzq())
   {
     Detenerse();
     Kit();
