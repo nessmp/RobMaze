@@ -231,7 +231,7 @@ bool color()
   return Negro;
 }
 //funcion para saber si hay rampa y si la hay atravesar
-void rampa()
+void Rampa()
 {
 
   int y;
