@@ -230,6 +230,28 @@ bool color()
 
   return Negro;
 }
+//funcion para saber si hay rampa y si la hay atravesar
+void rampa()
+{
+
+  int y;
+  byte piny = 1;
+  bool rampa;
+
+  y = map(analogRead(piny), 0, 1023, 0, 10000);
+
+  if (y < estable - 200 || y > estable + 200)
+  {
+    while(y<estable-50||y>estable+50)
+    {
+      Adelante();
+      y = map(analogRead(piny), 0, 1023, 0, 10000);
+    }
+    Detenerse();
+  }
+
+
+}
 
 ////////////////////
 //funciones de mov//
