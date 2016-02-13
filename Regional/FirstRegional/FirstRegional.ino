@@ -15,68 +15,68 @@
 /////////
 
 //Sensor de color
-const int s0  
-const int s1  
-const int s2  
-const int s3  
-const int out  
+const int s0  = 32;
+const int s1  =34;
+const int s2  =36;
+const int s3  =38;
+const int out  = 40;
 
 //motores
-byte motDerE1; 
-byte motDerE2; 
+byte motDerE1 = 6; 
+byte motDerE2 = 7; 
 
-byte motDerA1;
-byte motDerA2;
+byte motDerA1 = 4;
+byte motDerA2 = 5;
 
-byte motIzqE1;
-byte motIzqE2;
+byte motIzqE1 = 8;
+byte motIzqE2 = 9;
 
-byte motIzqA1;
-byte motIzqA2;
+byte motIzqA1 = 10;
+byte motIzqA2 = 11;
 
 //Ultrasonico enfrente A
-byte TriggEA;
-byte EchoEA;
+byte TriggEA = 23;
+byte EchoEA = 25;
 
 //Ultrasonico Enfrente B
 
-byte TriggEB;
-byte EchoEB;
+byte TriggEB = 51;
+byte EchoEB = 53;
 
 //Ultrasonico Derecha A
 
-byte TriggDA;
-byte EchoDA;
+byte TriggDA  =47;
+byte EchoDA =49;
 
 //Ultrasonico Derecha B
 
-byte TriggDB;
-byte EchoDB;
+byte TriggDB = 43;
+byte EchoDB =45;
 
 
 //Ultrasonico Atras A
 
-byte TriggAA;
-byte EchoAA;
+byte TriggAA = 39;
+byte EchoAA = 41;
 
 //Ultrasonico Atrás B
 
-byte TriggAB;
-byte EchoAB;
+byte TriggAB = 35;
+byte EchoAB = 37;
 
 //Ultrasonico Izquierda A
 
-byte TriggIA;
-byte EchoIA;
+byte TriggIA = 31;
+byte EchoIA = 33;
 
 //Ultrasonico Izquierda B
 
-byte TriggIB;
-byte EchoIB;
+byte TriggIB = 27;
+byte EchoIB = 29;
 
 //Sharps
-byte Enf;
-byte Der;
+byte Enf = A3;
+byte Der = A5;
 
 //////////
 //clases//
@@ -146,6 +146,7 @@ int pos = 0;
 
 void setup() {
   Serial.begin(9600);
+  /*
   //Direcciones I2C de los sensores de calor
   CalorEnf.begin(0x1C)
   CalorDer.begin(0x2C)
@@ -156,6 +157,7 @@ void setup() {
   CalorDer.setUnit(TEMP_C); 
   CalorAtr.setUnit(TEMP_C); 
   CalorIzq.setUnit(TEMP_C); 
+  */
 
   //Servo
   myservo.attach(9);
@@ -641,24 +643,22 @@ void AgujeroNegro()
 
 bool ParedDer()
 {
-  bool Pared = false
-  int Ult1 = UltDA();
-  int Ult2 =UltDB();
-  if(Ult1 < 15 || Ult2 < 15)
+  bool Pared = true
+  int Sharp = SharpDer.distance();
+  if(Sharp > 25)
   {
-    Pared = true;
+    Pared = false;
   }
   return Pared;
 }
 
 bool ParedEnf()
 {
-  bool Pared = false
-  int Ult1 = UltEA();
-  int Ult2 =UltEB();
-  if(Ult1 < 15 || Ult2 < 15)
+  bool Pared = true
+  int Sharp = SharpEnf.distance();
+  if(Sharp > 25)
   {
-    Pared = true;
+    Pared = false;
   }
   return Pared;
 }
@@ -752,21 +752,28 @@ void Adelante30()
    Detenerse();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-  if (ParedDerecha==false)
+void SeguirDerecha()
 {
-  GiroDer90();
-  Adelante30();
+  if (ParedDerecha==false)
+  {
+    GiroDer90();
+    Adelante30();
+    Detectado();
+  }
+
+  else if (ParedEnfrente==false)
+  {
+    Adelante30();
+    Detectado();
+  }
+  else if (ParedDerecha==true && ParedEnfrente==true)
+  {
+    GiroIzq90();
+  }
 }
 
-else if (ParedEnfrente==false)
-{
-  Adelante30();
-}
-else if (ParedDerecha==true && ParedEnfrente==true)
-{
-  GiroIzq90();
-}
+void loop() {
+  // put your main code here, to run repeatedly:
+  SeguirDerecha();
 }
 
