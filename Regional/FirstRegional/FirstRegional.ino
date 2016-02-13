@@ -780,12 +780,14 @@ void SeguirDerecha()
   {
     GiroDer90();
     Adelante30();
+    Rampa();
     Detectado();
   }
 
   else if (ParedEnfrente==false)
   {
     Adelante30();
+    Rampa();
     Detectado();
   }
   else if (ParedDerecha==true && ParedEnfrente==true)
