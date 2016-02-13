@@ -122,6 +122,15 @@ String colon = "";
 //Encoder
 long oldPosition  = -999;
 
+//Acelerometro
+int estable = 3280;
+
+//Giros
+int const90 = 4550;
+
+//Avances 30
+int const30=5700;
+
 /////////
 //SetUp//
 /////////
@@ -249,14 +258,13 @@ void Atras()
 
 }
 
-//funcion para moverse hacia adelante
-void Derecha()
+void DerechaM()
 {
-  analogWrite(motDerE1, 255);
-  analogWrite(motDerE2, 0);
+  analogWrite(motDerE1, 0);
+  analogWrite(motDerE2, 255);
 
-  analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 255);
+  analogWrite(motDerA1, 255);
+  analogWrite(motDerA2, 0);
 
   analogWrite(motIzqE1, 255);
   analogWrite(motIzqE2, 0);
@@ -266,14 +274,30 @@ void Derecha()
 
 }
 
-//funcion para moverse hacia izquierda
-void Izquierda()
+void Derecha()
 {
   analogWrite(motDerE1, 0);
   analogWrite(motDerE2, 255);
 
-  analogWrite(motDerA1, 255);
-  analogWrite(motDerA2, 0);
+  analogWrite(motDerA1, 0);
+  analogWrite(motDerA2, 255);
+
+  analogWrite(motIzqE1, 255);
+  analogWrite(motIzqE2, 0);
+
+  analogWrite(motIzqA1, 255);
+  analogWrite(motIzqA2, 0);
+
+}
+
+//funcion para moverse hacia izquierda
+void IzquierdaM()
+{
+  analogWrite(motDerE1, 255);
+  analogWrite(motDerE2, 0);
+
+  analogWrite(motDerA1, 0);
+  analogWrite(motDerA2, 255);
 
   analogWrite(motIzqE1, 0);
   analogWrite(motIzqE2, 255);
@@ -281,6 +305,92 @@ void Izquierda()
   analogWrite(motIzqA1, 255);
   analogWrite(motIzqA2, 0);
 }
+
+void Izquierda()
+{
+  analogWrite(motDerE1, 255);
+  analogWrite(motDerE2, 0);
+
+  analogWrite(motDerA1, 255);
+  analogWrite(motDerA2, 0);
+
+  analogWrite(motIzqE1, 0);
+  analogWrite(motIzqE2, 255);
+
+  analogWrite(motIzqA1, 0);
+  analogWrite(motIzqA2, 255);
+}
+
+//Giros
+void GiroDer90()
+{
+    
+  delay(1000);
+  EncDerA.write(0);
+ while (Encoder1() > const90*-1)
+  {
+    Derecha();
+    Encoder1();
+  }
+   Detenerse();
+}
+
+void GiroIzq90()
+{
+ 
+  delay(1000);
+  EncDerA.write(0);
+
+  while (Encoder1() < const90)
+  {
+    Izquierda();
+    Encoder1();
+  }
+   Detenerse();
+}
+
+//Avances de 30
+void Adelante30()
+{
+  
+
+  EncDerA.write(0);
+
+  while (Encoder1() < const30)
+  {
+    Adelante();
+    Encoder1();
+  }
+   Detenerse();
+}
+
+void Atras30()
+{
+    
+
+  EncDerA.write(0);
+
+  while (Encoder1() > const30*-1)
+  {
+    Atras();
+    Encoder1();
+  }
+   Detenerse();
+}
+
+
+//Cuentas del encoder
+int Encoder1()
+  {
+    long newPosition = EncDerA();
+  
+    if (newPosition != oldPosition) {
+      oldPosition = newPosition;
+  
+    }
+    return newPosition;
+  }
+  
 
 //funcion para ultrasonico de enfrente izq
 int UltEA()
@@ -402,6 +512,19 @@ void EncIzqA()
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.println(CalorIzq);
-  delay(20);
+  if (ParedDerecha==false)
+{
+  GiroDer90();
+  Adelante30();
 }
+
+else if (ParedEnfrente==false)
+{
+  Adelante30();
+}
+else if (ParedDerecha==true && ParedEnfrente==true)
+{
+  GiroIzq90();
+}
+}
+
