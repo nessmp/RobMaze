@@ -7,6 +7,8 @@
 #define MAX_DISTANCE 200 //distancia max detectada por los ultrasonicos
 #include <SharpIR.h> //sharps
 #define model 1080 //modelo del sharp GP2Y0A21Y
+#include <i2cmaster.h>
+#include <Servo.h>
 
 /////////
 //pines//
@@ -109,6 +111,9 @@ NewPing UltIB(TriggIB, EchoIB, MAX_DISTANCE);
 SharpIR SharpEnf(Enf, 25, 93, model);
 SharpIR SharpDer(Der, 25, 93, model);
 
+//Servo
+Servo myservo;
+
 //////////////
 // Variables//
 //////////////
@@ -122,6 +127,7 @@ String colon = "";
 //Encoder
 long oldPosition  = -999;
 
+<<<<<<< HEAD
 //Acelerometro
 int estable = 3280;
 
@@ -130,6 +136,10 @@ int const90 = 4550;
 
 //Avances 30
 int const30=5700;
+=======
+//servo
+int pos = 0;
+>>>>>>> origin/master
 
 /////////
 //SetUp//
@@ -148,6 +158,9 @@ void setup() {
   CalorAtr.setUnit(TEMP_C); 
   CalorIzq.setUnit(TEMP_C); 
 
+  //Servo
+  myservo.attach(9);
+  
   //Sensor de color
   pinMode(s0, OUTPUT);  
   pinMode(s1, OUTPUT);  
@@ -177,6 +190,10 @@ void setup() {
   //Sharps
   pinMode (Enf, INPUT);
   pinMode (Der, INPUT);
+
+  //Calor
+  i2c_init(); //Initialise the i2c bus
+  PORTC = (1 << PORTC4) | (1 << PORTC5);//enable pullups
 }
 
 /////////////
@@ -184,8 +201,9 @@ void setup() {
 /////////////
 
 //función para leer datos del sensor de color
-void color()  
+bool color()  
 {    
+  bool Negro = false;
   digitalWrite(s2, LOW);  
   digitalWrite(s3, LOW);  
   //count OUT, pRed, RED  
@@ -203,6 +221,21 @@ void color()
   Serial.println(green);
   Serial.println("blue: ");
   Serial.println(blue);
+
+  if(red && green && blue)
+  {
+    Negro = true;
+  }
+
+  return Negro;
+}
+
+//Acciones al encontrar zona negra
+void Negro()
+{
+  Atras30();
+  GiroIzq90();
+  Adelante30();
 }
 
 ////////////////////
@@ -459,24 +492,133 @@ int SharpDer()
   return SharpDer.distance()
 }
 
+//regresa el calor detectado por el sensor de enfrente, REVISAR EL ADDRESS
 int CalorEnf()
 {
-  return CalorEnf.object();
+    int Calor;
+    int dev = 0x1C<<1;
+    int data_low = 0;
+    int data_high = 0;
+    int pec = 0;
+    
+    i2c_start_wait(dev+I2C_WRITE);
+    i2c_write(0x07);
+    
+    // read
+    i2c_rep_start(dev+I2C_READ);
+    data_low = i2c_readAck(); //Read 1 byte and then send ack
+    data_high = i2c_readAck(); //Read 1 byte and then send ack
+    pec = i2c_readNak();
+    i2c_stop();
+    
+    //This converts high and low bytes together and processes temperature, MSB is a error bit and is ignored for temps
+    double tempFactor = 0.02; // 0.02 degrees per LSB (measurement resolution of the MLX90614)
+    double tempData = 0x0000; // zero out the data
+    int frac; // data past the decimal point
+    
+    // This masks off the error bit of the high byte, then moves it left 8 bits and adds the low byte.
+    tempData = (double)(((data_high & 0x007F) << 8) + data_low);
+    tempData = (tempData * tempFactor)-0.01;
+    
+    float celcius = tempData - 273.15;
+    Calor = celcius;
+    return Calor;
 }
 
 int CalorDer()
 {
-  return CalorDer.object();
+    int Calor;
+    int dev = 0x2C<<1;
+    int data_low = 0;
+    int data_high = 0;
+    int pec = 0;
+    
+    i2c_start_wait(dev+I2C_WRITE);
+    i2c_write(0x07);
+    
+    // read
+    i2c_rep_start(dev+I2C_READ);
+    data_low = i2c_readAck(); //Read 1 byte and then send ack
+    data_high = i2c_readAck(); //Read 1 byte and then send ack
+    pec = i2c_readNak();
+    i2c_stop();
+    
+    //This converts high and low bytes together and processes temperature, MSB is a error bit and is ignored for temps
+    double tempFactor = 0.02; // 0.02 degrees per LSB (measurement resolution of the MLX90614)
+    double tempData = 0x0000; // zero out the data
+    int frac; // data past the decimal point
+    
+    // This masks off the error bit of the high byte, then moves it left 8 bits and adds the low byte.
+    tempData = (double)(((data_high & 0x007F) << 8) + data_low);
+    tempData = (tempData * tempFactor)-0.01;
+    
+    float celcius = tempData - 273.15;
+    Calor = celcius;
+    return Calor;
 }
 
 int CalorAtr()
 {
-  return CalorAtr.object();
+    int Calor;
+    int dev = 0x3C<<1;
+    int data_low = 0;
+    int data_high = 0;
+    int pec = 0;
+    
+    i2c_start_wait(dev+I2C_WRITE);
+    i2c_write(0x07);
+    
+    // read
+    i2c_rep_start(dev+I2C_READ);
+    data_low = i2c_readAck(); //Read 1 byte and then send ack
+    data_high = i2c_readAck(); //Read 1 byte and then send ack
+    pec = i2c_readNak();
+    i2c_stop();
+    
+    //This converts high and low bytes together and processes temperature, MSB is a error bit and is ignored for temps
+    double tempFactor = 0.02; // 0.02 degrees per LSB (measurement resolution of the MLX90614)
+    double tempData = 0x0000; // zero out the data
+    int frac; // data past the decimal point
+    
+    // This masks off the error bit of the high byte, then moves it left 8 bits and adds the low byte.
+    tempData = (double)(((data_high & 0x007F) << 8) + data_low);
+    tempData = (tempData * tempFactor)-0.01;
+    
+    float celcius = tempData - 273.15;
+    Calor = celcius;
+    return Calor;
 }
 
 int CalorIzq()
 {
-  return CalorIzq.object();
+    int Calor;
+    int dev = 0x4C<<1;
+    int data_low = 0;
+    int data_high = 0;
+    int pec = 0;
+    
+    i2c_start_wait(dev+I2C_WRITE);
+    i2c_write(0x07);
+    
+    // read
+    i2c_rep_start(dev+I2C_READ);
+    data_low = i2c_readAck(); //Read 1 byte and then send ack
+    data_high = i2c_readAck(); //Read 1 byte and then send ack
+    pec = i2c_readNak();
+    i2c_stop();
+    
+    //This converts high and low bytes together and processes temperature, MSB is a error bit and is ignored for temps
+    double tempFactor = 0.02; // 0.02 degrees per LSB (measurement resolution of the MLX90614)
+    double tempData = 0x0000; // zero out the data
+    int frac; // data past the decimal point
+    
+    // This masks off the error bit of the high byte, then moves it left 8 bits and adds the low byte.
+    tempData = (double)(((data_high & 0x007F) << 8) + data_low);
+    tempData = (tempData * tempFactor)-0.01;
+    
+    float celcius = tempData - 273.15;
+    Calor = celcius;
+    return Calor;
 }
 
 void Blink()
@@ -510,12 +652,115 @@ void EncIzqA()
   return EncIzqA.read();
 }
 
+void AgujeroNegro()
+{
+  if(color() == true)
+  {
+    Negro();
+  }
+}
+
+bool ParedDer()
+{
+  bool Pared = false
+  int Ult1 = UltDA();
+  int Ult2 =UltDB();
+  if(Ult1 < 15 || Ult2 < 15)
+  {
+    Pared = true;
+  }
+  return Pared;
+}
+
+bool ParedEnf()
+{
+  bool Pared = false
+  int Ult1 = UltEA();
+  int Ult2 =UltEB();
+  if(Ult1 < 15 || Ult2 < 15)
+  {
+    Pared = true;
+  }
+  return Pared;
+}
+
+bool VictimaDer()
+{
+  bool Victima = false;
+  int Calor = CalorDer();
+  if(Calor > 29)
+  {
+    Victima = true;
+  }
+  return Victima;
+}
+
+bool VictimaEnf()
+{
+  bool Victima = false;
+  int Calor = CalorEnf();
+  if(Calor > 29)
+  {
+    Victima = true;
+  }
+  return Victima;
+}
+
+bool VictimaIzq()
+{
+  bool Victima = false;
+  int Calor = CalorIzq();
+  if(Calor > 29)
+  {
+    Victima = true;
+  }
+  return Victima;
+}
+
+bool VictimaAtr()
+{
+  bool Victima = false;
+  int Calor = CalorAtr();
+  if(Calor > 29)
+  {
+    Victima = true;
+  }
+  return Victima;
+}
+
+void Kit()
+{
+  for(pos = 0; pos <= 180; pos += 1) // goes from 0 degrees to 180 degrees 
+  {                                  // in steps of 1 degree 
+    myservo.write(pos);              // tell servo to go to position in variable 'pos' 
+    delay(15);                       // waits 15ms for the servo to reach the position 
+  } 
+  for(pos = 180; pos>=0; pos-=1)     // goes from 180 degrees to 0 degrees 
+  {                                
+    myservo.write(pos);              // tell servo to go to position in variable 'pos' 
+    delay(15);                       // waits 15ms for the servo to reach the position 
+  } 
+  Blink();
+}
+
+void Detectado()
+{
+  if(VictimaAtr() || VictimaDer() || VictimaEnf() || VictimaIzq())
+  {
+    Detenerse();
+    Kit();
+  }
+}
+
 void loop() {
   // put your main code here, to run repeatedly:
+<<<<<<< HEAD
   if (ParedDerecha==false)
 {
   GiroDer90();
   Adelante30();
+=======
+>>>>>>> origin/master
 }
 
 else if (ParedEnfrente==false)
