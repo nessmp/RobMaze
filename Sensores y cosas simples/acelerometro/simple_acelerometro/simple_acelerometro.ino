@@ -6,9 +6,9 @@
 
 
 //Analog read pins
-const int xPin = 0;
+const int xPin = 2;
 const int yPin = 1;
-const int zPin = 2;
+const int zPin = 0;
 
 //The minimum and maximum values that came from
 //the accelerometer while standing still
@@ -18,9 +18,9 @@ int maxVal = 402;
 
 
 //to hold the caculated values
-double x;
-double y;
-double z;
+int x;
+int y;
+int z;
 
 
 void setup(){
@@ -50,9 +50,9 @@ void loop(){
   //Output the caculations
   Serial.print("x: ");
   Serial.print(x);
-  Serial.print(" | y: ");
+  Serial.print("      | y: ");
   Serial.print(y);
-  Serial.print(" | z: ");
+  Serial.print("      | z: ");
   Serial.println(z);
 
   delay(100);//just here to slow down the serial output - Easier to read

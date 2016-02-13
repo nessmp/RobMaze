@@ -255,6 +255,8 @@ void Enf30()
   long Sharp = sharpEnf.distance();
   int Sharp30 = Sharp - 30;
 
+  bool Ramps = false;
+
   do{
     Adelante();
     
@@ -267,6 +269,17 @@ void Enf30()
     Ultrasonico2 = sonarE2.ping_cm();
     
     Sharp = sharpEnf.distance();
+
+    Rampa = acelerometro();
+
+    if(Rampa == true)
+    {
+      do{
+        Adelante(); 
+        Rampa = acelerometro();
+      }while(Rampa == true);
+      
+    }
   }while(EncDE <= EncDE30 && EncDA <= EncDA30 && EncIE <= EncIE30 && EncIA <= EncIA30 && Ultrasonico1 >= Ultrasonico130 && Ultrasonico2 >= Ultrasonico230 && Sharp >= Sharp30);
 
   Detenerse();
@@ -296,7 +309,7 @@ void Izq30()
   int Sharp30 = Sharp - 30;
 
   do{
-    Adelante();
+    Izquierda();
     
     EncDE = EncDerEnf.read();
     EncDA = EncDerAtr.read();
@@ -332,8 +345,10 @@ void Atr30()
   long Ultrasonico2 = sonarA2.ping_cm();
   long Ultrasonico230 = Ultrasonico2 - 30;
 
+  bool Rampa = false;
+
   do{
-    Adelante();
+    Atras();
     
     EncDE = EncDerEnf.read();
     EncDA = EncDerAtr.read();
@@ -342,6 +357,17 @@ void Atr30()
     
     Ultrasonico1 = sonarA1.ping_cm();
     Ultrasonico2 = sonarA2.ping_cm();
+
+    Rampa = acelerometro();
+
+    if(Rampa == true)
+    {
+      do{
+        Atras(); 
+        Rampa = acelerometro();
+      }while(Rampa == true);
+      
+    }
     
   }while(EncDE <= EncDE30 && EncDA <= EncDA30 && EncIE <= EncIE30 && EncIA <= EncIA30 && Ultrasonico1 >= Ultrasonico130 && Ultrasonico2 >= Ultrasonico230);
 
