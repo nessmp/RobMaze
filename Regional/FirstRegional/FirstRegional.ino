@@ -1,25 +1,25 @@
 #include <Wire.h> // I2C library, required for MLX90614
-#include <SparkFunMLX90614.h> // SparkFunMLX90614 Arduino library
 #include <Encoder.h> //para que crees...
-#include <Wire.h>  // Comes with Arduino IDE
 #include <LiquidCrystal_I2C.h> //para la pantalla LCD
 #include <NewPing.h> //ultrasonicos
-#define MAX_DISTANCE 200 //distancia max detectada por los ultrasonicos
 #include <SharpIR.h> //sharps
-#define model 1080 //modelo del sharp GP2Y0A21Y
 #include <i2cmaster.h>
 #include <Servo.h>
+
+#define MAX_DISTANCE 200 //distancia max detectada por los ultrasonicos
+#define model 1080 //modelo del sharp GP2Y0A21Y
 
 /////////
 //pines//
 /////////
 
 //Sensor de color
-const int s0  = 32;
-const int s1  =34;
-const int s2  =36;
-const int s3  =38;
-const int out  = 40;
+int s0  = 32;
+int s1  = 34;
+int s2  = 36;
+int s3  = 38;
+int out  = 40;
+
 
 //motores
 byte motDerE1 = 6; 
