@@ -122,6 +122,10 @@ String colon = "";
 //Encoder
 long oldPosition  = -999;
 
+/////////
+//SetUp//
+/////////
+
 void setup() {
   Serial.begin(9600);
   //Direcciones I2C de los sensores de calor
@@ -278,9 +282,126 @@ void Izquierda()
   analogWrite(motIzqA2, 0);
 }
 
+//funcion para ultrasonico de enfrente izq
+int UltEA()
+{
+  return UltEA.ping_cm();
+  delay(1);
+}
 
+//funcion para ultrasonico de enfrente der
+int UltEB()
+{
+  return UltEB.ping_cm();
+  delay(1);
+}
+
+//funcion para ultrasonico de derecha izq
+int UltDA()
+{
+  return UltDA.ping_cm();
+  delay(1);
+}
+
+//funcion para ultrasonico derecha  der
+int UltDB()
+
+{
+  return UltDB.ping_cm();
+  delay(1);
+}
+
+//funcion para ultrasonico de atras izq
+int UltAA()
+{
+  return UltAA.ping_cm();
+  delay(1);
+}
+
+//funcion para ultrasonico de atras der
+int UltAB()
+{
+  return UltAB.ping_cm();
+  delay(1);
+}
+
+//funcion para ultrasonico de izquierda izq
+int UltIA()
+{
+  return UltIA.ping_cm();
+  delay(1);
+}
+
+//funcion para ultrasonico de izquierda der
+int UltIB()
+{
+  return UltIB.ping_cm();
+  delay(1);
+}
+
+int SharpEnf()
+{
+  return SharpEnf.distance()
+}
+
+int SharpDer()
+{
+  return SharpDer.distance()
+}
+
+int CalorEnf()
+{
+  return CalorEnf.object();
+}
+
+int CalorDer()
+{
+  return CalorDer.object();
+}
+
+int CalorAtr()
+{
+  return CalorAtr.object();
+}
+
+int CalorIzq()
+{
+  return CalorIzq.object();
+}
+
+void Blink()
+{
+  for(int iI = 0; iI < 6; iI++)
+  {
+    lcd.noBacklight();
+    delay(500)
+    lcd.backlight();
+    delay(500);
+  }
+}
+
+void EncDerE()
+{
+  return EncDerE.read();
+}
+
+void EncDerA()
+{
+  return EncDerA.read();
+}
+
+void EncIzqE()
+{
+  return EncIzqE.read();
+}
+
+void EncIzqA()
+{
+  return EncIzqA.read();
+}
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  Serial.println(CalorIzq);
+  delay(20);
 }
