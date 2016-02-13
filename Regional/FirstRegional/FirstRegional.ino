@@ -538,7 +538,29 @@ void AgujeroNegro()
   }
 }
 
+bool ParedDer()
+{
+  bool Pared = false
+  int Ult1 = UltDA();
+  int Ult2 =UltDB();
+  if(Ult1 < 15 || Ult2 < 15)
+  {
+    Pared = true;
+  }
+  return Pared;
+}
 
+bool ParedEnf()
+{
+  bool Pared = false
+  int Ult1 = UltEA();
+  int Ult2 =UltEB();
+  if(Ult1 < 15 || Ult2 < 15)
+  {
+    Pared = true;
+  }
+  return Pared;
+}
 
 void loop() {
   // put your main code here, to run repeatedly:
