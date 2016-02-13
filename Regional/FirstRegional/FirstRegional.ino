@@ -3,7 +3,6 @@
 #include <LiquidCrystal_I2C.h> //para la pantalla LCD
 #include <NewPing.h> //ultrasonicos
 #include <SharpIR.h> //sharps
-#include <i2cmaster.h>
 #include <Servo.h>
 
 #define MAX_DISTANCE 200 //distancia max detectada por los ultrasonicos
