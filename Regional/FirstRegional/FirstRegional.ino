@@ -8,6 +8,7 @@
 #include <SharpIR.h> //sharps
 #define model 1080 //modelo del sharp GP2Y0A21Y
 #include <i2cmaster.h>
+#include <Servo.h>
 
 /////////
 //pines//
@@ -110,6 +111,9 @@ NewPing UltIB(TriggIB, EchoIB, MAX_DISTANCE);
 SharpIR SharpEnf(Enf, 25, 93, model);
 SharpIR SharpDer(Der, 25, 93, model);
 
+//Servo
+Servo myservo;
+
 //////////////
 // Variables//
 //////////////
@@ -122,6 +126,9 @@ String colon = "";
 
 //Encoder
 long oldPosition  = -999;
+
+//servo
+int pos = 0;
 
 /////////
 //SetUp//
@@ -140,6 +147,9 @@ void setup() {
   CalorAtr.setUnit(TEMP_C); 
   CalorIzq.setUnit(TEMP_C); 
 
+  //Servo
+  myservo.attach(9);
+  
   //Sensor de color
   pinMode(s0, OUTPUT);  
   pinMode(s1, OUTPUT);  
@@ -560,6 +570,74 @@ bool ParedEnf()
     Pared = true;
   }
   return Pared;
+}
+
+bool VictimaDer()
+{
+  bool Victima = false;
+  int Calor = CalorDer();
+  if(Calor > 29)
+  {
+    Victima = true;
+  }
+  return Victima;
+}
+
+bool VictimaEnf()
+{
+  bool Victima = false;
+  int Calor = CalorEnf();
+  if(Calor > 29)
+  {
+    Victima = true;
+  }
+  return Victima;
+}
+
+bool VictimaIzq()
+{
+  bool Victima = false;
+  int Calor = CalorIzq();
+  if(Calor > 29)
+  {
+    Victima = true;
+  }
+  return Victima;
+}
+
+bool VictimaAtr()
+{
+  bool Victima = false;
+  int Calor = CalorAtr();
+  if(Calor > 29)
+  {
+    Victima = true;
+  }
+  return Victima;
+}
+
+void Kit()
+{
+  for(pos = 0; pos <= 180; pos += 1) // goes from 0 degrees to 180 degrees 
+  {                                  // in steps of 1 degree 
+    myservo.write(pos);              // tell servo to go to position in variable 'pos' 
+    delay(15);                       // waits 15ms for the servo to reach the position 
+  } 
+  for(pos = 180; pos>=0; pos-=1)     // goes from 180 degrees to 0 degrees 
+  {                                
+    myservo.write(pos);              // tell servo to go to position in variable 'pos' 
+    delay(15);                       // waits 15ms for the servo to reach the position 
+  } 
+  Blink();
+}
+
+void Detectado()
+{
+  if(VictimaAtr || VictimaDer || VictimaEnf || VictimaIzq)
+  {
+    Detenerse();
+    Kit();
+  }
 }
 
 void loop() {
