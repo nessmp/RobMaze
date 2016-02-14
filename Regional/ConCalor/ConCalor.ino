@@ -1,9 +1,8 @@
-#include <Wire.h> // I2C library, required for MLX90614
 #include <Encoder.h> //para que crees...
-#include <LiquidCrystal_I2C.h> //para la pantalla LCD
 #include <NewPing.h> //ultrasonicos
 #include <SharpIR.h> //sharps
 #include <Servo.h>
+#include <i2cmaster.h>
 
 #define MAX_DISTANCE 200 //distancia max detectada por los ultrasonicos
 #define model 1080 //modelo del sharp GP2Y0A21Y
@@ -54,7 +53,8 @@ byte EchoIB = 29;
 byte Enf = A3;
 byte Der = A5;
 
-LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
+//LED
+int Led = 27;
 
 Encoder EncDerE(3, 14);
 
@@ -100,14 +100,15 @@ void setup() {
   pinMode(motIzqA1, OUTPUT);
   pinMode(motIzqA2, OUTPUT);
 
-  lcd.begin(16,2); //la inicializa
-  lcd.backlight(); //enciende el led de la pantalla
-
   pinMode (Enf, INPUT);
   pinMode (Der, INPUT);
 
-  
+  //LED
+  pinMode(Led, OUTPUT);
 
+  //calor
+  i2c_init(); //Initialise the i2c bus
+  PORTC = (1 << PORTC4) | (1 << PORTC5);//enable pullups
 }
 
 bool color()  
@@ -130,14 +131,12 @@ bool color()
   Serial.println(green);
   Serial.println("blue: ");
   Serial.println(blue);
-  lcd.setCursor(0,0);
-  lcd.print(red);
   delay(1000);
   //red: 2350-2440
   //green: 2160-2240
   //blue:1640-1720
 
-  if(red > 0 && green > 0 && blue > 0 )
+  if(red > 1000 && green > 1400 && blue > 1200 )
   {
     Negro = true;
   }
@@ -256,6 +255,59 @@ void Izquierda()
   analogWrite(motIzqA2, 0);
 }
 
+//Calor
+int Calor()
+{
+  int dev = 0x1C<<1;
+    int data_low = 0;
+    int data_high = 0;
+    int pec = 0;
+    
+    i2c_start_wait(dev+I2C_WRITE);
+    i2c_write(0x07);
+    
+    // read
+    i2c_rep_start(dev+I2C_READ);
+    data_low = i2c_readAck(); //Read 1 byte and then send ack
+    data_high = i2c_readAck(); //Read 1 byte and then send ack
+    pec = i2c_readNak();
+    i2c_stop();
+    
+    //This converts high and low bytes together and processes temperature, MSB is a error bit and is ignored for temps
+    double tempFactor = 0.02; // 0.02 degrees per LSB (measurement resolution of the MLX90614)
+    double tempData = 0x0000; // zero out the data
+    int frac; // data past the decimal point
+    
+    // This masks off the error bit of the high byte, then moves it left 8 bits and adds the low byte.
+    tempData = (double)(((data_high & 0x007F) << 8) + data_low);
+    tempData = (tempData * tempFactor)-0.01;
+    
+    int celcius = tempData - 273.15;
+
+    return celcius;
+}
+
+void Blink()
+{
+  for(int iI = 0; iI < 6; iI++)
+  {
+    digitalWrite(Led, HIGH);
+    delay(500);
+    digitalWrite(Led, LOW);
+    delay(500);
+  }
+}
+
+void DetectarVictima()
+{
+  int temp = Calor();
+  if(temp > 27)
+  {
+    Detenerse();
+    Blink();
+  }
+}
+
 //Giros
 void GiroDer90()
 {
@@ -309,6 +361,7 @@ void Adelante30()
   while (Enc < const30)
   {
     Adelante();
+    DetectarVictima();
     Enc = EncDerE.read();
   }
    Detenerse();
@@ -335,17 +388,6 @@ int SharpEnf()
 int SharpDer()
 {
   return SharpDe.distance();
-}
-
-void Blink()
-{
-  for(int iI = 0; iI < 6; iI++)
-  {
-    lcd.noBacklight();
-    delay(500);
-    lcd.backlight();
-    delay(500);
-  }
 }
 
 void Negro()
@@ -408,7 +450,7 @@ int Y()
 
 void Rampa()
 {
-  lcd.setCursor(1, 1);
+ 
   int y;
   byte piny = 1;
   bool rampa;
@@ -448,7 +490,7 @@ void SeguirDerecha()
     delay(1000);
     Detenerse();
     delay(500);
-    //Rampa();
+    Rampa();
     delay(100);
     AgujeroNegro();
     delay(100);
@@ -459,7 +501,7 @@ void SeguirDerecha()
     delay(100);
     Detenerse();
     delay(1000);
-    //Rampa();
+    Rampa();
     delay(100);
     AgujeroNegro();
     delay(100);
@@ -472,5 +514,6 @@ void SeguirDerecha()
 }
 
 void loop() {
-  SeguirDerecha();
+  Adelante30();
+  delay(500);
 }
