@@ -61,6 +61,8 @@ Encoder EncDerE(3, 14);
 SharpIR SharpEn(Enf, 25, 93, model);
 SharpIR SharpDe(Der, 25, 93, model);
 
+NewPing Ult(TriggAB, EchoAB, MAX_DISTANCE);
+
 int red = 0;  
 int green = 0;  
 int blue = 0;  
@@ -194,16 +196,16 @@ void Atras()
 
 void DerechaM()
 {
-  analogWrite(motDerE1, 255);
+  analogWrite(motDerE1, 130);
   analogWrite(motDerE2, 0);
 
-  analogWrite(motDerA1, 255);
+  analogWrite(motDerA1, 130);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 255);
+  analogWrite(motIzqE1, 150);
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 255);
+  analogWrite(motIzqA1, 150);
   analogWrite(motIzqA2, 0);
 
 }
@@ -228,16 +230,16 @@ void Derecha()
 void IzquierdaM()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 255);
+  analogWrite(motDerE2, 150);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 255);
+  analogWrite(motDerA2, 150);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 255);
+  analogWrite(motIzqE2, 150);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 255);
+  analogWrite(motIzqA2, 150);
 }
 
 void Izquierda()
@@ -253,6 +255,32 @@ void Izquierda()
 
   analogWrite(motIzqA1, 255);
   analogWrite(motIzqA2, 0);
+}
+
+//NO FUNCIONA
+void Centrar()
+{
+ //deseada, 8cm
+ int Pos = SharpDe.distance();
+ if(Pos > 8 || Pos < 8)
+ {
+  do{
+    if(Pos > 8)
+    {
+      do{
+        DerechaM();
+        Pos = SharpDe.distance();
+      }while(Pos > 8);
+    }
+    else if(Pos < 8)
+    {
+     do{
+         IzquierdaM();
+         Pos = SharpDe.distance();
+      }while (Pos < 8);
+    }
+   }while(Pos > 8 ||Pos < 8);
+ }
 }
 
 //Calor
@@ -478,6 +506,18 @@ y=y/10;
   }
 }
 
+bool Rampa2()
+{
+  bool Rampa = false;
+  int Ultra = Ult.ping_cm();
+  int Sharp = SharpEn.distance();
+  if(Ultra > Sharp + 3 )
+  {
+    Rampa = true;
+  }
+  return Rampa;
+}
+
 void SeguirDerecha()
 {
   bool ParedD = ParedDer();
@@ -514,6 +554,12 @@ void SeguirDerecha()
 }
 
 void loop() {
-  Adelante30();
-  delay(500);
+  /*
+  Serial.print("Sharp: ");
+  Serial.println(SharpEn.distance());
+  Serial.print("Ultrasonico: ");
+  Serial.println(Ult.ping_cm());
+  delay(10);
+  Serial.println("");
+  */
 }
