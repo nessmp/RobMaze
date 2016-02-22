@@ -22,7 +22,6 @@ void setup()
     lcd.noBacklight();
     delay(250);
   }
-  lcd.backlight();
 
   /*lcd.print("Hello, world!");
   delay(1000);
@@ -30,32 +29,12 @@ void setup()
   lcd.print("HI!YourDuino.com");
   delay(8000); */ 
   lcd.clear();
-  lcd.print("Holis soy rasputia");
 }
 
 
 void loop()
 {
-  /*
-  lcd.noBacklight();
-  delay(500);
   lcd.backlight();
-  delay(500);
-  */
-      /*
-    // when characters arrive over the serial port...
-    if (Serial.available()) {
-      // wait a bit for the entire message to arrive
-      delay(100);
-      // clear the screen
-      lcd.clear();
-      // read all the available characters
-      while (Serial.available() > 0) {
-        // display each character to the LCD
-        lcd.write(Serial.read());
-      }
-    }
-  }
-  */
-
+  lcd.setCursor(0, 0);
+  lcd.write("Hello");
 }

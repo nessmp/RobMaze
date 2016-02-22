@@ -2,7 +2,7 @@ const int s0 = 3;
 const int s1 = 4;  
 const int s2 = 6;  
 const int s3 = 5;  
-const int out = 7;   
+const int out = 8;   
 
 // Variables  
 int red = 0;  
@@ -18,8 +18,8 @@ void setup()
   pinMode(s2, OUTPUT);  
   pinMode(s3, OUTPUT);  
 
-  digitalWrite(s0, HIGH);  
-  digitalWrite(s1, HIGH);  
+  //digitalWrite(s0, HIGH);  
+  //digitalWrite(s1, HIGH);  
 }  
 
 String color()  
@@ -62,10 +62,16 @@ String color()
   }
   return colon;
 }
+
+void ColorNuevo()
+{
+  red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+  Serial.println(red);
+}
     
 void loop() 
 {
-  color();
-  delay(2000);
+  ColorNuevo();
+  delay(500);
 } 
 

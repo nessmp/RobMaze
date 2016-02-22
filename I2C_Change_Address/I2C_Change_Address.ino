@@ -3,7 +3,7 @@
 // remap_mlx90614.ino
 
  // New slave address, purposefully left shifted
- byte NewMLXAddr = 0x3C;
+ byte NewMLXAddr = 0x1A;
  // 0x5A is the default address - uncomment this to set it back
  // byte NewMLXAddr = 0x5A;
 
