@@ -29,6 +29,16 @@ void dmpDataReady() {
 
 float MPU_Y;
 
+///////////
+//MOTORES//
+///////////
+
+byte MotDer = 4;
+byte MotDer2 = 5;
+
+byte MotIzq = 6;
+byte MotIzq2 = 7;
+
 void setup() {
   Serial.begin(115200);
 
@@ -77,6 +87,47 @@ void setup() {
         Serial.println(F(")"));
     }
 
+    pinMode(MotDer, OUTPUT);
+    pinMode(MotDer2, OUTPUT);
+
+    pinMode(MotIzq, OUTPUT);
+    pinMode(MotIzq2, OUTPUT);
+}
+
+void adelante()
+{
+  analogWrite(MotDer, 0);
+  analogWrite(MotDer2, 130);
+
+  analogWrite(MotIzq, 0);
+  analogWrite(MotIzq2, 150);
+}
+
+void izquierda()
+{
+  analogWrite(MotDer, 0);
+  analogWrite(MotDer2, 140);
+
+  analogWrite(MotIzq, 140);
+  analogWrite(MotIzq2, 0);
+}
+
+void derecha()
+{
+  analogWrite(MotDer, 140);
+  analogWrite(MotDer2, 0);
+
+  analogWrite(MotIzq, 0);
+  analogWrite(MotIzq2, 140);
+}
+
+void detenerse()
+{
+  analogWrite(MotDer, 0);
+  analogWrite(MotDer2, 0);
+
+  analogWrite(MotIzq, 0);
+  analogWrite(MotIzq2, 0);
 }
 
 int MPUY()
@@ -136,9 +187,10 @@ void GiroDer90()
   }
   while (giro != meta)
   {
-    //derecha();
+    derecha();
     giro = MPUY();
   }
+  detenerse();
 }
 
 void GiroIzq90()
@@ -152,13 +204,16 @@ void GiroIzq90()
   }
   while (giro != meta)
   {
-    //derecha();
+    izquierda();
     giro = MPUY();
   }
+  detenerse();
 }
 
 void loop() {
-  Serial.println("entro");
-    GiroIzq90();
-    Serial.println("salio");
+  delay(5000);
+  GiroIzq90();
+  Serial.println("Salio");
+  delay(5000);
+  //Serial.println(MPUY());
 }
