@@ -312,7 +312,7 @@ void GiroDer90MPU()
   }
   while (giro != meta)
   {
-    //derecha();
+    Derecha();
     giro = MPUY();
   }
 }
@@ -328,11 +328,12 @@ void GiroIzq90MPU()
   }
   while (giro != meta)
   {
-    //derecha();
+    Izquierda();
     giro = MPUY();
   }
 }
 
+//INCOMPLETA
 void AcomodoMpu()
 {
   int giro = MPUY();
@@ -371,28 +372,6 @@ void Adelante30()
     Enc = EncDerE.read();
   }
   Detenerse();
-}
-
-//Cuentas del encoder
-int Encoder1()
-{
-  long newPosition = EncDerE.read();
-
-  if (newPosition != oldPosition) {
-    oldPosition = newPosition;
-
-  }
-  return newPosition;
-}
-
-int SharpEnf()
-{
-  return SharpEn.distance();
-}
-
-int SharpDer()
-{
-  return SharpDe.distance();
 }
 
 bool ParedDer()
@@ -445,6 +424,5 @@ void SeguirDerecha()
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Adelante();
+  
 }
