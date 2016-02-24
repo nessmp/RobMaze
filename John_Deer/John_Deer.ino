@@ -28,17 +28,17 @@ void dmpDataReady() {
 
 float MPU_Y;
 
-byte motDerE1 = 7;
-byte motDerE2 = 6;
+byte motDerE1 = 8;
+byte motDerE2 = 9;
 
-byte motDerA1 = 4;
-byte motDerA2 = 5;
+byte motDerA1 = 11;
+byte motDerA2 = 10;
 
-byte motIzqE1 = 8;
-byte motIzqE2 = 9;
+byte motIzqE1 = 6;
+byte motIzqE2 = 7;
 
-byte motIzqA1 = 10;
-byte motIzqA2 = 11;
+byte motIzqA1 = 5;
+byte motIzqA2 = 4;
 
 byte Enf = A15;
 byte Der =  A14;
@@ -180,64 +180,64 @@ void Detenerse()
 void Adelante()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 255);
+  analogWrite(motDerE2, 133);
 
-  analogWrite(motDerA1, 255);
+  analogWrite(motDerA1, 133);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 255);
+  analogWrite(motIzqE1, 125);
   analogWrite(motIzqE2, 0);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 255);
+  analogWrite(motIzqA2, 125);
 }
 
 //funcion para moverse hacia atras
 void Atras()
 {
-  analogWrite(motDerE1, 255);
+  analogWrite(motDerE1, 133);
   analogWrite(motDerE2, 0);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 255);
+  analogWrite(motDerA2, 133);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 255);
+  analogWrite(motIzqE2, 125);
 
-  analogWrite(motIzqA1, 255);
+  analogWrite(motIzqA1, 125);
   analogWrite(motIzqA2, 0);
 
 }
 
 void DerechaM()
 {
-  analogWrite(motDerE1, 130);
+  analogWrite(motDerE1, 140);
   analogWrite(motDerE2, 0);
 
-  analogWrite(motDerA1, 130);
+  analogWrite(motDerA1, 140);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 150);
+  analogWrite(motIzqE1, 125);
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 150);
+  analogWrite(motIzqA1, 125);
   analogWrite(motIzqA2, 0);
 
 }
 
 void Derecha()
 {
-  analogWrite(motDerE1, 255);
+  analogWrite(motDerE1, 125);
   analogWrite(motDerE2, 0);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 255);
+  analogWrite(motDerA2, 125);
 
-  analogWrite(motIzqE1, 255);
+  analogWrite(motIzqE1, 125);
   analogWrite(motIzqE2, 0);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 255);
+  analogWrite(motIzqA2, 125);
 
 }
 
@@ -245,31 +245,44 @@ void Derecha()
 void IzquierdaM()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 150);
+  analogWrite(motDerE2, 133);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 150);
+  analogWrite(motDerA2, 133);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 150);
+  analogWrite(motIzqE2, 125);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 150);
+  analogWrite(motIzqA2, 125);
 }
 
 void Izquierda()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 255);
+  analogWrite(motDerE2, 125);
 
-  analogWrite(motDerA1, 255);
+  analogWrite(motDerA1, 125);
   analogWrite(motDerA2, 0);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 255);
+  analogWrite(motIzqE2, 125);
 
-  analogWrite(motIzqA1, 255);
+  analogWrite(motIzqA1, 125);
   analogWrite(motIzqA2, 0);
+}
+
+
+//Cuentas del encoder
+int Encoder1()
+{
+  long newPosition = EncDerE.read();
+
+  if (newPosition != oldPosition) {
+    oldPosition = newPosition;
+
+  }
+  return newPosition;
 }
 
 //Giros
@@ -331,6 +344,7 @@ void GiroIzq90MPU()
     Izquierda();
     giro = MPUY();
   }
+  Detenerse();
 }
 
 //INCOMPLETA
@@ -402,7 +416,7 @@ void SeguirDerecha()
   bool ParedE = ParedEnf();
   if (ParedD == false)
   {
-    GiroDer90MPU();
+    GiroDer90();
     delay(200);
     Adelante30();
     delay(1000);
@@ -418,11 +432,12 @@ void SeguirDerecha()
   }
   else if (ParedD == true && ParedE == true)
   {
-    GiroIzq90MPU();
+    GiroIzq90();
     delay(100);
   }
 }
 
 void loop() {
-  
+ 
+  Adelante();
 }
