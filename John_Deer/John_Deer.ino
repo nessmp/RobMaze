@@ -211,16 +211,16 @@ void Atras()
 
 void DerechaM()
 {
-  analogWrite(motDerE1, 140);
+  analogWrite(motDerE1, 125);
   analogWrite(motDerE2, 0);
 
-  analogWrite(motDerA1, 140);
+  analogWrite(motDerA1, 125);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 125);
+  analogWrite(motIzqE1, 133);
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 125);
+  analogWrite(motIzqA1, 133);
   analogWrite(motIzqA2, 0);
 
 }
@@ -245,10 +245,10 @@ void Derecha()
 void IzquierdaM()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 133);
+  analogWrite(motDerE2, 125);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 133);
+  analogWrite(motDerA2, 125);
 
   analogWrite(motIzqE1, 0);
   analogWrite(motIzqE2, 125);
@@ -437,7 +437,88 @@ void SeguirDerecha()
   }
 }
 
+void Acomodo()
+{
+  int pos = MPUY();
+  int counter = 0;
+  if(pos < 0)
+  {
+    pos *= -1;
+    counter++;
+  }
+
+  if(0 - pos <= 44 && 0 - pos > 1)
+  {
+    while(MPUY() != 0 || MPUY() != -1 || MPUY() != 1)
+    {
+      Izquierda();
+      MPUY(); 
+    }
+  }
+  else if( 0 - pos >= -44 && 0 - pos < -1)
+  {
+    while(MPUY() != 0 || MPUY() != -1 || MPUY() != 1)
+    {
+      Derecha();
+      MPUY(); 
+    }
+  }
+
+  else if(90 - pos <= 44 && 90 - pos > 1)
+  {
+    while(MPUY() != 90 || MPUY() != 89 || MPUY() != 91)
+    {
+      Izquierda();
+      MPUY(); 
+    }
+  }
+  else if(90 - pos >= -44 && 90 - pos < -1)
+  {
+    while(MPUY() != 90 || MPUY() != 89 || MPUY() != 91)
+    {
+      Derecha();
+      MPUY(); 
+    }
+  }
+
+  else if(-90 + pos <= 44)
+  {
+    while(MPUY() != -90 || MPUY() != -89 || MPUY() != -91)
+    {
+      Izquierda();
+      MPUY(); 
+    }
+  }
+  else if( -90 + pos <= -44 && -90 + pos > -89)
+  {
+    while(MPUY() != -90 || MPUY() != -89 || MPUY() != -91)
+    {
+      Derecha();
+      MPUY(); 
+    }
+  }
+
+  else if(179 - pos <= 44 && 179 - pos > 1 && counter == 1)
+  {
+    while(MPUY() != 179 || MPUY() != -179 || MPUY() != 179)
+    {
+      Izquierda();
+      MPUY(); 
+    }
+  }
+  else if(179 - pos <= 44 && 179 - pos > 1 )
+  {
+    while(MPUY() != 179 || MPUY() != -179 || MPUY() != 179)
+    {
+      Derecha();
+      MPUY(); 
+    }
+  }
+  Detenerse();
+}
+
 void loop() {
- 
-  Adelante();
+  //Adelante();
+  Acomodo();
+  delay(5000);
 }
