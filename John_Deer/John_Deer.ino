@@ -18,18 +18,18 @@ uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
-Quaternion q;  
-VectorFloat gravity; 
+Quaternion q;
+VectorFloat gravity;
 
 volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 void dmpDataReady() {
-    mpuInterrupt = true;
+  mpuInterrupt = true;
 }
 
 float MPU_Y;
 
-byte motDerE1 = 8;
-byte motDerE2 = 9;
+byte motDerE1 = 9;
+byte motDerE2 = 8;
 
 byte motDerA1 = 11;
 byte motDerA2 = 10;
@@ -37,11 +37,11 @@ byte motDerA2 = 10;
 byte motIzqE1 = 6;
 byte motIzqE2 = 7;
 
-byte motIzqA1 = 5;
-byte motIzqA2 = 4;
+byte motIzqA1 = 4;
+byte motIzqA2 = 5;
 
-byte Enf = A15;
-byte Der =  A14;
+byte Enf = A1;
+byte Der =  A0;
 
 Encoder EncDerE(19, 18);
 SharpIR SharpEn(Enf, 25, 93, model);
@@ -49,19 +49,19 @@ SharpIR SharpDe(Der, 25, 93, model);
 
 long oldPosition  = -999;
 
-int const90 = 4500;
+int const90 = 3450;
 
-int const30 = 5700;
+int const30 = 5500;
 
 void setup() {
   Serial.begin(115200);
 
-  #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-        Wire.begin();
-        TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz). Comment this line if having compilation difficulties with TWBR.
-    #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
-        Fastwire::setup(400, true);
-    #endif
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+  Wire.begin();
+  TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz). Comment this line if having compilation difficulties with TWBR.
+#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+  Fastwire::setup(400, true);
+#endif
 
   pinMode(motDerE1, OUTPUT);
   pinMode(motDerE2, OUTPUT);
@@ -78,87 +78,87 @@ void setup() {
   //MPU
 
   Serial.println(F("Initializing I2C devices..."));
-    mpu.initialize();
+  mpu.initialize();
 
-    // verify connection
-    Serial.println(F("Testing device connections..."));
-    Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+  // verify connection
+  Serial.println(F("Testing device connections..."));
+  Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 
-    // load and configure the DMP
-    Serial.println(F("Initializing DMP..."));
-    devStatus = mpu.dmpInitialize();
+  // load and configure the DMP
+  Serial.println(F("Initializing DMP..."));
+  devStatus = mpu.dmpInitialize();
 
-    mpu.setXGyroOffset(20);
-    mpu.setYGyroOffset(-7);
-    mpu.setZGyroOffset(87);
-    mpu.setZAccelOffset(1402); // 1688 factory default for my test chip
+  mpu.setXGyroOffset(20);
+  mpu.setYGyroOffset(-7);
+  mpu.setZGyroOffset(87);
+  mpu.setZAccelOffset(1402); // 1688 factory default for my test chip
 
-    if (devStatus == 0) {
-        // turn on the DMP, now that it's ready
-        Serial.println(F("Enabling DMP..."));
-        mpu.setDMPEnabled(true);
+  if (devStatus == 0) {
+    // turn on the DMP, now that it's ready
+    Serial.println(F("Enabling DMP..."));
+    mpu.setDMPEnabled(true);
 
-        Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-        attachInterrupt(0, dmpDataReady, RISING);
-        mpuIntStatus = mpu.getIntStatus();
+    Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
+    attachInterrupt(0, dmpDataReady, RISING);
+    mpuIntStatus = mpu.getIntStatus();
 
-        Serial.println(F("DMP ready! Waiting for first interrupt..."));
-        dmpReady = true;
+    Serial.println(F("DMP ready! Waiting for first interrupt..."));
+    dmpReady = true;
 
-        packetSize = mpu.dmpGetFIFOPacketSize();
-    } else {
+    packetSize = mpu.dmpGetFIFOPacketSize();
+  } else {
 
-        Serial.print(F("DMP Initialization failed (code "));
-        Serial.print(devStatus);
-        Serial.println(F(")"));
-    }
+    Serial.print(F("DMP Initialization failed (code "));
+    Serial.print(devStatus);
+    Serial.println(F(")"));
+  }
 }
 
 //Regresa el valor de YAW del MPU
 int MPUY()
 {
-    // wait for MPU interrupt or extra packet(s) available
-    while (!mpuInterrupt && fifoCount < packetSize) {
-    }
+  // wait for MPU interrupt or extra packet(s) available
+  while (!mpuInterrupt && fifoCount < packetSize) {
+  }
 
-    // reset interrupt flag and get INT_STATUS byte
-    mpuInterrupt = false;
-    mpuIntStatus = mpu.getIntStatus();
+  // reset interrupt flag and get INT_STATUS byte
+  mpuInterrupt = false;
+  mpuIntStatus = mpu.getIntStatus();
 
-    // get current FIFO count
-    fifoCount = mpu.getFIFOCount();
+  // get current FIFO count
+  fifoCount = mpu.getFIFOCount();
 
-    // check for overflow (this should never happen unless our code is too inefficient)
-    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
-        // reset so we can continue cleanly
-        mpu.resetFIFO();
-        Serial.println(F("FIFO overflow!"));
+  // check for overflow (this should never happen unless our code is too inefficient)
+  if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+    // reset so we can continue cleanly
+    mpu.resetFIFO();
+    Serial.println(F("FIFO overflow!"));
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
-    } else if (mpuIntStatus & 0x02) {
-        // wait for correct available data length, should be a VERY short wait
-        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+  } else if (mpuIntStatus & 0x02) {
+    // wait for correct available data length, should be a VERY short wait
+    while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
 
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
-        
-        // track FIFO count here in case there is > 1 packet available
-        // (this lets us immediately read more without waiting for an interrupt)
-        fifoCount -= packetSize;
+    // read a packet from FIFO
+    mpu.getFIFOBytes(fifoBuffer, packetSize);
 
-        #ifdef OUTPUT_READABLE_YAWPITCHROLL
-            // display Euler angles in degrees
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            /*
-            Serial.print("ypr\t");
-            Serial.println(ypr[0] * 180/M_PI);
-            */
-            MPU_Y = ypr[0] * 180/M_PI;
-        #endif
-    }
-    return MPU_Y;
+    // track FIFO count here in case there is > 1 packet available
+    // (this lets us immediately read more without waiting for an interrupt)
+    fifoCount -= packetSize;
+
+#ifdef OUTPUT_READABLE_YAWPITCHROLL
+    // display Euler angles in degrees
+    mpu.dmpGetQuaternion(&q, fifoBuffer);
+    mpu.dmpGetGravity(&gravity, &q);
+    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    /*
+    Serial.print("ypr\t");
+    Serial.println(ypr[0] * 180/M_PI);
+    */
+    MPU_Y = ypr[0] * 180 / M_PI;
+#endif
+  }
+  return MPU_Y;
 }
 
 void Detenerse()
@@ -180,31 +180,31 @@ void Detenerse()
 void Adelante()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 133);
+  analogWrite(motDerE2, 190);
 
-  analogWrite(motDerA1, 133);
+  analogWrite(motDerA1, 190);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 125);
+  analogWrite(motIzqE1, 100);
   analogWrite(motIzqE2, 0);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 125);
+  analogWrite(motIzqA2, 90);
 }
 
 //funcion para moverse hacia atras
 void Atras()
 {
-  analogWrite(motDerE1, 133);
+  analogWrite(motDerE1, 190);
   analogWrite(motDerE2, 0);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 133);
+  analogWrite(motDerA2, 190);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 125);
+  analogWrite(motIzqE2, 100);
 
-  analogWrite(motIzqA1, 125);
+  analogWrite(motIzqA1, 90);
   analogWrite(motIzqA2, 0);
 
 }
@@ -227,17 +227,17 @@ void DerechaM()
 
 void Derecha()
 {
-  analogWrite(motDerE1, 125);
+  analogWrite(motDerE1, 190);
   analogWrite(motDerE2, 0);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 125);
+  analogWrite(motDerA2, 190);
 
-  analogWrite(motIzqE1, 125);
+  analogWrite(motIzqE1, 100);
   analogWrite(motIzqE2, 0);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 125);
+  analogWrite(motIzqA2, 90);
 
 }
 
@@ -245,30 +245,30 @@ void Derecha()
 void IzquierdaM()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 125);
+  analogWrite(motDerE2, 190);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 125);
+  analogWrite(motDerA2, 190);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 125);
+  analogWrite(motIzqE2, 100);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 125);
+  analogWrite(motIzqA2, 90);
 }
 
 void Izquierda()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 125);
+  analogWrite(motDerE2, 190);
 
-  analogWrite(motDerA1, 125);
+  analogWrite(motDerA1, 190); //190
   analogWrite(motDerA2, 0);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 125);
+  analogWrite(motIzqE2, 100); //100
 
-  analogWrite(motIzqA1, 125);
+  analogWrite(motIzqA1, 90); //90
   analogWrite(motIzqA2, 0);
 }
 
@@ -319,7 +319,7 @@ void GiroDer90MPU()
   int giro = MPUY();
   int meta = giro + 90;
   //Serial.println(giro);
-  if(meta >= 180)
+  if (meta >= 180)
   {
     meta -= 359;
   }
@@ -331,11 +331,11 @@ void GiroDer90MPU()
 }
 
 void GiroIzq90MPU()
-{  
+{
   int giro = MPUY();
   int meta = giro - 90;
   //Serial.println(giro);
-  if(meta <= -180)
+  if (meta <= -180)
   {
     meta += 359;
   }
@@ -439,86 +439,121 @@ void SeguirDerecha()
 
 void Acomodo()
 {
-  int pos = MPUY();
-  int counter = 0;
-  if(pos < 0)
-  {
-    pos *= -1;
-    counter++;
-  }
+  int pos = MPUY() * -1;
 
-  if(0 - pos <= 44 && 0 - pos > 1)
+  //Para cuando te quieres mover a 90 grados
+  if ((90 + pos) <= 44 && (90 + pos) > 1)
   {
-    while(MPUY() != 0 || MPUY() != -1 || MPUY() != 1)
-    {
-      Izquierda();
-      MPUY(); 
-    }
-  }
-  else if( 0 - pos >= -44 && 0 - pos < -1)
-  {
-    while(MPUY() != 0 || MPUY() != -1 || MPUY() != 1)
+    while (MPUY() != 90 || MPUY() != 91 || MPUY() != 89)
     {
       Derecha();
-      MPUY(); 
+      MPUY();
+    }
+  }
+  else if ((90 + pos) >= -41 && (90 + pos) < -1)
+  {
+    while (MPUY() != 90 || MPUY() != 91 || MPUY() != 89)
+    {
+      Izquierda();
+      MPUY();
     }
   }
 
-  else if(90 - pos <= 44 && 90 - pos > 1)
+  //Para cuando esta en 0
+  else if (0 + pos <= 44 && 0 + pos > 1)
   {
-    while(MPUY() != 90 || MPUY() != 89 || MPUY() != 91)
-    {
-      Izquierda();
-      MPUY(); 
-    }
-  }
-  else if(90 - pos >= -44 && 90 - pos < -1)
-  {
-    while(MPUY() != 90 || MPUY() != 89 || MPUY() != 91)
+    while (MPUY() != 0 || MPUY() != 1 || MPUY() != -1)
     {
       Derecha();
-      MPUY(); 
+      MPUY();
+    }
+  }
+  else if (0 + pos >= -44 && 0 + pos < -1)
+  {
+    while (MPUY() != 0 || MPUY() != 1 || MPUY() != -1)
+    {
+      Izquierda();
+      MPUY();
     }
   }
 
-  else if(-90 + pos <= 44)
+  //Para cuando esta en -90
+  else if (-90 + pos <= 44 && -90 + pos > 1)
   {
-    while(MPUY() != -90 || MPUY() != -89 || MPUY() != -91)
-    {
-      Izquierda();
-      MPUY(); 
-    }
-  }
-  else if( -90 + pos <= -44 && -90 + pos > -89)
-  {
-    while(MPUY() != -90 || MPUY() != -89 || MPUY() != -91)
+    while (MPUY() != -90 || MPUY() != -91 || MPUY() != -89)
     {
       Derecha();
-      MPUY(); 
+      MPUY();
+    }
+  }
+  else if (-90 + pos >= -44 && -90 + pos < -1)
+  {
+    while (MPUY() != -90 || MPUY() != -91 || MPUY() != -89)
+    {
+      Izquierda();
+      MPUY();
     }
   }
 
-  else if(179 - pos <= 44 && 179 - pos > 1 && counter == 1)
+  //Para cuando este en 179
+  else if (179 + pos  <= 43 && 179 + pos > 1)
   {
-    while(MPUY() != 179 || MPUY() != -179 || MPUY() != 179)
-    {
-      Izquierda();
-      MPUY(); 
-    }
-  }
-  else if(179 - pos <= 44 && 179 - pos > 1 )
-  {
-    while(MPUY() != 179 || MPUY() != -179 || MPUY() != 179)
+    while (MPUY() != 179 || MPUY() != -179 || MPUY() != 178 || MPUY() != -178)
     {
       Derecha();
-      MPUY(); 
+      MPUY();
+    }
+  }
+  else if (179 + pos >= 315 && 179 + pos <= 357)
+  {
+    while (MPUY() != 179 || MPUY() != -179 || MPUY() != 178 || MPUY() != -178)
+    {
+      Izquierda();
+      MPUY();
     }
   }
   Detenerse();
 }
 
+void Acejarse()
+{
+  int Dist = SharpDe.distance();
+
+  if (Dist < 7)
+  {
+    while (Dist < 7)
+    {
+      IzquierdaM();
+      Dist = SharpDe.distance();
+    }
+    if (Dist > 9)
+    {
+      while (Dist > 9)
+      {
+        DerechaM();
+        Dist = SharpDe.distance();
+      }
+    }
+  }
+  else if (Dist > 9)
+  {
+    while (Dist > 9)
+    {
+      DerechaM();
+      Dist = SharpDe.distance();
+    }
+    if (Dist < 7)
+    {
+      while (Dist < 7)
+      {
+        IzquierdaM();
+        Dist = SharpDe.distance();
+      }
+    }
+  }
+}
+
 void loop() {
-  //Adelante();
-  Acomodo();
-  delay(5000);
+  SeguirDerecha();
+  delay(500);
 }
