@@ -3,10 +3,21 @@
 #include <Wire.h> //comunicaion
 #include "I2Cdev.h" //MPU
 #include "MPU6050_6Axis_MotionApps20.h" //MPU
+#include <Servo.h>
+#include <SparkFunMLX90614.h>
 
 #define MAX_DISTANCE 200 //distancia max detectada por los ultrasonicos
 #define model 1080 //modelo del sharp GP2Y0A21Y
 #define OUTPUT_READABLE_YAWPITCHROLL //Yaw Pitch Roll del MPU
+
+//Servo
+Servo Dispensador;
+const int pinservo = 3;
+const int PulsoMinimo = 650;
+const int PulsoMaximo = 2550;
+
+//calor
+IRTherm therm;
 
 //MPU
 MPU6050 mpu;
@@ -51,7 +62,7 @@ long oldPosition  = -999;
 
 int const90 = 3450;
 
-int const30 = 5500;
+const int const30 = 100;
 
 void setup() {
   Serial.begin(115200);
@@ -111,6 +122,33 @@ void setup() {
     Serial.print(F("DMP Initialization failed (code "));
     Serial.print(devStatus);
     Serial.println(F(")"));
+  }
+  therm.begin(0x2C);
+  therm.setUnit(TEMP_C);
+  Dispensador.attach(pinservo, PulsoMinimo, PulsoMaximo);
+}
+
+bool Victima()
+{
+  bool Victima = false;
+  therm.read();
+  int Calor = therm.object();
+  if (Calor > 23)
+  {
+    Victima = true;
+  }
+  return Victima;
+}
+
+void Detectar()
+{
+  if (Victima())
+  {
+    Detenerse();
+    Dispensador.write(113);
+    delay(1000);
+    Dispensador.write(75);
+    delay(1000);
   }
 }
 
@@ -180,29 +218,30 @@ void Detenerse()
 void Adelante()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 190);
+  analogWrite(motDerE2, 200);
 
-  analogWrite(motDerA1, 190);
+  analogWrite(motDerA1, 200);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 100);
+  analogWrite(motIzqE1, 90);
   analogWrite(motIzqE2, 0);
 
   analogWrite(motIzqA1, 0);
   analogWrite(motIzqA2, 90);
+  Detectar();
 }
 
 //funcion para moverse hacia atras
 void Atras()
 {
-  analogWrite(motDerE1, 190);
+  analogWrite(motDerE1, 200);
   analogWrite(motDerE2, 0);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 190);
+  analogWrite(motDerA2, 200);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 100);
+  analogWrite(motIzqE2, 90);
 
   analogWrite(motIzqA1, 90);
   analogWrite(motIzqA2, 0);
@@ -227,13 +266,13 @@ void DerechaM()
 
 void Derecha()
 {
-  analogWrite(motDerE1, 190);
+  analogWrite(motDerE1, 200);
   analogWrite(motDerE2, 0);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 190);
+  analogWrite(motDerA2, 200);
 
-  analogWrite(motIzqE1, 100);
+  analogWrite(motIzqE1, 90);
   analogWrite(motIzqE2, 0);
 
   analogWrite(motIzqA1, 0);
@@ -260,13 +299,13 @@ void IzquierdaM()
 void Izquierda()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 190);
+  analogWrite(motDerE2, 200);
 
-  analogWrite(motDerA1, 190); //190
+  analogWrite(motDerA1, 200); //190
   analogWrite(motDerA2, 0);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 100); //100
+  analogWrite(motIzqE2, 90); //100
 
   analogWrite(motIzqA1, 90); //90
   analogWrite(motIzqA2, 0);
@@ -363,8 +402,6 @@ void AcomodoMpu()
 
 void Atras30()
 {
-
-
   EncDerE.write(0);
 
   while (Encoder1() > const30 * -1)
@@ -377,14 +414,38 @@ void Atras30()
 
 void Adelante30()
 {
+  delay(500);
   EncDerE.write(0);
   int Enc = EncDerE.read();
 
-  while (Enc < const30)
+  while (Encoder1() < 100)
   {
     Adelante();
-    Enc = EncDerE.read();
+    Encoder1();
   }
+  Detenerse();
+}
+
+void Ad30()
+{
+  int Dist = SharpEn.distance();
+  int DistQ = Dist - 30;
+  Serial.println("Entro");
+  Serial.println(Dist);
+  while (Dist <= DistQ)
+  {
+    Adelante();
+    Dist = SharpEn.distance();
+  }
+  Serial.println("Salio");
+  Serial.println(Dist);
+  Detenerse();
+}
+
+void AdelanteTiempo()
+{
+  Adelante();
+  delay(40);
   Detenerse();
 }
 
@@ -554,6 +615,5 @@ void Acejarse()
 }
 
 void loop() {
-  SeguirDerecha();
-  delay(500);
+  
 }
