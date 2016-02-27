@@ -62,7 +62,7 @@ long oldPosition  = -999;
 
 int const90 = 3450;
 
-const int const30 = 100;
+const int const30 = 5500;
 
 void setup() {
   Serial.begin(115200);
@@ -133,9 +133,15 @@ bool Victima()
   bool Victima = false;
   therm.read();
   int Calor = therm.object();
+  Serial.println(Calor);
   if (Calor > 23)
   {
     Victima = true;
+    Detenerse();
+    Dispensador.write(113);
+    delay(1000);
+    Dispensador.write(75);
+    delay(1000);
   }
   return Victima;
 }
@@ -216,7 +222,7 @@ void Detenerse()
 
 //funcion para moverse hacia adelante
 void Adelante()
-{
+{  
   analogWrite(motDerE1, 0);
   analogWrite(motDerE2, 200);
 
@@ -228,7 +234,8 @@ void Adelante()
 
   analogWrite(motIzqA1, 0);
   analogWrite(motIzqA2, 90);
-  Detectar();
+
+//  Victima();
 }
 
 //funcion para moverse hacia atras
@@ -418,7 +425,7 @@ void Adelante30()
   EncDerE.write(0);
   int Enc = EncDerE.read();
 
-  while (Encoder1() < 100)
+  while (Encoder1() < const30)
   {
     Adelante();
     Encoder1();
@@ -426,34 +433,11 @@ void Adelante30()
   Detenerse();
 }
 
-void Ad30()
-{
-  int Dist = SharpEn.distance();
-  int DistQ = Dist - 30;
-  Serial.println("Entro");
-  Serial.println(Dist);
-  while (Dist <= DistQ)
-  {
-    Adelante();
-    Dist = SharpEn.distance();
-  }
-  Serial.println("Salio");
-  Serial.println(Dist);
-  Detenerse();
-}
-
-void AdelanteTiempo()
-{
-  Adelante();
-  delay(40);
-  Detenerse();
-}
-
 bool ParedDer()
 {
   bool Pared = true;
   int Sharp = SharpDe.distance();
-  if (Sharp > 25)
+  if (Sharp > 17)
   {
     Pared = false;
   }
@@ -464,17 +448,25 @@ bool ParedEnf()
 {
   bool Pared = true;
   int Sharp = SharpEn.distance();
-  if (Sharp > 25)
+  if (Sharp > 17)
   {
     Pared = false;
   }
   return Pared;
 }
 
+
 void SeguirDerecha()
 {
   bool ParedD = ParedDer();
   bool ParedE = ParedEnf();
+  delay(100);
+  ParedD = ParedDer();
+  ParedE = ParedEnf();
+  delay(100);
+  ParedD = ParedDer();
+  ParedE = ParedEnf();
+  
   if (ParedD == false)
   {
     GiroDer90();
@@ -496,6 +488,35 @@ void SeguirDerecha()
     GiroIzq90();
     delay(100);
   }
+}
+
+
+void SeguiDerecha2()
+{
+  bool ParedD = ParedDer();
+  bool ParedE = ParedEnf();
+  delay(100);
+  ParedD = ParedDer();
+  ParedE = ParedEnf();
+  delay(100);
+  ParedD = ParedDer();
+  ParedE = ParedEnf();
+  
+  if(ParedD == true && ParedE == false)
+  {
+    Adelante30();
+  }
+  else if(ParedD == true && ParedE == true)
+  {
+    GiroIzq90();
+  }
+  else if(ParedD == false)
+  {
+    GiroDer90();
+    delay(1000);
+    Adelante30();
+  }
+  delay(1000);
 }
 
 void Acomodo()
@@ -615,5 +636,18 @@ void Acejarse()
 }
 
 void loop() {
-  
+  /*
+Serial.println(SharpDe.distance()); Serial.println(SharpEn.distance());
+Serial.println("");
+delay(100);
+*/
+
+//Adelante();
+ 
+SeguirDerecha();
+
+
+ 
+ 
+ 
 }
