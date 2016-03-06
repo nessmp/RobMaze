@@ -128,7 +128,7 @@ void setup() {
   Dispensador.attach(pinservo, PulsoMinimo, PulsoMaximo);
 }
 
-bool Victima()
+void Victima()
 {
   bool Victima = false;
   therm.read();
@@ -143,9 +143,9 @@ bool Victima()
     Dispensador.write(75);
     delay(1000);
   }
-  return Victima;
 }
 
+/*
 void Detectar()
 {
   if (Victima())
@@ -157,42 +157,28 @@ void Detectar()
     delay(1000);
   }
 }
+*/
 
 //Regresa el valor de YAW del MPU
 int MPUY()
 {
-  // wait for MPU interrupt or extra packet(s) available
   while (!mpuInterrupt && fifoCount < packetSize) {
   }
-
-  // reset interrupt flag and get INT_STATUS byte
   mpuInterrupt = false;
   mpuIntStatus = mpu.getIntStatus();
-
-  // get current FIFO count
   fifoCount = mpu.getFIFOCount();
-
-  // check for overflow (this should never happen unless our code is too inefficient)
   if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
-    // reset so we can continue cleanly
     mpu.resetFIFO();
     return 9988;
     //Serial.println(F("FIFO overflow!"));
-
-    // otherwise, check for DMP data ready interrupt (this should happen frequently)
   } else if (mpuIntStatus & 0x02) {
-    // wait for correct available data length, should be a VERY short wait
     while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
 
-    // read a packet from FIFO
     mpu.getFIFOBytes(fifoBuffer, packetSize);
 
-    // track FIFO count here in case there is > 1 packet available
-    // (this lets us immediately read more without waiting for an interrupt)
     fifoCount -= packetSize;
 
 #ifdef OUTPUT_READABLE_YAWPITCHROLL
-    // display Euler angles in degrees
     mpu.dmpGetQuaternion(&q, fifoBuffer);
     mpu.dmpGetGravity(&gravity, &q);
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
@@ -227,6 +213,7 @@ void Adelante()
   analogWrite(motDerE1, 0);
   analogWrite(motDerE2, 200);
 
+
   analogWrite(motDerA1, 200);
   analogWrite(motDerA2, 0);
 
@@ -256,6 +243,7 @@ void Atras()
 
 }
 
+//Se desplaza a la derecha con mov mecano
 void DerechaM()
 {
   analogWrite(motDerE1, 150);
@@ -288,23 +276,7 @@ void Derecha()
 
 }
 
-void DerechaLento()
-{
-  analogWrite(motDerE1, 130);
-  analogWrite(motDerE2, 0);
-
-  analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 130);
-
-  analogWrite(motIzqE1, 70);
-  analogWrite(motIzqE2, 0);
-
-  analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 70);
-
-}
-
-//funcion para moverse hacia izquierda
+//funcion para moverse hacia izquierda como mecanum
 void IzquierdaM()
 {
   analogWrite(motDerE1, 0);
@@ -334,22 +306,6 @@ void Izquierda()
   analogWrite(motIzqA1, 90); //90
   analogWrite(motIzqA2, 0);
 }
-
-void IzquierdaLento()
-{
-  analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 130);
-
-  analogWrite(motDerA1, 130); //190
-  analogWrite(motDerA2, 0);
-
-  analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 70); //100
-
-  analogWrite(motIzqA1, 70); //90
-  analogWrite(motIzqA2, 0);
-}
-
 
 //Cuentas del encoder
 int Encoder1()
@@ -391,54 +347,7 @@ void GiroIzq90()
   Detenerse();
 }
 
-//Giros con MPU
-void GiroDer90MPU()
-{
-  int giro = MPUY();
-  int meta = giro + 90;
-  //Serial.println(giro);
-  if (meta >= 180)
-  {
-    meta -= 359;
-  }
-  while (giro != meta)
-  {
-    Derecha();
-    giro = MPUY();
-  }
-}
-
-void GiroIzq90MPU()
-{
-  int giro = MPUY();
-  int meta = giro - 90;
-  //Serial.println(giro);
-  if (meta <= -180)
-  {
-    meta += 359;
-  }
-  while (giro != meta)
-  {
-    Izquierda();
-    giro = MPUY();
-  }
-  Detenerse();
-}
-
-//INCOMPLETA
-void AcomodoMpu()
-{
-  int giro = MPUY();
-  int P90 = 90;
-  int P179 = 179;
-  int P0 = 0;
-  int N90 = -90;
-  int Meta;
-}
-
-//Avances de 30
-
-
+//Regresa 30 cm
 void Atras30()
 {
   EncDerE.write(0);
@@ -451,6 +360,7 @@ void Atras30()
   Detenerse();
 }
 
+//Avanza 30 cm
 void Adelante30()
 {
   delay(500);
@@ -465,6 +375,7 @@ void Adelante30()
   Detenerse();
 }
 
+//Detecta si hay pared a la Derecha
 bool ParedDer()
 {
   bool Pared = true;
@@ -476,6 +387,7 @@ bool ParedDer()
   return Pared;
 }
 
+//Detecta si hay pared Enfrente
 bool ParedEnf()
 {
   bool Pared = true;
@@ -487,6 +399,21 @@ bool ParedEnf()
   return Pared;
 }
 
+//Detecta si hay pared a la Izquirda
+/*
+bool ParedIzq()
+{
+  bool Pared = true;
+  int Sharp = SharpIz.distance();
+  if (Sharp > 17)
+  {
+    Pared = false;
+  }
+  return Pared;
+}
+*/
+
+//Se acerca o aleja a la pared para acomodarse
 void Acejarse()
 {
   int Dist = SharpDe.distance();
@@ -527,73 +454,8 @@ void Acejarse()
   }
 }
 
-void SeguirDerecha()
-{
-  bool ParedD = ParedDer();
-  bool ParedE = ParedEnf();
-  delay(100);
-  ParedD = ParedDer();
-  ParedE = ParedEnf();
-  delay(100);
-  ParedD = ParedDer();
-  ParedE = ParedEnf();
 
-  if (ParedD == false)
-  {
-    GiroDer90();
-    delay(200);
-    Adelante30();
-    delay(1000);
-    Detenerse();
-    delay(500);
-  }
-  else if (ParedE == false)
-  {
-    Adelante30();
-    delay(100);
-    Detenerse();
-    delay(1000);
-    //Acejarse();
-  }
-  else if (ParedD == true && ParedE == true)
-  {
-    GiroIzq90();
-    delay(100);
-    //Acejarse();
-  }
-  //Acejarse();
-  Victima();
-}
-
-
-void SeguiDerecha2()
-{
-  bool ParedD = ParedDer();
-  bool ParedE = ParedEnf();
-  delay(100);
-  ParedD = ParedDer();
-  ParedE = ParedEnf();
-  delay(100);
-  ParedD = ParedDer();
-  ParedE = ParedEnf();
-
-  if (ParedD == true && ParedE == false)
-  {
-    Adelante30();
-  }
-  else if (ParedD == true && ParedE == true)
-  {
-    GiroIzq90();
-  }
-  else if (ParedD == false)
-  {
-    GiroDer90();
-    delay(1000);
-    Adelante30();
-  }
-  delay(1000);
-}
-
+//acomodarse a 90, 180, -90 o 0 grados 
 void Acomodo()
 {
   int pos = MPUY();
@@ -701,7 +563,45 @@ void Acomodo()
   } while (Listo = false);
 }
 
+//Sigue dereecha duh.
+void SeguirDerecha()
+{
+  bool ParedD = ParedDer();
+  bool ParedE = ParedEnf();
+  delay(100);
+  ParedD = ParedDer();
+  ParedE = ParedEnf();
+  delay(100);
+  ParedD = ParedDer();
+  ParedE = ParedEnf();
 
+  if (ParedD == false)
+  {
+    GiroDer90();
+    delay(200);
+    Adelante30();
+    delay(1000);
+    Detenerse();
+    delay(500);
+  }
+  else if (ParedE == false)
+  {
+    Adelante30();
+    delay(100);
+    Detenerse();
+    delay(1000);
+    //Acejarse();
+  }
+  else if (ParedD == true && ParedE == true)
+  {
+    GiroIzq90();
+    delay(100);
+    //Acejarse();
+  }
+  Acejarse();
+  Victima();
+  Acomodo();
+}
 
 void loop() {
 

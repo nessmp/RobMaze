@@ -302,9 +302,10 @@ int MPUY()
 }
 
 //COLOR
-
-void color()
+String Color()
 {
+  String color = "Blanco";
+  
   digitalWrite(s2, LOW);
   digitalWrite(s3, LOW);
   //count OUT, pRed, RED
@@ -322,6 +323,13 @@ void color()
   Serial.println(green);
   Serial.println("blue: ");
   Serial.println(blue);
+
+  if( == red &&  == green &&  == blue)
+  {
+    color = "Negro";
+  }
+  
+  return color;
 }
 
 //MOTORES
@@ -566,6 +574,20 @@ void Detectar()
   }
 }
 
+bool AgujeroNegro()
+{
+  String Negro = Color();
+  bool AgNegro = false;
+  if(Negro == "Negro")
+  {
+    Detenerse();
+    delay(500);
+    Atras30();
+    AgNegro = true;
+  }
+  return AgNegro;
+}
+
 void Acejarse()
 {
   int Dist = SharpDe.distance();
@@ -748,11 +770,11 @@ void SeguirDerecha()
     delay(100);
     //Acejarse();
   }
-  //Acejarse();
   Victima();
+  Acomodo();
+  Acejarse();
+  Acomodo();
 }
-
-
 
 void loop() {
   // put your main code here, to run repeatedly:
