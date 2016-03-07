@@ -120,11 +120,11 @@ bool BeenHere(int Pos)
 bool Moverse()
 {
   bool Next = false;
-  bool Go;
+  bool Go = 0;
   int GoHere = 0;
   for(int iI = 0; iI < 4; iI++)
   {
-    Go = BeenHere(iRun[iCounter][iI]);
+    Go = iRun[iCounter][iI];
     if(Go == false)
     {
        GoHere = BeenHere(iRun[iCounter][iI]);
@@ -211,6 +211,7 @@ int GetPass(int iRun)
   return iThis;
 }
 
+/*
 void Moverse(int iHere, int iHelper)
 {
   int iActual = iPos[iHelper]
@@ -240,6 +241,7 @@ void Moverse(int iHere, int iHelper)
     iCoord -= 1;
   }
 }
+*/
 
 //Ir a la posicion que necesitas ir
 void Go()
