@@ -162,9 +162,8 @@ bool Moverse()
 }
 
 //busca y regresa el paso al cual quieres ir para moverte a una localizacion desconocida
-int SearchWhereToGo()
+int SearchWhereToGo(int &iReturn)
 {
-  int iReturn = 999999;
   int iPassToGo;
   for (int iI = iCounter; iI >= 0; iI--)
   {
@@ -191,7 +190,6 @@ int SearchWhereToGo()
     }
   }
   return iPassToGo;
-  // return iReturn;
 }
 
 //consigue el iPass de el iRun que le des como parametro
@@ -241,11 +239,11 @@ MoverseShido(int iActual, int iDestination)
 
 
 //Ir a la posicion que necesitas ir
-void Go()
+int Go(int &iParamter)
 {
   int CopyCounter = iCounter;
   int iYouAreHere = iPass[iCopyCounter];
-  int iGetHere = SearchWhereToGo();
+  int iGetHere = SearchWhereToGo(iParameter);
   int iMinor[4];
   int iProx;
   int iHelper;
@@ -268,7 +266,9 @@ void Go()
     int i2 = getCoord(iProx);
     MoverseShido(i1, i2);
     YouAreHere = iProx;
+    iCopyCounter = iProx;
   } while (iYouAreHere != iGetHere);
+  return iYouAreHere;
 }
 
 void Laberinto()
@@ -277,8 +277,9 @@ void Laberinto()
   bool Next = Moverse();
   if (Next == true)
   {
-    int iPassToGo = SearchWhereToGo();
-    Go();
+    int iReturn = 999999;
+    int iDestination = Go(iReturn);
+    MoverseShido(iPos[iDestination], iReturn);
   }
 }
 
