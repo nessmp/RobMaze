@@ -210,35 +210,9 @@ int GetPass(int iHere)
   return iReturn;
 }
 
-
-void Moverse2(int iHere, int iHelper)
+int GetCoord(int iThesePass)
 {
-  int iActual = iPos[iHelper]
-  int iProxima = iPos[iHere]
-
-  if(iActual == iProxima + 100)
-  {
-    Derecha30();
-    iCoord += 100;
-  }
-
-  else if(iActual == iProxima + 1)
-  {
-    Enfrente30();
-    iCoord += 1;
-  }
-
-  else if(iActual == iProxima - 100)
-  {
-    Izquierda30();
-    iCoord -= 100;
-  }
-
-  else if(iActual == iProxima - 1)
-  {
-    Atras30();
-    iCoord -= 1;
-  }
+  return iPos[iThesePass];
 }
 
 
@@ -266,8 +240,9 @@ void Go()
     }
     //contiene el ipass menor al cual se debe de mover
     iProx = iTemporal;//iMinor[iI];
-    
-    Moverse2(iProx, iHelper);
+    int i1 = getCoord(iYouAreHere);
+    int i2 = getCoord(iProx);
+    MoverseShido(i1, i2);
     YouAreHere = iPos[iProx];
   } while (iYouAreHere != iGetHere);
 }
