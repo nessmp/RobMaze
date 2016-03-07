@@ -197,18 +197,17 @@ int SearchWhereToGo()
 //consigue el iPass de el iRun que le des como parametro
 int GetPass(int iRun)
 {
-  int iThis;
-  int iOfThis = iRun;
-  int iCopyPass = iPass;
-  
-  while(iRun != iPass)
+  int iReturn = 0;
+  int iCopyCounter = iCounter;
+  while(iRun != iPos[iCopyCounter])
   {
-    iRun = iCopyPass;
-    iCopyPass--;
+    iCopyCounter--;
+    if(iRun == iPos[iCopyCounter])
+    {
+      iReturn = iPass[iCopyCounter];
+    }
   }
-  
-  iThis = iCopyPass;
-  return iThis;
+  return iReturn;
 }
 
 /*
@@ -253,7 +252,7 @@ void Go()
   int iProx;
   int iHelper;
 
-  while(YouAreHere != iGetHere)
+  do
   {
     for(int iI = 0; iI < iPossibility[iCopyCounter]; iI++)
     {
@@ -276,7 +275,7 @@ void Go()
     }
     Moverse(iProx,iHelper);
     YouAreHere = iPos[iProx];
-  }
+  }while(iYouAreHere != iGetHere);
 }
 
 void Laberinto()
@@ -285,7 +284,7 @@ void Laberinto()
   bool Next = Moverse();
   if(Next == true)
   {
-    SearchWhereToGo();
+    int iPassToGo = SearchWhereToGo();
     Go();
   }
 }
