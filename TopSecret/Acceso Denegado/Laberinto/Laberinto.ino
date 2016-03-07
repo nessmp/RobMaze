@@ -215,6 +215,30 @@ int GetCoord(int iThesePass)
   return iPos[iThesePass];
 }
 
+MoverseShido(int iActual, int iDestination)
+{
+  if (iActual + 1 == iDestination)
+  {
+    Adelante30();
+    iCoord += 1;
+  }
+  else if  (iActual - 1 == iDestination)
+  {
+    Atras30();
+    iCoord -= 1;
+  }
+  else if (iActual + 100 == iDestination)
+  {
+    Derecha30();
+    iCoord += 100;
+  }
+  else if (iActual - 100 == iDestination)
+  {
+    Izquierda30();
+    iCoord -= 100;
+  }
+}
+
 
 //Ir a la posicion que necesitas ir
 void Go()
@@ -243,7 +267,7 @@ void Go()
     int i1 = getCoord(iYouAreHere);
     int i2 = getCoord(iProx);
     MoverseShido(i1, i2);
-    YouAreHere = iPos[iProx];
+    YouAreHere = iProx;
   } while (iYouAreHere != iGetHere);
 }
 
