@@ -21,14 +21,14 @@ int GetPossibility()
   bDireccion[1] = false;
   bDireccion[2] = false;
   bDireccion[3] = false;
-  
+
   //variable a regresar
   int iReturn = 0;
 
   //comprueba la Der
   int DistDerA = UltDA.ping_cm();
   int DistDerB = UltDB.ping_cm();
-  if(DistDerA > 30 || DistDerB > 30)
+  if (DistDerA > 30 || DistDerB > 30)
   {
     bDireccion[0] = true;
     iReturn++;
@@ -37,7 +37,7 @@ int GetPossibility()
   //comprueba Enf
   int iDistEA = UltEA.ping_cm();
   int iDistEB = UltEB.ping_cm();
-  if(iDistEA > 30 || iDistEB > 30)
+  if (iDistEA > 30 || iDistEB > 30)
   {
     bDireccion[1] = true;
     iReturn++;
@@ -46,16 +46,16 @@ int GetPossibility()
   //comprueba la Izq
   int iDistIzqA = UltIA.ping_cm();
   int iDistIzqB = UltIB.ping_cm();
-  if(iDistIzqB > 30 || iDistIzqB > 30)
+  if (iDistIzqB > 30 || iDistIzqB > 30)
   {
     bDireccion[2] = true;
-    iRetrun++; 
+    iRetrun++;
   }
 
   //comprueba atras
   int iDistAA = UltAA.ping_cm();
   int iDistAB = UltAB.ping_cm();
-  if(iDistAA > 30 || iDistAB > 30)
+  if (iDistAA > 30 || iDistAB > 30)
   {
     bDireccion[3] = true;
     iReturn++;
@@ -74,27 +74,27 @@ void GetData()
   //llena iPossibility
   iPossibility[iCounter] = GetPossibility();
   //llena iRun
-  for(int iI = 0; iI < iPossibility[iCounter]; iI++)
+  for (int iI = 0; iI < iPossibility[iCounter]; iI++)
   {
-    if(bDireccion[0] == true)
+    if (bDireccion[0] == true)
     {
       iRun[iCounter][iI] = iCoord + 100;
       bDireccion[0] = false;
     }
-    
-    else if(bDireccion[1] == true)
+
+    else if (bDireccion[1] == true)
     {
       iRun[iCounter][iI] = iCoord + 1;
       bDireccion[1] = false;
     }
 
-    else if(bDireccion[2] == true)
+    else if (bDireccion[2] == true)
     {
       iRun[iCounter][iI] = iCoord - 100;
       bDireccion[2] = false;
     }
 
-    else if(bDireccion[3] == true)
+    else if (bDireccion[3] == true)
     {
       iRun[iCounter][iI] = iCoord - 1;
       bDireccion[3] = false;
@@ -106,9 +106,9 @@ void GetData()
 bool BeenHere(int Pos)
 {
   bool bReturn = false;
-  for(int iI = iCounter; iI >= 0; iI--)
+  for (int iI = iCounter; iI >= 0; iI--)
   {
-    if(Pos == iPos[iI])
+    if (Pos == iPos[iI])
     {
       bReturn = true;
     }
@@ -122,37 +122,37 @@ bool Moverse()
   bool Next = false;
   bool Go = false;
   int GoHere = 0;
-  for(int iI = 0; iI < 4; iI++)
+  for (int iI = 0; iI < 4; iI++)
   {
     Go = BeenHere(iRun[iCounter][iI]);
-    if(Go == false)
+    if (Go == false)
     {
-       GoHere = iRun[iCounter][iI];
-       break;
+      GoHere = iRun[iCounter][iI];
+      break;
     }
   }
-  if(GoHere == 0)
+  if (GoHere == 0)
   {
     Next = true;
   }
   else
   {
-    if(iPos[iCounter] + 100 == GoHere) 
+    if (iPos[iCounter] + 100 == GoHere)
     {
       Derecha30();
       iCoord += 100;
     }
-    else if(iPos[iCounter] + 1 == GoHere) 
+    else if (iPos[iCounter] + 1 == GoHere)
     {
       Adelante30();
       iCoord += 1;
     }
-    else if(iPos[iCounter] - 100 == GoHere) 
+    else if (iPos[iCounter] - 100 == GoHere)
     {
       Izquierda30();
       iCoord -= 100;
     }
-    else if(iPos[iCounter] - 1 == GoHere) 
+    else if (iPos[iCounter] - 1 == GoHere)
     {
       Atras30();
       iCoord -= 1;
@@ -164,45 +164,45 @@ bool Moverse()
 //busca y regresa el paso al cual quieres ir para moverte a una localizacion desconocida
 int SearchWhereToGo()
 {
-   int iReturn = 999999;
-   int iPassToGo;
-   for(int iI = iCounter; iI >= 0; iI--)
-   {
-    for(int iJ = 0; iJ < iPossibility[iI]; iJ++)
+  int iReturn = 999999;
+  int iPassToGo;
+  for (int iI = iCounter; iI >= 0; iI--)
+  {
+    for (int iJ = 0; iJ < iPossibility[iI]; iJ++)
     {
       int iHelper = 0;
-      for(int iK = iI; iK >= 0; iK--)
+      for (int iK = iI; iK >= 0; iK--)
       {
-        if(iRun[iI][iJ] == iPos[iK])
+        if (iRun[iI][iJ] == iPos[iK])
         {
-          iHelper++  
+          iHelper++
         }
       }
-      if(iHelper = 0)
+      if (iHelper = 0)
       {
         iReturn = iRun[iI][iJ];
         iPassToGo = iI;
         break;
       }
     }
-    if(iReturn != 999999)
+    if (iReturn != 999999)
     {
       break;
     }
-   }
-   return iPassToGo;
-   // return iReturn;
+  }
+  return iPassToGo;
+  // return iReturn;
 }
 
 //consigue el iPass de el iRun que le des como parametro
-int GetPass(int iRun)
+int GetPass(int iHere)
 {
   int iReturn = 0;
   int iCopyCounter = iCounter;
-  while(iRun != iPos[iCopyCounter])
+  while (iHere != iPos[iCopyCounter])
   {
     iCopyCounter--;
-    if(iRun == iPos[iCopyCounter])
+    if (iHere == iPos[iCopyCounter])
     {
       iReturn = iPass[iCopyCounter];
     }
@@ -210,8 +210,8 @@ int GetPass(int iRun)
   return iReturn;
 }
 
-/*
-void Moverse(int iHere, int iHelper)
+
+void Moverse2(int iHere, int iHelper)
 {
   int iActual = iPos[iHelper]
   int iProxima = iPos[iHere]
@@ -221,7 +221,7 @@ void Moverse(int iHere, int iHelper)
     Derecha30();
     iCoord += 100;
   }
-  
+
   else if(iActual == iProxima + 1)
   {
     Enfrente30();
@@ -240,7 +240,7 @@ void Moverse(int iHere, int iHelper)
     iCoord -= 1;
   }
 }
-*/
+
 
 //Ir a la posicion que necesitas ir
 void Go()
@@ -251,38 +251,32 @@ void Go()
   int iMinor[4];
   int iProx;
   int iHelper;
+  int iTemporal = 9999;
 
   do
   {
-    for(int iI = 0; iI < iPossibility[iCopyCounter]; iI++)
+    for (int iI = 0; iI < iPossibility[iCopyCounter]; iI++)
     {
       iMinor[iI] = GetPass(iRun[iCounter][iI]);
-    }
-    for(int iI = 0; iI < iPossibility[iCopyCounter] - 1; iI++)
-    {
-      if(iMinor[iI] < iMinor[iI + 1])
+      if (iMinor[iI] < iTemporal)
       {
-        /*
-        if(iMinor[iI] >= iGetHere)
-        {
-          iProx = iMinor[iI];
-        }
-        */
-        //contiene el ipass menor al cual se debe de mover
-        iProx = iMinor[iI];
+        iTemporal = iMinor[iI];
         iHelper = iI;
       }
     }
-    Moverse(iProx,iHelper);
+    //contiene el ipass menor al cual se debe de mover
+    iProx = iTemporal;//iMinor[iI];
+    
+    Moverse2(iProx, iHelper);
     YouAreHere = iPos[iProx];
-  }while(iYouAreHere != iGetHere);
+  } while (iYouAreHere != iGetHere);
 }
 
 void Laberinto()
 {
   GetData();
   bool Next = Moverse();
-  if(Next == true)
+  if (Next == true)
   {
     int iPassToGo = SearchWhereToGo();
     Go();
