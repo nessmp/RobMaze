@@ -120,14 +120,14 @@ bool BeenHere(int Pos)
 bool Moverse()
 {
   bool Next = false;
-  bool Go = 0;
+  bool Go = false;
   int GoHere = 0;
   for(int iI = 0; iI < 4; iI++)
   {
-    Go = iRun[iCounter][iI];
+    Go = BeenHere(iRun[iCounter][iI]);
     if(Go == false)
     {
-       GoHere = BeenHere(iRun[iCounter][iI]);
+       GoHere = iRun[iCounter][iI];
        break;
     }
   }
