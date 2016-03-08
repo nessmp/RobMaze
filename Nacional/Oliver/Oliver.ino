@@ -7,7 +7,7 @@
 #include "I2Cdev.h" //MPU
 #include "MPU6050_6Axis_MotionApps20.h" //MPU
 #include <SparkFunMLX90614.h>
-#define MAX_DISTANCE 200
+#define MAX_DISTANCE 12
 #define model 1080 //modelo del sharp GP2Y0A21Y
 #define OUTPUT_READABLE_YAWPITCHROLL //Yaw Pitch Roll del MPU
 
@@ -305,7 +305,7 @@ int MPUY()
 String Color()
 {
   String color = "Blanco";
-  
+
   digitalWrite(s2, LOW);
   digitalWrite(s3, LOW);
   //count OUT, pRed, RED
@@ -324,11 +324,11 @@ String Color()
   Serial.println("blue: ");
   Serial.println(blue);
 
-  if( == red &&  == green &&  == blue)
+  if (0 == red && 0 == green && 0 == blue)
   {
     color = "Negro";
   }
-  
+
   return color;
 }
 
@@ -522,6 +522,19 @@ bool ParedDer()
   return Pared;
 }
 
+bool ParedDerU()
+{
+  bool Pared = false;
+  int Ult3 = sonar1.ping_cm();
+  delay(30);
+  int Ult4 = sonar2.ping_cm();
+  if (Ult3 > 0 && Ult3 < MAX_DISTANCE || Ult4 > 0 && Ult4 < MAX_DISTANCE)
+  {
+    Pared = true;
+  }
+  return Pared;
+}
+
 bool ParedIzq()
 {
   bool Pared = true;
@@ -533,13 +546,39 @@ bool ParedIzq()
   return Pared;
 }
 
+bool ParedIzqU()
+{
+  bool Pared = false;
+  int Ult7 = sonar7.ping_cm();
+  delay(30);
+  int Ult8 = sonar8.ping_cm();
+  if (Ult7 > 0 && Ult7 < MAX_DISTANCE || Ult8 > 0 && Ult8 < MAX_DISTANCE)
+  {
+    Pared = true;
+  }
+  return Pared;
+}
+
 bool ParedEnf()
 {
   bool Pared = true;
   int Sharp = SharpEn.distance();
-  if (Sharp > 17)
+  if (Sharp > 14)
   {
     Pared = false;
+  }
+  return Pared;
+}
+
+bool ParedEnfU()
+{
+  bool Pared = false;
+  int Ult1 = sonar1.ping_cm();
+  delay(30);
+  int Ult2 = sonar2.ping_cm();
+  if (Ult1 > 0 && Ult1 < MAX_DISTANCE || Ult2 > 0 && Ult2 < MAX_DISTANCE)
+  {
+    Pared = true;
   }
   return Pared;
 }
@@ -578,7 +617,7 @@ bool AgujeroNegro()
 {
   String Negro = Color();
   bool AgNegro = false;
-  if(Negro == "Negro")
+  if (Negro == "Negro")
   {
     Detenerse();
     delay(500);
@@ -736,16 +775,48 @@ void Acomodo()
   } while (Listo = false);
 }
 
+void Rampa()
+{
+ /* int iMed = *medida actual mpu* ;
+
+  if (iMed > *constante * +*error*)
+  {
+    while (iMed > *constante * +*error*)
+    {
+      Adelante(); //en este caso pwm alto
+      iMed = *medida actual mpu* ;
+    }
+    Detenerse();
+  }
+
+  else if (iMed < *constante * -*error*)
+  {
+    while (iMed < *constante * -*error*)
+    {
+      Adelante(); //en este paso pwm bajo
+      iMed = *medida actual mpu* ;
+    }
+    Detenerse();
+  }
+  */
+}
+
 void SeguirDerecha()
 {
   bool ParedD = ParedDer();
   bool ParedE = ParedEnf();
+  bool ParedDU = ParedDerU();
+  bool ParedEU = ParedEnfU();
   delay(100);
   ParedD = ParedDer();
   ParedE = ParedEnf();
+  ParedDU = ParedDerU();
+  ParedEU = ParedEnfU();
   delay(100);
   ParedD = ParedDer();
   ParedE = ParedEnf();
+  ParedDU = ParedDerU();
+  ParedEU = ParedEnfU();
 
   if (ParedD == false)
   {
@@ -764,19 +835,43 @@ void SeguirDerecha()
     delay(1000);
     //Acejarse();
   }
+
+  else if (ParedD == true && ParedDU == false)
+  {
+    GiroDer90();
+    delay(100);
+    Adelante30();
+    delay(100);
+
+  }
+
+  else if (ParedE == true && ParedEU == false)
+  {
+
+    Adelante30();
+    delay(100);
+
+  }
+
+
   else if (ParedD == true && ParedE == true)
   {
     GiroIzq90();
     delay(100);
     //Acejarse();
   }
+  Rampa();
+  delay(100);
   Victima();
+  delay(100);
   Acomodo();
+  delay(100);
   Acejarse();
+  delay(100);
   Acomodo();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  Rampa();
 }
