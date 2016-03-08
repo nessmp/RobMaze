@@ -11,6 +11,39 @@
 #define model 1080 //modelo del sharp GP2Y0A21Y
 #define OUTPUT_READABLE_YAWPITCHROLL //Yaw Pitch Roll del MPU
 
+/*SENSORES:
+Ultrasonicos--
+Sharps--
+Color--
+MPU6050--
+Encoders--
+Kits--
+Pantalla--
+MLX--
+*/
+
+/////////////////
+////ALGROTIMO////
+/////////////////
+
+//Paso
+int iPass[400];
+//Posicion
+int iPos[400];
+//posibles movimientos
+int iPossibility[400];
+//coordenadas posibles
+int iRun[400][4];
+//counter de los pasos
+int iCounter = -1;
+//coordenada
+int iCoord = 2020;
+//direcciones
+bool bDireccion[4] = {false, false, false, false};
+//Direccion
+int iDireccion = 1;
+int iMovimiento = 0;
+
 /////////////////
 //////COLOR//////
 /////////////////
@@ -75,6 +108,8 @@ byte motIzqA2 = 7;
 
 const byte MotD = 200;
 const byte MotI = 200;
+const byte MotDM = 150;
+const byte MotIM = 90;
 
 //////////////////
 /////ENCODERS/////
@@ -405,89 +440,88 @@ void Adelante()
   analogWrite(motDerA1, MotD);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, MotD);
+  analogWrite(motIzqE1, MotI);
   analogWrite(motIzqE2, 0);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, MotD);
+  analogWrite(motIzqA2, MotI);
 
   //Victima();
 }
 
 void Atras()
 {
-  analogWrite(motDerE1, 200);
+  analogWrite(motDerE1, MotD);
   analogWrite(motDerE2, 0);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 200);
+  analogWrite(motDerA2, MotD);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 90);
+  analogWrite(motIzqE2, MotI);
 
-  analogWrite(motIzqA1, 90);
+  analogWrite(motIzqA1, MotI);
   analogWrite(motIzqA2, 0);
 }
 
 void DerechaM()
 {
-  analogWrite(motDerE1, 150);
+  analogWrite(motDerE1, MotDM);
   analogWrite(motDerE2, 0);
 
-  analogWrite(motDerA1, 150);
+  analogWrite(motDerA1, MotDM);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 90);
+  analogWrite(motIzqE1, MotIM);
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 90);
+  analogWrite(motIzqA1, MotIM);
   analogWrite(motIzqA2, 0);
-
-}
-
-void Derecha()
-{
-  analogWrite(motDerE1, 200);
-  analogWrite(motDerE2, 0);
-
-  analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 200);
-
-  analogWrite(motIzqE1, 90);
-  analogWrite(motIzqE2, 0);
-
-  analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 90);
 }
 
 //funcion para moverse hacia izquierda
 void IzquierdaM()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 145);
+  analogWrite(motDerE2, MotDM);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 145);
+  analogWrite(motDerA2, MotDM);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 80);
+  analogWrite(motIzqE2, MotIM);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 80);
+  analogWrite(motIzqA2, MotIM);
+}
+
+void Derecha()
+{
+  analogWrite(motDerE1, MotD);
+  analogWrite(motDerE2, 0);
+
+  analogWrite(motDerA1, 0);
+  analogWrite(motDerA2, MotD);
+
+  analogWrite(motIzqE1, MotI);
+  analogWrite(motIzqE2, 0);
+
+  analogWrite(motIzqA1, 0);
+  analogWrite(motIzqA2, MotI);
 }
 
 void Izquierda()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 200);
+  analogWrite(motDerE2, MotD);
 
-  analogWrite(motDerA1, 200); //190
-  analogWrite(motDerA2, 0);
-
+  analogWrite(motDerA1, MotD); //190
+  analogWrite(motDerA2, 0)
+;
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 90); //100
+  analogWrite(motIzqE2, MotI); //100
 
-  analogWrite(motIzqA1, 90); //90
+  analogWrite(motIzqA1, MotI); //90
   analogWrite(motIzqA2, 0);
 }
 
@@ -975,6 +1009,443 @@ void SeguirDerecha()
   AgujeroNegro();
 }
 
+////////////////
+///ALGORTIMO////
+////////////////
+
+//Actualiza el valor de coord
+void setCoord(int iDirecc, int iMov)
+{
+  if (iDirecc == 1)
+  {
+    if (iMov == 1)
+    {
+      iCoord += 100;
+    }
+    else if (iMov == 2)
+    {
+      iCoord += 1;
+    }
+    else if (iMov == 3)
+    {
+      iCoord -= 100;
+    }
+    else if (iMov == 4)
+    {
+      iCoord -= 1;
+    }
+  }
+
+  else if (iDirecc == 2)
+  {
+    if (iMov == 1)
+    {
+      iCoord += 1;
+    }
+    else if (iMov == 2)
+    {
+      iCoord -= 100;
+    }
+    else if (iMov == 3)
+    {
+      iCoord -= 1;
+    }
+    else if (iMov == 4)
+    {
+      iCoord += 100;
+    }
+  }
+
+  else if (iDirecc == 3)
+  {
+    if (iMov == 1)
+    {
+      iCoord -= 100;
+    }
+
+    else if (iMov == 2)
+    {
+      iCoord -= 1;
+    }
+
+    else if (iMov == 3)
+    {
+      iCoord += 100;
+    }
+
+    else if (iMov == 4)
+    {
+      iCoord += 1;
+    }
+  }
+
+  else if (iDirecc == 4)
+  {
+    if (iMov == 1)
+    {
+      iCoord -= 1;
+    }
+
+    else if (iMov == 2)
+    {
+      iCoord += 100;
+    }
+
+    else if (iMov == 3)
+    {
+      iCoord += 1;
+    }
+
+    else if (iMov == 4)
+    {
+      iCoord -= 100;
+    }
+  }
+}
+
+//Da el numero de posibilidades
+int GetPossibility()
+{
+  //todo el arreglo a falso.
+  bDireccion[0] = false;
+  bDireccion[1] = false;
+  bDireccion[2] = false;
+  bDireccion[3] = false;
+
+  //variable a regresar
+  int iReturn = 0;
+
+  //comprueba la Der
+  int DistDerA = sonar3.ping_cm();
+  int DistDerB = sonar4.ping_cm();
+  if (DistDerA > 30 || DistDerB > 30)
+  {
+    bDireccion[0] = true;
+    iReturn++;
+  }
+
+  //comprueba Enf
+  int iDistEA = sonar1.ping_cm();
+  int iDistEB = sonar2.ping_cm();
+  if (iDistEA > 30 || iDistEB > 30)
+  {
+    bDireccion[1] = true;
+    iReturn++;
+  }
+
+  //comprueba la Izq
+  int iDistIzqA = sonar7.ping_cm();
+  int iDistIzqB = sonar8.ping_cm();
+  if (iDistIzqB > 30 || iDistIzqB > 30)
+  {
+    bDireccion[2] = true;
+    iReturn++;
+  }
+
+  //comprueba atras
+  int iDistAA = sonar5.ping_cm();
+  int iDistAB = sonar6.ping_cm();
+  if (iDistAA > 30 || iDistAB > 30)
+  {
+    bDireccion[3] = true;
+    iReturn++;
+  }
+  return iReturn;
+}
+
+//da los datos de la posicion actual
+void GetData()
+{
+  iCounter++;
+  //llena iPass
+  iPass[iCounter] = iCounter;
+  //llena iPos
+  iPos[iCounter] = iCoord;
+  //llena iPossibility
+  iPossibility[iCounter] = GetPossibility();
+  //llena iRun
+  for (int iI = 0; iI < iPossibility[iCounter]; iI++)
+  {
+    if (bDireccion[0] == true)
+    {
+      iRun[iCounter][iI] = iCoord + 100;
+      bDireccion[0] = false;
+    }
+
+    else if (bDireccion[1] == true)
+    {
+      iRun[iCounter][iI] = iCoord + 1;
+      bDireccion[1] = false;
+    }
+
+    else if (bDireccion[2] == true)
+    {
+      iRun[iCounter][iI] = iCoord - 100;
+      bDireccion[2] = false;
+    }
+
+    else if (bDireccion[3] == true)
+    {
+      iRun[iCounter][iI] = iCoord - 1;
+      bDireccion[3] = false;
+    }
+  }
+}
+
+//comprueva si ya se ha estado en la posicion mandada como paramtetro
+bool BeenHere(int Pos)
+{
+  bool bReturn = false;
+  for (int iI = iCounter; iI >= 0; iI--)
+  {
+    if (Pos == iPos[iI])
+    {
+      bReturn = true;
+    }
+  }
+  return bReturn;
+}
+
+//se mueve al irun preferencial o regresa un true si es necesario buscar alguno que no este adyecente
+bool Moverse()
+{
+  bool Next = false;
+  bool Go = false;
+  int GoHere = 0;
+  for (int iI = 0; iI < 4; iI++)
+  {
+    Go = BeenHere(iRun[iCounter][iI]);
+    if (Go == false)
+    {
+      GoHere = iRun[iCounter][iI];
+      break;
+    }
+  }
+  if (GoHere == 0)
+  {
+    Next = true;
+  }
+  else
+  {
+    if (iPos[iCounter] + 100 == GoHere)
+    {
+      GiroDer90();
+      delay(500);
+      Adelante30();
+      delay(500);
+      iMovimiento = 1;
+      iDireccion -= 1;
+      if (iDireccion == 0)
+      {
+        iDireccion = 4;
+      }
+      setCoord(iDireccion, iMovimiento);
+    }
+
+    else if (iPos[iCounter] + 1 == GoHere)
+    {
+      Adelante30();
+      iMovimiento = 2;
+      setCoord(iDireccion, iMovimiento);
+    }
+
+    else if (iPos[iCounter] - 100 == GoHere)
+    {
+      GiroIzq90();
+      delay(500);
+      Adelante30();
+      delay(500);
+      iMovimiento = 3;
+      iDireccion += 1;
+      if (iDireccion == 5)
+      {
+        iDireccion = 0;
+      }
+      setCoord(iDireccion, iMovimiento);
+    }
+
+    else if (iPos[iCounter] - 1 == GoHere)
+    {
+      GiroDer90();
+      delay(500);
+      GiroDer90();
+      delay(500);
+            Adelante30();
+            delay(500);
+            iMovimiento = 4;
+            iDireccion += 2;
+            if (iDireccion == 5)
+    {
+      iDireccion = 1;
+    }
+    else if (iDireccion == 6)
+    {
+      iDireccion = 2;
+    }
+    setCoord(iDireccion, iMovimiento);
+  }
+}
+return Next;
+}
+
+//busca y regresa el paso al cual quieres ir para moverte a una localizacion desconocida
+int SearchWhereToGo(int &iReturn)
+{
+  int iPassToGo;
+  for (int iI = iCounter; iI >= 0; iI--)
+  {
+    for (int iJ = 0; iJ < iPossibility[iI]; iJ++)
+    {
+      int iHelper = 0;
+      for (int iK = iI; iK >= 0; iK--)
+      {
+        if (iRun[iI][iJ] == iPos[iK])
+        {
+          iHelper++;
+        }
+      }
+      if (iHelper = 0)
+      {
+        iReturn = iRun[iI][iJ];
+        iPassToGo = iI;
+        break;
+      }
+    }
+    if (iReturn != 999999)
+    {
+      break;
+    }
+  }
+  return iPassToGo;
+}
+
+//consigue el iPass de el iRun que le des como parametro
+int GetPass(int iHere)
+{
+  int iReturn = 0;
+  int iCopyCounter = iCounter;
+  while (iHere != iPos[iCopyCounter])
+  {
+    iCopyCounter--;
+    if (iHere == iPos[iCopyCounter])
+    {
+      iReturn = iPass[iCopyCounter];
+    }
+  }
+  return iReturn;
+}
+
+int GetCoord(int iThesePass)
+{
+  return iPos[iThesePass];
+}
+
+void MoverseShido(int iActual, int iDestination)
+{
+  if (iActual + 1 == iDestination)
+  {
+    Adelante30();
+    iMovimiento = 2;
+    setCoord(iDireccion, iMovimiento);
+  }
+
+  else if  (iActual - 1 == iDestination)
+  {
+    GiroDer90();
+    delay(500);
+    GiroDer90();
+    delay(500);
+          Adelante30();
+          delay(500);
+          iMovimiento = 4;
+          iDireccion += 2;
+          if (iDireccion == 5)
+  {
+    iDireccion = 1;
+  }
+  else if (iDireccion == 6)
+  {
+    iDireccion = 2;
+  }
+  setCoord(iDireccion, iMovimiento);
+}
+
+else if (iActual + 100 == iDestination)
+  {
+    GiroDer90();
+    delay(500);
+    Adelante30();
+    delay(500);
+    iMovimiento = 1;
+    iDireccion -= 1;
+    if (iDireccion == 0)
+    {
+      iDireccion = 4;
+    }
+    setCoord(iDireccion, iMovimiento);
+  }
+
+  else if (iActual - 100 == iDestination)
+  {
+    GiroIzq90();
+    delay(500);
+    Adelante30();
+    delay(500);
+    iMovimiento = 3;
+    iDireccion += 1;
+    if (iDireccion == 5)
+    {
+      iDireccion = 0;
+    }
+    setCoord(iDireccion, iMovimiento);
+  }
+}
+
+//Ir a la posicion que necesitas ir
+int Go(int &iParameter)
+{
+  int iCopyCounter = iCounter;
+  int iYouAreHere = iPass[iCopyCounter];
+  int iGetHere = SearchWhereToGo(iParameter);
+  int iMinor[4];
+  int iProx;
+  int iHelper;
+  int iTemporal = 9999;
+
+  do
+  {
+    for (int iI = 0; iI < iPossibility[iCopyCounter]; iI++)
+    {
+      iMinor[iI] = GetPass(iRun[iCounter][iI]);
+      if (iMinor[iI] < iTemporal)
+      {
+        iTemporal = iMinor[iI];
+        iHelper = iI;
+      }
+    }
+    //contiene el ipass menor al cual se debe de mover
+    iProx = iTemporal;//iMinor[iI];
+    int i1 = GetCoord(iYouAreHere);
+    int i2 = GetCoord(iProx);
+    MoverseShido(i1, i2);
+    iYouAreHere = iProx;
+    iCopyCounter = iProx;
+  } while (iYouAreHere != iGetHere);
+  return iYouAreHere;
+}
+
+void Laberinto()
+{
+  GetData();
+  bool Next = Moverse();
+  if (Next == true)
+  {
+    int iReturn = 999999;
+    int iDestination = Go(iReturn);
+    MoverseShido(iPos[iDestination], iReturn);
+  }
+}
+
 void loop() {
   // put your main code here, to run repeatedly:
   lcd.setCursor(0, 0);
@@ -994,4 +1465,6 @@ void loop() {
   //--DetectarRampa();
   //Rampa();
   //SeguirDerecha();
+
+  //Laberinto();
 }
