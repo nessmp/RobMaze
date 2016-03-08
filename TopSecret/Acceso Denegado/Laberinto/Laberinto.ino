@@ -12,6 +12,99 @@ int iCounter = -1;
 int iCoord = 2020;
 //direcciones
 bool bDireccion[4] = {false, false, false, false};
+//Direccion
+int iDireccion = 1;
+int iMovimiento = 0;
+
+//Actualiza el valor de coord
+void setCoord(int iDirecc, int iMov)
+{
+  if (iDirecc == 1)
+  {
+    if (iMov == 1)
+    {
+      iCoord += 100;
+    }
+    else if (iMov == 2)
+    {
+      iCoord += 1;
+    }
+    else if (iMov == 3)
+    {
+      iCoord -= 100;
+    }
+    else if (iMov == 4)
+    {
+      iCoord -= 1;
+    }
+  }
+
+  else if (iDirecc == 2)
+  {
+    if (iMov == 1)
+    {
+      iCoord += 1;
+    }
+    else if (iMov == 2)
+    {
+      iCoord -= 100;
+    }
+    else if (iMov == 3)
+    {
+      iCoord -= 1;
+    }
+    else if (iMov == 4)
+    {
+      iCoord += 100;
+    }
+  }
+
+  else if (iDirecc == 3)
+  {
+    if (iMov == 1)
+    {
+      iCoord -= 100;
+    }
+
+    else if (iMov == 2)
+    {
+      iCoord -= 1;
+    }
+
+    else if (iMov == 3)
+    {
+      iCoord += 100;
+    }
+
+    else if (iMov == 4)
+    {
+      iCoord += 1;
+    }
+  }
+
+  else if (iDirecc == 4)
+  {
+    if (iMov == 1)
+    {
+      iCoord -= 1;
+    }
+
+    else if (iMov == 2)
+    {
+      iCoord += 100;
+    }
+
+    else if (iMov == 3)
+    {
+      iCoord += 1;
+    }
+
+    else if (iMov == 4)
+    {
+      iCoord -= 100;
+    }
+  }
+}
 
 //Da el numero de posibilidades
 int GetPossibility()
@@ -139,26 +232,63 @@ bool Moverse()
   {
     if (iPos[iCounter] + 100 == GoHere)
     {
-      Derecha30();
-      iCoord += 100;
+      GiroDer90();
+      delay(500);
+      Adelante30();
+      delay(500);
+      iMovimiento = 1;
+      iDireccion -= 1;
+      if (iDireccion == 0)
+      {
+        iDireccion = 4;
+      }
+      setCoord(iDireccion, iMovimiento);
     }
+
     else if (iPos[iCounter] + 1 == GoHere)
     {
       Adelante30();
-      iCoord += 1;
+      iMovimiento = 2;
+      setCoord(iDireccion, iMovimiento);
     }
+
     else if (iPos[iCounter] - 100 == GoHere)
     {
-      Izquierda30();
-      iCoord -= 100;
+      GiroIzq90();
+      delay(500);
+      Adelante30();
+      delay(500);
+      iMovimiento = 3;
+      iDireccion += 1;
+      if (iDireccion == 5)
+      {
+        iDireccion = 0;
+      }
+      setCoord(iDireccion, iMovimiento);
     }
+
     else if (iPos[iCounter] - 1 == GoHere)
     {
-      Atras30();
-      iCoord -= 1;
+      GiroDer90();
+      delay(500);
+      GiroDer90();
+      delay(500;
+            Adelante30();
+            delay(500);
+            iMovimiento = 4;
+            iDireccion += 2;
+            if (iDireccion == 5)
+    {
+      iDireccion = 1;
     }
+    else if (iDireccion == 6)
+    {
+      iDireccion = 2;
+    }
+    setCoord(iDireccion, iMovimiento);
   }
-  return Next;
+}
+return Next;
 }
 
 //busca y regresa el paso al cual quieres ir para moverte a una localizacion desconocida
@@ -218,25 +348,61 @@ MoverseShido(int iActual, int iDestination)
   if (iActual + 1 == iDestination)
   {
     Adelante30();
-    iCoord += 1;
+    iMovimiento = 2;
+    setCoord(iDireccion, iMovimiento);
   }
+
   else if  (iActual - 1 == iDestination)
   {
-    Atras30();
-    iCoord -= 1;
-  }
-  else if (iActual + 100 == iDestination)
+    GiroDer90();
+    delay(500);
+    GiroDer90();
+    delay(500;
+          Adelante30();
+          delay(500);
+          iMovimiento = 4;
+          iDireccion += 2;
+          if (iDireccion == 5)
   {
-    Derecha30();
-    iCoord += 100;
+    iDireccion = 1;
   }
-  else if (iActual - 100 == iDestination)
+  else if (iDireccion == 6)
   {
-    Izquierda30();
-    iCoord -= 100;
+    iDireccion = 2;
   }
+  setCoord(iDireccion, iMovimiento);
 }
 
+else if (iActual + 100 == iDestination)
+  {
+    GiroDer90();
+    delay(500);
+    Adelante30();
+    delay(500);
+    iMovimiento = 1;
+    iDireccion -= 1;
+    if (iDireccion == 0)
+    {
+      iDireccion = 4;
+    }
+    setCoord(iDireccion, iMovimiento);
+  }
+
+  else if (iActual - 100 == iDestination)
+  {
+    GiroIzq90();
+    delay(500);
+    Adelante30();
+    delay(500);
+    iMovimiento = 3;
+    iDireccion += 1;
+    if (iDireccion == 5)
+    {
+      iDireccion = 0;
+    }
+    setCoord(iDireccion, iMovimiento);
+  }
+}
 
 //Ir a la posicion que necesitas ir
 int Go(int &iParamter)
@@ -282,4 +448,3 @@ void Laberinto()
     MoverseShido(iPos[iDestination], iReturn);
   }
 }
-

@@ -161,7 +161,9 @@ void dmpDataReady() {
   mpuInterrupt = true;
 }
 
-float MPU_Y;
+int MPU_Y;
+int MPU_P;
+int Vict = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -301,11 +303,58 @@ int MPUY()
   return MPU_Y;
 }
 
+int MPUP()
+{
+  // wait for MPU interrupt or extra packet(s) available
+  while (!mpuInterrupt && fifoCount < packetSize) {
+  }
+
+  // reset interrupt flag and get INT_STATUS byte
+  mpuInterrupt = false;
+  mpuIntStatus = mpu.getIntStatus();
+
+  // get current FIFO count
+  fifoCount = mpu.getFIFOCount();
+
+  // check for overflow (this should never happen unless our code is too inefficient)
+  if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+    // reset so we can continue cleanly
+    mpu.resetFIFO();
+    return 9988;
+    //Serial.println(F("FIFO overflow!"));
+
+    // otherwise, check for DMP data ready interrupt (this should happen frequently)
+  } else if (mpuIntStatus & 0x02) {
+    // wait for correct available data length, should be a VERY short wait
+    while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+    // read a packet from FIFO
+    mpu.getFIFOBytes(fifoBuffer, packetSize);
+
+    // track FIFO count here in case there is > 1 packet available
+    // (this lets us immediately read more without waiting for an interrupt)
+    fifoCount -= packetSize;
+
+#ifdef OUTPUT_READABLE_YAWPITCHROLL
+    // display Euler angles in degrees
+    mpu.dmpGetQuaternion(&q, fifoBuffer);
+    mpu.dmpGetGravity(&gravity, &q);
+    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    /*
+    Serial.print("ypr\t");
+    Serial.println(ypr[0] * 180/M_PI);
+    */
+    MPU_P = ypr[1] * 180 / M_PI;
+#endif
+  }
+  return MPU_P;
+}
+
 //COLOR
 String Color()
 {
   String color = "Blanco";
-  
+
   digitalWrite(s2, LOW);
   digitalWrite(s3, LOW);
   //count OUT, pRed, RED
@@ -324,11 +373,11 @@ String Color()
   Serial.println("blue: ");
   Serial.println(blue);
 
-  if( == red &&  == green &&  == blue)
+  if (0 == red && 0  == green && 0  == blue)
   {
     color = "Negro";
   }
-  
+
   return color;
 }
 
@@ -505,10 +554,15 @@ void Adelante30()
   while (Encoder1() < const30)
   {
     Adelante();
+    //Victima();
     Encoder1();
-    Victima();
+    //Victima();
+    if (Vict == 0)
+    {
+      Victima();
+    }
+    Detenerse();
   }
-  Detenerse();
 }
 
 bool ParedDer()
@@ -558,6 +612,7 @@ bool Victima()
     delay(1000);
     Dispensador.write(75);
     delay(1000);
+    Vict++;
   }
   return Victima;
 }
@@ -574,58 +629,105 @@ void Detectar()
   }
 }
 
-bool AgujeroNegro()
+void AgujeroNegro()
 {
   String Negro = Color();
   bool AgNegro = false;
-  if(Negro == "Negro")
+  bool Pared = false;
+  if (Negro == "Negro")
   {
-    Detenerse();
-    delay(500);
-    Atras30();
-    AgNegro = true;
+    bool Listo = false;
+    do {
+      Atras30();
+      delay(500);
+      Pared = ParedIzq();
+      if (Pared == true)
+      {
+        GiroIzq90();
+        delay(500);
+        Adelante30();
+        Listo = true;
+      }
+    } while (Listo == false);
   }
-  return AgNegro;
 }
 
 void Acejarse()
 {
-  int Dist = SharpDe.distance();
+  if (ParedDer())
+  {
+    int Dist = SharpDe.distance();
 
-  if (Dist < 7)
-  {
-    while (Dist < 7)
-    {
-      IzquierdaM();
-      Dist = SharpDe.distance();
-    }
-    if (Dist > 9)
-    {
-      while (Dist > 9)
+    do {
+      if (Dist < 8)
       {
-        DerechaM();
-        Dist = SharpDe.distance();
+        while (Dist < 8)
+        {
+          IzquierdaM();
+          Dist = SharpDe.distance();
+        }
       }
-    }
-    Detenerse();
-  }
-  else if (Dist > 9)
-  {
-    while (Dist > 9)
-    {
-      DerechaM();
-      Dist = SharpDe.distance();
-    }
-    if (Dist < 7)
-    {
-      while (Dist < 7)
+      else if (Dist > 9)
       {
-        IzquierdaM();
-        Dist = SharpDe.distance();
+        while (Dist > 9)
+        {
+          DerechaM();
+          Dist = SharpDe.distance();
+        }
       }
+      Detenerse();
+    } while (Dist != 8);
     }
-    Detenerse();
-  }
+
+  if (ParedEnf())
+  {
+    int Dist2 = SharpEn.distance();
+
+    do {
+      if (Dist2 < 8)
+      {
+        while (Dist2 < 8)
+        {
+          Atras();
+          Dist2 = SharpEn.distance();
+        }
+      }
+      else if (Dist2 > 9)
+      {
+        while (Dist2 > 9)
+        {
+          Adelante();
+          Dist2 = SharpEn.distance();
+        }
+      }
+      Detenerse();
+    } while (Dist2 != 8);
+    }
+
+    if (ParedIzq())
+  {
+    int Dist = SharpIz.distance();
+
+    do {
+      if (Dist < 8)
+      {
+        while (Dist < 8)
+        {
+          DerechaM();
+          Dist = SharpIz.distance();
+        }
+      }
+      else if (Dist > 9)
+      {
+        while (Dist > 9)
+        {
+          IzquierdaM();
+          Dist = SharpIz.distance();
+        }
+      }
+      Detenerse();
+    } while (Dist != 8);
+    }
 }
 
 
@@ -738,6 +840,7 @@ void Acomodo()
 
 void SeguirDerecha()
 {
+  Vict = 0;
   bool ParedD = ParedDer();
   bool ParedE = ParedEnf();
   delay(100);
@@ -767,16 +870,35 @@ void SeguirDerecha()
   else if (ParedD == true && ParedE == true)
   {
     GiroIzq90();
-    delay(100);
+    delay(1000);
     //Acejarse();
   }
   Victima();
   Acomodo();
-  Acejarse();
+  if (ParedDer())
+  {
+    Acejarse();
+  }
   Acomodo();
+  AgujeroNegro();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  lcd.setCursor(0, 0);
+  lcd.print("Loop");
+  Serial.println(MPUY());
+  //Adelante();
+  //Adelante30();
+  //GiroIzq90();
+  //Sharps;
+  //Ultrasonicos;
+  //Color;
+  //MPU;
+  //Acejarse();
+  //Acomodo();
+  //Victima();
+  //Negro();
+  //--DetectarRampa();
+  //Rampa();
+  //SeguirDerecha();
 }
