@@ -373,11 +373,7 @@ String Color()
   Serial.println("blue: ");
   Serial.println(blue);
 
-<<<<<<< HEAD
   if (0 == red && 0 == green && 0 == blue)
-=======
-  if (0 == red && 0  == green && 0  == blue)
->>>>>>> origin/master
   {
     color = "Negro";
   }
@@ -676,10 +672,7 @@ void AgujeroNegro()
 {
   String Negro = Color();
   bool AgNegro = false;
-<<<<<<< HEAD
-=======
   bool Pared = false;
->>>>>>> origin/master
   if (Negro == "Negro")
   {
     bool Listo = false;
@@ -975,25 +968,15 @@ void SeguirDerecha()
   Victima();
   delay(100);
   Acomodo();
-<<<<<<< HEAD
   delay(100);
   Acejarse();
   delay(100);
-=======
-  if (ParedDer())
-  {
-    Acejarse();
-  }
->>>>>>> origin/master
   Acomodo();
   AgujeroNegro();
 }
 
 void loop() {
-<<<<<<< HEAD
   // put your main code here, to run repeatedly:
-  Rampa();
-=======
   lcd.setCursor(0, 0);
   lcd.print("Loop");
   Serial.println(MPUY());
@@ -1011,5 +994,4 @@ void loop() {
   //--DetectarRampa();
   //Rampa();
   //SeguirDerecha();
->>>>>>> origin/master
 }
