@@ -116,7 +116,7 @@ const byte MotIM = 90;
 //////////////////
 
 Encoder EncDerE(19, 18);
-Encoder Enc2(2, 3);
+Encoder Enc2(17, 3);
 
 long oldPosition  = -999;
 
@@ -530,7 +530,7 @@ void Izquierda()
 //Cuentas del encoder
 int Encoder1()
 {
-  long newPosition = EncDerE.read();
+  long newPosition = Enc2.read();
 
   if (newPosition != oldPosition) {
     oldPosition = newPosition;
@@ -1447,10 +1447,26 @@ void Laberinto()
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  Serial.println(Encoder1());
+  /*
+  lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Loop");
-  Serial.println(MPUY());
+  therm1.read(); //IZQ ENF 
+  lcd.print(sonar1.ping_cm());
+  
+  lcd.setCursor(7, 0);
+  therm2.read(); //DER ATR
+  lcd.print(sonar2.ping_cm());
+  
+  lcd.setCursor(0, 1);
+  therm3.read(); //IZQ ATR
+  lcd.print(sonar3.ping_cm());
+  
+  lcd.setCursor(7, 1);
+  therm4.read();//DER ENF
+  lcd.print(sonar4.ping_cm());
+  */
+  //delay(1000);
   //Adelante();
   //Adelante30();
   //GiroIzq90();

@@ -147,24 +147,32 @@ void loop() {
   delay(29);
   
   lcd.setCursor(3,0);
-  lcd.print(sonar3.ping_cm());
+  lcd.print(sonar2.ping_cm());
   delay(29);
   
   lcd.setCursor(6,0);
-  lcd.print(sonar5.ping_cm());
+  lcd.print(sonar3.ping_cm());
   delay(29);
   
   lcd.setCursor(9,0);
+  lcd.print(sonar4.ping_cm());
+  delay(29);
+
+  lcd.setCursor(0,1);
+  lcd.print(sonar5.ping_cm());
+  delay(29);
+  
+  lcd.setCursor(3,1);
+  lcd.print(sonar6.ping_cm());
+  delay(29);
+  
+  lcd.setCursor(6,1);
   lcd.print(sonar7.ping_cm());
   delay(29);
   
-  lcd.setCursor(0, 1);
-  therm1.read();
-  lcd.print(therm1.object());
-
-  lcd.setCursor(6, 1);
-  therm4.read();
-  lcd.print(therm4.object());
+  lcd.setCursor(9,1);
+  lcd.print(sonar8.ping_cm());
+  delay(29);
  
   delay(1000);
 }
