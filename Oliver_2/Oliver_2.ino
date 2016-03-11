@@ -366,6 +366,38 @@ void SeguirDerecha()
   
 }
 
-void loop() {
+void Acejarse()
+{
+  Serial.println(SharpDe.distance());
+  if (ParedDer())
+  {
+    Serial.println("entro 1 if");
+    int Dist = SharpDe.distance();
+
+    do {
+      if (Dist < 8)
+      {
+        while (Dist < 8)
+        {
+          IzquierdaM();
+          Dist = SharpDe.distance();
+          Serial.println(SharpDe.distance());
+        }
+      }
+      else if (Dist > 9)
+      {
+        while (Dist > 9)
+        {
+          DerechaM();
+          Dist = SharpDe.distance();
+          Serial.println(SharpDe.distance());
+        }
+      }
+      Detenerse();
+    } while (Dist != 8);
+  }
+} 
+void loop() 
+{
     SeguirDerecha();
 }
