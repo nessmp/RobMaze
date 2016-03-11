@@ -178,6 +178,16 @@ byte Echo8 = 22;
 
 NewPing sonar8(Trigger8, Echo8, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
 
+byte Trigger7B = 23;
+byte Echo7B = 25;
+
+NewPing sonar7B(Trigger7, Echo7, 200);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
+
+byte Trigger8B = 24;
+byte Echo8B = 22;
+
+NewPing sonar8B(Trigger8, Echo8, 200);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
+
 
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
 
@@ -409,29 +419,51 @@ int MPUP()
 String Color()
 {
   String color = "Blanco";
+  int sensibilidad=30;
+  int cont;
 
-  digitalWrite(s2, LOW);
-  digitalWrite(s3, LOW);
+  // digitalWrite(s2, LOW);
+  //digitalWrite(s3, LOW);
   //count OUT, pRed, RED
   red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-  digitalWrite(s3, HIGH);
+ // digitalWrite(s3, HIGH);
   //count OUT, pBLUE, BLUE
   blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-  digitalWrite(s2, HIGH);
+//  digitalWrite(s2, HIGH);
   //count OUT, pGreen, GREEN
   green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
 
-  Serial.println("red: ");
+  /*Serial.println("red: ");
   Serial.println(red);
   Serial.println("green: ");
   Serial.println(green);
   Serial.println("blue: ");
-  Serial.println(blue);
-
-  if (0 == red && 0 == green && 0 == blue)
+  Serial.println(blue);*/
+cont=0;
+for (int i=0; i<5; i++)
+{
+  
+  if (sensibilidad < red || sensibilidad < green || sensibilidad < blue)
   {
-    color = "Negro";
+    
+    cont++;
   }
+
+    red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+
+  blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+
+  green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+}
+
+if (cont>0)
+{
+  color = "Negro";
+}
+else if (cont=0)
+{
+  color = "Blanco";
+}
 
   return color;
 }
@@ -1478,88 +1510,28 @@ void Laberinto()
   }
 }
 
-void loop() {
-  Acejarse();
-  /*
-  delay(1000);
-  EncDerE.write(0);
-  int Enc = EncDerE.read();
-  Serial.println(EncDerE.read());
-  while (Enc > -880 )
+void AcomodoUltra()
+{
+  if (ParedDer)
   {
-    Izquierda();
-    Enc = EncDerE.read();
-    Serial.println(EncDerE.read());
+    
   }
-  Detenerse();
-  */
-  /*
-  Acomodo();
-  //Serial.println(EncDerE.read());
-  delay(500);
-  lcd.clear();
-  delay(200);
-  lcd.setCursor(0, 0);
-  lcd.print("listo");
-  */
+}
 
-  /*
-  Serial.println(EncDerE.read());
-  Serial.println(Enc2.read());
-  Serial.println();
-  delay(1000);
-  */
-  //Adelante30();
-  //delay(2000);
 
-  /*
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.println(SharpEn.distance());
-  lcd.setCursor(6, 0);
-  lcd.println(SharpDe.distance());
-  lcd.setCursor(0, 1);
-  lcd.println(SharpIz.distance());
-  lcd.println();
-  delay(500);
-  */
 
-  /*
-  Serial.println(sonar1.ping_cm());
-  Serial.println(sonar2.ping_cm());
-  Serial.println(sonar3.ping_cm());
-  Serial.println(sonar4.ping_cm());
-  Serial.println(sonar7.ping_cm());
-  Serial.println(sonar8.ping_cm());
-  Serial.println();
-  delay(500);
-  */
+void loop() {
 
-  /*
-  therm1.read();
-  therm2.read();
-  therm3.read();
-  therm4.read();
-  Serial.println(therm1.object());
-  Serial.println(therm2.object());
-  Serial.println(therm3.object());
-  Serial.println(therm4.object());
-  Serial.println();
-  delay(500);
-  */
+Serial.println(Color());
+delay(100);
+Serial.println();
 
-  /*
-  Serial.println(Enc2.read()); //ENFRETNE
-  Serial.println(EncDerE.read()); //ATRAS
-  Serial.println();
-  delay(500);
-  */
 
-  /*
-  Dispensador.write(111);
-  delay(1000);
-  Dispensador.write(81);
-  delay(1000);
-  */
+/*Serial.println(SharpIz.distance()); Serial.print("\t"); Serial.print(sonar7.ping_cm());Serial.print("\t");delay(30); Serial.println(sonar8.ping_cm());
+delay(100);
+Serial.println();
+Serial.print("ULT: ");
+Serial.println(sonar7B.ping_cm());
+Serial.println();*/
 
 }

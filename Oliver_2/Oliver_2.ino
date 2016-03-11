@@ -73,6 +73,19 @@ const int pinservo = 47;
 const int PulsoMinimo = 650;
 const int PulsoMaximo = 2550;
 
+//////////////////
+//////COLOR//////
+//////////////////
+const byte out = 13;
+
+int red = 0;
+int green = 0;
+int blue = 0;
+String colon = "";
+
+const int sensibilidad = 30;
+
+
 SharpIR SharpEn(Enf, 25, 93, model);
 SharpIR SharpIz(Izq, 25, 93, model);
 SharpIR SharpDe(Der, 25, 93, model);
@@ -128,6 +141,59 @@ void setup() {
 
   //SERVO
   Dispensador.attach(pinservo, PulsoMinimo, PulsoMaximo);
+}
+
+//COLOR
+String Color()
+{
+  String color = "Blanco";
+ 
+  int cont;
+
+  // digitalWrite(s2, LOW);
+  //digitalWrite(s3, LOW);
+  //count OUT, pRed, RED
+  red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+ // digitalWrite(s3, HIGH);
+  //count OUT, pBLUE, BLUE
+  blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+//  digitalWrite(s2, HIGH);
+  //count OUT, pGreen, GREEN
+  green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+
+  /*Serial.println("red: ");
+  Serial.println(red);
+  Serial.println("green: ");
+  Serial.println(green);
+  Serial.println("blue: ");
+  Serial.println(blue);*/
+cont=0;
+for (int i=0; i<5; i++)
+{
+  
+  if (sensibilidad < red || sensibilidad < green || sensibilidad < blue)
+  {
+    
+    cont++;
+  }
+
+    red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+
+  blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+
+  green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+}
+
+if (cont>0)
+{
+  color = "Negro";
+}
+else if (cont=0)
+{
+  color = "Blanco";
+}
+
+  return color;
 }
 
 //MOTORES

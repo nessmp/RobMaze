@@ -60,6 +60,7 @@ String color()
   {
     colon = "red";
   }
+  Serial.println(colon);
   return colon;
 }
 
@@ -72,5 +73,6 @@ void ColorNuevo()
 void loop() 
 {
   color();
+  delay(1000);
 } 
 
