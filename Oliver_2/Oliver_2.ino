@@ -64,6 +64,15 @@ byte Enf = A0;
 byte Izq = A1;
 byte Der =  A2;
 
+/////////////////
+//////SERVO//////
+/////////////////
+
+Servo Dispensador;
+const int pinservo = 47;
+const int PulsoMinimo = 650;
+const int PulsoMaximo = 2550;
+
 SharpIR SharpEn(Enf, 25, 93, model);
 SharpIR SharpIz(Izq, 25, 93, model);
 SharpIR SharpDe(Der, 25, 93, model);
@@ -116,6 +125,9 @@ void setup() {
   lcd.noBacklight(); // finish with backlight on
   lcd.setCursor(0, 0); //Start at character 4 on line 0
   lcd.print(";)");
+
+  //SERVO
+  Dispensador.attach(pinservo, PulsoMinimo, PulsoMaximo);
 }
 
 //MOTORES
@@ -263,6 +275,7 @@ void Atras30()
   {
     Atras();
     Enc = EncDerE.read();
+    Serial.println(Enc);
   }
   Detenerse();
 }
@@ -286,7 +299,31 @@ bool ParedDer()
   bool Pared = true;
   int Sharp = SharpDe.distance();
   Serial.println(Sharp);
-  if (Sharp > 14)
+  if (Sharp >= 14)
+  {
+    Pared = false;
+  }
+  return Pared;
+}
+
+bool ParedIzq()
+{
+  bool Pared = true;
+  int Sharp = SharpIz.distance();
+  Serial.println(Sharp);
+  if (Sharp >= 14)
+  {
+    Pared = false;
+  }
+  return Pared;
+}
+
+bool ParedEnf()
+{
+  bool Pared = true;
+  int Sharp = SharpEn.distance();
+  Serial.println(Sharp);
+  if (Sharp >= 10)
   {
     Pared = false;
   }
@@ -294,6 +331,8 @@ bool ParedDer()
 }
 
 void loop() {
-  //Serial.println(ParedDer());
-  Atras30();
+    Dispensador.write(113);
+    delay(1000);
+    Dispensador.write(75);
+    delay(1000);
 }
