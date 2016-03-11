@@ -322,18 +322,6 @@ bool ParedEnf()
 {
   bool Pared = true;
   int Sharp = SharpEn.distance();
-  Serial.println(Sharp);
-  if (Sharp >= 10)
-  {
-    Pared = false;
-  }
-  return Pared;
-}
-
-bool ParedEnf()
-{
-  bool Pared = true;
-  int Sharp = SharpEn.distance();
   if (Sharp > 14)
   {
     Pared = false;
@@ -379,8 +367,5 @@ void SeguirDerecha()
 }
 
 void loop() {
-    Dispensador.write(113);
-    delay(1000);
-    Dispensador.write(75);
-    delay(1000);
+    SeguirDerecha();
 }
