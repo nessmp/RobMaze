@@ -76,7 +76,7 @@ const int PulsoMaximo = 2550;
 //////////////////
 //////COLOR//////
 //////////////////
-const byte out = 13;
+const byte out = 14;
 
 int red = 0;
 int green = 0;
@@ -171,52 +171,62 @@ void setup() {
 //COLOR
 String Color()
 {
-  String color = "Blanco";
- 
+  String color = "Negro";
+
   int cont;
 
   // digitalWrite(s2, LOW);
   //digitalWrite(s3, LOW);
   //count OUT, pRed, RED
+  
   red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
- // digitalWrite(s3, HIGH);
+  // digitalWrite(s3, HIGH);
   //count OUT, pBLUE, BLUE
   blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-//  digitalWrite(s2, HIGH);
+  //  digitalWrite(s2, HIGH);
   //count OUT, pGreen, GREEN
   green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-
-  /*Serial.println("red: ");
-  Serial.println(red);
-  Serial.println("green: ");
-  Serial.println(green);
-  Serial.println("blue: ");
-  Serial.println(blue);*/
-cont=0;
-for (int i=0; i<5; i++)
-{
   
-  if (sensibilidad < red || sensibilidad < green || sensibilidad < blue)
+  Serial.println();
+  cont = 0;
+  //Serial.println("red: ");
+    //Serial.println(red);
+    //Serial.println("green: ");
+    //Serial.println(green);
+    //Serial.println("blue: ");
+   //Serial.println(blue);
+  
+  for (int i = 0; i < 5; i++)
   {
-    
-    cont++;
-  }
+
+    if (red < 6 || green < 6 || blue < 6)
+    {
+      cont++;
+    }
 
     red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
 
-  blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+    blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
 
-  green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-}
+    green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
 
-if (cont>0)
-{
-  color = "Negro";
-}
-else if (cont=0)
-{
-  color = "Blanco";
-}
+    Serial.println("red: ");
+    Serial.println(red);
+    Serial.println("green: ");
+    Serial.println(green);
+    Serial.println("blue: ");
+    Serial.println(blue);
+    delay(1000);
+  }
+  
+  if (cont > 0)
+  {
+    color = "Blanco";
+  }
+  else if (cont = 0)
+  {
+    color = "Negro";
+  }
 
   return color;
 }
@@ -459,6 +469,31 @@ bool ParedEnf()
   return Pared;
 }
 
+void HoyoNegro()
+{
+  String color = Color();
+  int DistIzq = SharpIz.distance();
+
+  if (color == "Negro")
+  {
+    Atras30();
+    delay(500);
+    DistIzq = SharpIz.distance();
+    if (DistIzq > 20)
+    {
+      GiroIzq90();
+      delay(500);
+      Adelante30();
+    }
+    else
+    {
+      GiroIzq90();
+      delay(500);
+      GiroIzq90();
+    }
+  }
+}
+
 void Detectar()
 {
   therm1.read();
@@ -522,7 +557,7 @@ void SeguirDerecha()
     delay(100);
   }
   Acejarse();
-  //Detectar(0);
+  delay(500);
 }
 
 void Acejarse()
@@ -615,4 +650,5 @@ void Acejarse()
 void loop()
 {
   SeguirDerecha();
+  delay(500);
 }

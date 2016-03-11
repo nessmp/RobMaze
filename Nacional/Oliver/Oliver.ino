@@ -50,11 +50,11 @@ int iMovimiento = 0;
 //////COLOR//////
 /////////////////
 
-const byte s0 = 9;
-const byte s1 = 10;
-const byte s2 = 12;
-const byte s3 = 11;
-const byte out = 13;
+const byte s0 = 0;
+const byte s1 = 0;
+const byte s2 = 0;
+const byte s3 = 0;
+const byte out = 9; // 10 9
 
 int red = 0;
 int green = 0;
@@ -177,16 +177,6 @@ byte Trigger8 = 24;
 byte Echo8 = 22;
 
 NewPing sonar8(Trigger8, Echo8, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
-
-byte Trigger7B = 23;
-byte Echo7B = 25;
-
-NewPing sonar7B(Trigger7, Echo7, 200);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
-
-byte Trigger8B = 24;
-byte Echo8B = 22;
-
-NewPing sonar8B(Trigger8, Echo8, 200);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
 
 
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
@@ -419,51 +409,29 @@ int MPUP()
 String Color()
 {
   String color = "Blanco";
-  int sensibilidad=30;
-  int cont;
 
-  // digitalWrite(s2, LOW);
-  //digitalWrite(s3, LOW);
+  digitalWrite(s2, LOW);
+  digitalWrite(s3, LOW);
   //count OUT, pRed, RED
   red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
- // digitalWrite(s3, HIGH);
+  digitalWrite(s3, HIGH);
   //count OUT, pBLUE, BLUE
   blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-//  digitalWrite(s2, HIGH);
+  digitalWrite(s2, HIGH);
   //count OUT, pGreen, GREEN
   green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
 
-  /*Serial.println("red: ");
+  Serial.println("red: ");
   Serial.println(red);
   Serial.println("green: ");
   Serial.println(green);
   Serial.println("blue: ");
-  Serial.println(blue);*/
-cont=0;
-for (int i=0; i<5; i++)
-{
-  
-  if (sensibilidad < red || sensibilidad < green || sensibilidad < blue)
+  Serial.println(blue);
+
+  if (0 == red && 0 == green && 0 == blue)
   {
-    
-    cont++;
+    color = "Negro";
   }
-
-    red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-
-  blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-
-  green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-}
-
-if (cont>0)
-{
-  color = "Negro";
-}
-else if (cont=0)
-{
-  color = "Blanco";
-}
 
   return color;
 }
@@ -1500,6 +1468,7 @@ int Go(int &iParameter)
 
 void Laberinto()
 {
+  
   GetData();
   bool Next = Moverse();
   if (Next == true)
@@ -1510,28 +1479,6 @@ void Laberinto()
   }
 }
 
-void AcomodoUltra()
-{
-  if (ParedDer)
-  {
-    
-  }
-}
-
-
-
 void loop() {
-
-Serial.println(Color());
-delay(100);
-Serial.println();
-
-
-/*Serial.println(SharpIz.distance()); Serial.print("\t"); Serial.print(sonar7.ping_cm());Serial.print("\t");delay(30); Serial.println(sonar8.ping_cm());
-delay(100);
-Serial.println();
-Serial.print("ULT: ");
-Serial.println(sonar7B.ping_cm());
-Serial.println();*/
-
+  Serial.println(Color());
 }
