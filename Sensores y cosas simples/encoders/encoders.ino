@@ -1,7 +1,7 @@
 ///////////////////////
 ///////////////////////
 #define ENCODER_A_PIN 12
-#define ENCODER_B_PIN 13
+#define ENCODER_B_PIN 18
 
 long position;
 

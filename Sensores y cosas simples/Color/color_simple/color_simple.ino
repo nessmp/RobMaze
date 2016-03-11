@@ -1,8 +1,8 @@
-const int s0 = 3;  
-const int s1 = 4;  
-const int s2 = 6;  
-const int s3 = 5;  
-const int out = 8;   
+const int s0 = 18;  
+const int s1 = 17;  
+const int s2 = 20;  
+const int s3 = 19;  
+const int out = 21;   
 
 // Variables  
 int red = 0;  
@@ -71,7 +71,6 @@ void ColorNuevo()
     
 void loop() 
 {
-  ColorNuevo();
-  delay(500);
+  color();
 } 
 

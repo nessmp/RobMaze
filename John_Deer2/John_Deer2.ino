@@ -12,9 +12,11 @@
 
 //Servo
 Servo Dispensador;
-const int pinservo = 3;
+const int pinservo = 47;
 const int PulsoMinimo = 650;
 const int PulsoMaximo = 2550;
+
+byte VCC = 49;
 
 //calor
 IRTherm therm;
@@ -126,23 +128,19 @@ void setup() {
   therm.begin(0x2C);
   therm.setUnit(TEMP_C);
   Dispensador.attach(pinservo, PulsoMinimo, PulsoMaximo);
+  pinMode(VCC, OUTPUT);
+  digitalWrite(VCC, HIGH);
 }
 
 void Victima()
 {
-  bool Victima = false;
-  therm.read();
-  int Calor = therm.object();
-  Serial.println(Calor);
-  if (Calor > 23)
-  {
-    Victima = true;
-    Detenerse();
-    Dispensador.write(113);
-    delay(1000);
-    Dispensador.write(75);
-    delay(1000);
-  }
+  //Victima = true;
+  Detenerse();
+  Dispensador.write(113);
+  delay(1000);
+  Dispensador.write(75);
+  delay(1000);
+
 }
 
 /*
@@ -455,7 +453,7 @@ void Acejarse()
 }
 
 
-//acomodarse a 90, 180, -90 o 0 grados 
+//acomodarse a 90, 180, -90 o 0 grados
 void Acomodo()
 {
   int pos = MPUY();
@@ -604,5 +602,5 @@ void SeguirDerecha()
 }
 
 void loop() {
-
+  Victima();
 }

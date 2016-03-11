@@ -1,3 +1,5 @@
+///////EL ATTACH PARA LOS LACK OF PROGRESS ESTAN EN EL PIN #3//////////
+
 #include <Encoder.h> //para que crees...
 #include <NewPing.h>
 #include <Wire.h>  // Comes with Arduino IDE
@@ -64,7 +66,7 @@ String colon = "";
 /////////////////
 
 Servo Dispensador;
-const int pinservo = 52;
+const int pinservo = 47;
 const int PulsoMinimo = 650;
 const int PulsoMaximo = 2550;
 
@@ -72,10 +74,10 @@ const int PulsoMaximo = 2550;
 //////CALOR///////
 //////////////////
 
-IRTherm therm1;
-IRTherm therm2;
-IRTherm therm3;
-IRTherm therm4;
+IRTherm therm1; //IZQUIERDA ADELANTE
+IRTherm therm2; //DERECHA ATRAS
+IRTherm therm3; //IZQUIERDA ATRAS
+IRTherm therm4; //DERECHA ENFRENTE
 
 //////////////////
 //////SHARPS//////
@@ -97,17 +99,17 @@ SharpIR SharpDe(Der, 25, 93, model);
 byte motDerE1 = 8;
 byte motDerE2 = 9;
 
-byte motDerA1 = 10;
-byte motDerA2 = 11;
+byte motDerA1 = 11;
+byte motDerA2 = 10;
 
-byte motIzqE1 = 4;
-byte motIzqE2 = 5;
+byte motIzqE1 = 7;
+byte motIzqE2 = 6;
 
-byte motIzqA1 = 6;
-byte motIzqA2 = 7;
+byte motIzqA1 = 5;
+byte motIzqA2 = 4;
 
-const byte MotD = 200;
-const byte MotI = 200;
+const byte MotD = 255;
+const byte MotI = 255;
 const byte MotDM = 150;
 const byte MotIM = 90;
 
@@ -115,14 +117,14 @@ const byte MotIM = 90;
 /////ENCODERS/////
 //////////////////
 
-Encoder EncDerE(19, 18);
-Encoder Enc2(17, 3);
+Encoder EncDerE(18, 19);
+Encoder Enc2(17, 27);
 
 long oldPosition  = -999;
 
-int const90 = 3450;
+int const90 = 3600;
 
-const int const30 = 5500;
+const int const30 = 6000;
 
 //////////////////
 ///ULTRASONICOS///
@@ -152,15 +154,19 @@ byte Echo4 = 53;
 
 NewPing sonar4(Trigger4, Echo4, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
 
+/*
 byte Trigger5 = 47;
 byte Echo5 = 49;
 
 NewPing sonar5(Trigger5, Echo5, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
+*/
 
+/*
 byte Trigger6 = 27;
 byte Echo6 = 29;
 
 NewPing sonar6(Trigger6, Echo6, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
+*/
 
 byte Trigger7 = 23;
 byte Echo7 = 25;
@@ -221,10 +227,10 @@ void setup() {
   Serial.println(F("Initializing DMP..."));
   devStatus = mpu.dmpInitialize();
 
-  mpu.setXGyroOffset(20);
-  mpu.setYGyroOffset(-7);
-  mpu.setZGyroOffset(87);
-  mpu.setZAccelOffset(1402); // 1688 factory default for my test chip
+  mpu.setXGyroOffset(4);
+  mpu.setYGyroOffset(-6);
+  mpu.setZGyroOffset(101);
+  mpu.setZAccelOffset(1357); // 1688 factory default for my test chip
 
   if (devStatus == 0) {
     // turn on the DMP, now that it's ready
@@ -250,7 +256,7 @@ void setup() {
   therm1.begin(0x1C);
   therm1.setUnit(TEMP_C);
 
-  therm2.begin(0x2C);
+  therm2.begin(0x2C); //derecha atras
   therm2.setUnit(TEMP_C);
 
   therm3.begin(0x3C);
@@ -275,13 +281,27 @@ void setup() {
   pinMode(motIzqA1, OUTPUT);
   pinMode(motIzqA2, OUTPUT);
 
+  analogWrite(motDerE1, LOW);
+  analogWrite(motDerE2, LOW);
+
+  analogWrite(motDerA1, LOW);
+  analogWrite(motDerA2, LOW);
+
+  analogWrite(motIzqE1, LOW);
+  analogWrite(motIzqE2, LOW);
+
+  analogWrite(motIzqA1, LOW);
+  analogWrite(motIzqA2, LOW);
+
   //COLOR
+  /*
   pinMode(s0, OUTPUT);
   pinMode(s1, OUTPUT);
   pinMode(s2, OUTPUT);
   pinMode(s3, OUTPUT);
   digitalWrite(s0, HIGH);
   digitalWrite(s1, HIGH);
+  */
 
   //LCD
   lcd.begin(16, 2);  // initialize the lcd for 16 chars 2 lines, turn on backlight
@@ -308,7 +328,7 @@ int MPUY()
   if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
     // reset so we can continue cleanly
     mpu.resetFIFO();
-    return 9988;
+    //return 9988;
     //Serial.println(F("FIFO overflow!"));
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
@@ -434,19 +454,49 @@ void Detenerse()
 
 void Adelante()
 {
-  analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, MotD);
+  analogWrite(motDerE1, 160); //190
+  analogWrite(motDerE2, 0);
 
-  analogWrite(motDerA1, MotD);
+  analogWrite(motDerA1, 220); //255  //205
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, MotI);
+  analogWrite(motIzqE1, 148); //178  //132
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, MotI);
+  analogWrite(motIzqA1, 148); //178  //132
+  analogWrite(motIzqA2, 0);
 
   //Victima();
+}
+
+void Izquierda()
+{
+  analogWrite(motDerE1, 160);
+  analogWrite(motDerE2, 0);
+
+  analogWrite(motDerA1, 220);
+  analogWrite(motDerA2, 0);
+
+  analogWrite(motIzqE1, 0);
+  analogWrite(motIzqE2, 148);
+
+  analogWrite(motIzqA1, 0);
+  analogWrite(motIzqA2, 148);
+}
+
+void Derecha()
+{
+  analogWrite(motDerE1, 0);
+  analogWrite(motDerE2, 160);
+
+  analogWrite(motDerA1, 0);
+  analogWrite(motDerA2, 220);
+
+  analogWrite(motIzqE1, 148);
+  analogWrite(motIzqE2, 0);
+
+  analogWrite(motIzqA1, 148);
+  analogWrite(motIzqA2, 0);
 }
 
 void Atras()
@@ -466,71 +516,38 @@ void Atras()
 
 void DerechaM()
 {
-  analogWrite(motDerE1, MotDM);
-  analogWrite(motDerE2, 0);
+  analogWrite(motDerE1, 0);
+  analogWrite(motDerE2, 180);
 
-  analogWrite(motDerA1, MotDM);
+  analogWrite(motDerA1, 200);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, MotIM);
+  analogWrite(motIzqE1, 150);
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, MotIM);
-  analogWrite(motIzqA2, 0);
+  analogWrite(motIzqA1, 0);
+  analogWrite(motIzqA2, 160);
 }
 
-//funcion para moverse hacia izquierda
 void IzquierdaM()
 {
-  analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, MotDM);
-
-  analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, MotDM);
-
-  analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, MotIM);
-
-  analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, MotIM);
-}
-
-void Derecha()
-{
-  analogWrite(motDerE1, MotD);
+  analogWrite(motDerE1, 180);
   analogWrite(motDerE2, 0);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, MotD);
+  analogWrite(motDerA2, 200);
 
-  analogWrite(motIzqE1, MotI);
-  analogWrite(motIzqE2, 0);
-
-  analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, MotI);
-}
-
-void Izquierda()
-{
-  analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, MotD);
-
-  analogWrite(motDerA1, MotD); //190
-  analogWrite(motDerA2, 0)
-;
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, MotI); //100
+  analogWrite(motIzqE2, 150);
 
-  analogWrite(motIzqA1, MotI); //90
+  analogWrite(motIzqA1, 160);
   analogWrite(motIzqA2, 0);
 }
-
-
 
 //Cuentas del encoder
 int Encoder1()
 {
-  long newPosition = Enc2.read();
+  long newPosition = EncDerE.read();
 
   if (newPosition != oldPosition) {
     oldPosition = newPosition;
@@ -545,24 +562,26 @@ void GiroDer90()
 
   delay(1000);
   EncDerE.write(0);
-  while (Encoder1() > const90 * -1)
+  int Enc = EncDerE.read();
+  //Serial.println(EncDerE.read());
+  while (Enc < const90 )
   {
     Derecha();
-    Encoder1();
+    Enc = EncDerE.read();
   }
   Detenerse();
 }
 
 void GiroIzq90()
 {
-
   delay(1000);
   EncDerE.write(0);
-
-  while (Encoder1() < const90)
+  int Enc = EncDerE.read();
+  //Serial.println(EncDerE.read());
+  while (Enc > const90 * -1 )
   {
     Izquierda();
-    Encoder1();
+    Enc = EncDerE.read();
   }
   Detenerse();
 }
@@ -585,18 +604,14 @@ void Adelante30()
   EncDerE.write(0);
   int Enc = EncDerE.read();
 
-  while (Encoder1() < const30)
+  while (Enc < const30)
   {
     Adelante();
     //Victima();
-    Encoder1();
+    Enc = EncDerE.read();
     //Victima();
-    if (Vict == 0)
-    {
-      Victima();
-    }
-    Detenerse();
   }
+  Detenerse();
 }
 
 bool ParedDer()
@@ -727,8 +742,10 @@ void AgujeroNegro()
 
 void Acejarse()
 {
+  Serial.println(SharpDe.distance());
   if (ParedDer())
   {
+    Serial.println("entro 1 if");
     int Dist = SharpDe.distance();
 
     do {
@@ -738,6 +755,7 @@ void Acejarse()
         {
           IzquierdaM();
           Dist = SharpDe.distance();
+          Serial.println(SharpDe.distance());
         }
       }
       else if (Dist > 9)
@@ -746,14 +764,16 @@ void Acejarse()
         {
           DerechaM();
           Dist = SharpDe.distance();
+          Serial.println(SharpDe.distance());
         }
       }
       Detenerse();
     } while (Dist != 8);
-    }
-
+  }
+  /*
   if (ParedEnf())
   {
+    Serial.println("entro 2 if");
     int Dist2 = SharpEn.distance();
 
     do {
@@ -775,10 +795,11 @@ void Acejarse()
       }
       Detenerse();
     } while (Dist2 != 8);
-    }
+  }
 
-    if (ParedIzq())
+  if (ParedIzq())
   {
+    Serial.println("entro 3 if");
     int Dist = SharpIz.distance();
 
     do {
@@ -800,30 +821,35 @@ void Acejarse()
       }
       Detenerse();
     } while (Dist != 8);
-    }
+  }
+  */
 }
 
 
 void Acomodo()
 {
   int pos = MPUY();
+  Serial.println(pos);
   double CountEnc = const90 / 90; //
   bool Listo = false;
 
   do {
-    if (pos > 90 && pos < 135)
+    if (pos > 92 && pos < 135)
     {
+      Serial.println("ENTRO 1 IF");
       double New = (pos - 90) * CountEnc;
       EncDerE.write(0);
-      while (Encoder1() < New)
+      while (Encoder1() > New * -1)
       {
         Izquierda();
         Encoder1();
       }
+      Serial.println("Salio");
       Detenerse();
     }
-    else if (pos < 90 && pos > 45)
+    else if (pos < 88 && pos > 45)
     {
+      Serial.println("ENTRO 2 IF");
       double New = (90 - pos) * CountEnc;
       EncDerE.write(0);
       while (Encoder1() < New)
@@ -831,22 +857,27 @@ void Acomodo()
         Derecha();
         Encoder1();
       }
+      Serial.println("Salio");
       Detenerse();
     }
 
-    else if (pos > 0 && pos < 45)
+    else if (pos > 2 && pos < 45)
     {
+      Serial.println("ENTRO 3 IF");
       double New = pos * CountEnc;
+      Serial.println(New);
       EncDerE.write(0);
-      while (Encoder1() < New)
+      while (Encoder1() > New * -1)
       {
         Izquierda();
         Encoder1();
       }
+      Serial.println("Salio");
       Detenerse();
     }
-    else if (pos < 0 && pos > -45)
+    else if (pos < -2 && pos > -45)
     {
+      Serial.println("ENTRO 4 IF");
       double New = (pos * -1) * CountEnc;
       EncDerE.write(0);
       while (Encoder1() < New)
@@ -854,22 +885,26 @@ void Acomodo()
         Derecha();
         Encoder1();
       }
+      Serial.println("Salio");
       Detenerse();
     }
 
-    else if (pos > -90 && pos < -45)
+    else if (pos > -88 && pos < -45)
     {
+      Serial.println("ENTRO 5 IF");
       double New = (pos + 90) * CountEnc;
       EncDerE.write(0);
-      while (Encoder1() < New)
+      while (Encoder1() > New * -1)
       {
         Izquierda();
         Encoder1();
       }
+      Serial.println("Salio");
       Detenerse();
     }
-    else if (pos < -90 && pos > -135)
+    else if (pos < -92 && pos > -135)
     {
+      Serial.println("ENTRO 6 IF");
       double New = (pos + 90) * -1 * CountEnc;
       EncDerE.write(0);
       while (Encoder1() < New)
@@ -877,22 +912,26 @@ void Acomodo()
         Derecha();
         Encoder1();
       }
+      Serial.println("Salio");
       Detenerse();
     }
 
-    else if (pos < 179 && pos > 135)
+    else if (pos < 177 && pos > 135)
     {
+      Serial.println("ENTRO 7 IF");
       double New = (179 - pos) * CountEnc;
       EncDerE.write(0);
-      while (Encoder1() < New)
+      while (Encoder1() > New * -1)
       {
         Derecha();
         Encoder1();
       }
+      Serial.println("Salio");
       Detenerse();
     }
-    else if (pos > -179 && pos < -135)
+    else if (pos > -177 && pos < -135)
     {
+      Serial.println("ENTRO 8 IF");
       double New = (pos + 179) * CountEnc;
       EncDerE.write(0);
       while (Encoder1() < New)
@@ -900,6 +939,7 @@ void Acomodo()
         Izquierda();
         Encoder1();
       }
+      Serial.println("Salio");
       Detenerse();
     }
     Detenerse();
@@ -913,28 +953,28 @@ void Acomodo()
 
 void Rampa()
 {
- /* int iMed = *medida actual mpu* ;
+  /* int iMed = *medida actual mpu* ;
 
-  if (iMed > *constante * +*error*)
-  {
-    while (iMed > *constante * +*error*)
-    {
-      Adelante(); //en este caso pwm alto
-      iMed = *medida actual mpu* ;
-    }
-    Detenerse();
-  }
+   if (iMed > *constante * +*error*)
+   {
+     while (iMed > *constante * +*error*)
+     {
+       Adelante(); //en este caso pwm alto
+       iMed = *medida actual mpu* ;
+     }
+     Detenerse();
+   }
 
-  else if (iMed < *constante * -*error*)
-  {
-    while (iMed < *constante * -*error*)
-    {
-      Adelante(); //en este paso pwm bajo
-      iMed = *medida actual mpu* ;
-    }
-    Detenerse();
-  }
-  */
+   else if (iMed < *constante * -*error*)
+   {
+     while (iMed < *constante * -*error*)
+     {
+       Adelante(); //en este paso pwm bajo
+       iMed = *medida actual mpu* ;
+     }
+     Detenerse();
+   }
+   */
 }
 
 void SeguirDerecha()
@@ -1142,14 +1182,6 @@ int GetPossibility()
     iReturn++;
   }
 
-  //comprueba atras
-  int iDistAA = sonar5.ping_cm();
-  int iDistAB = sonar6.ping_cm();
-  if (iDistAA > 30 || iDistAB > 30)
-  {
-    bDireccion[3] = true;
-    iReturn++;
-  }
   return iReturn;
 }
 
@@ -1270,22 +1302,22 @@ bool Moverse()
       delay(500);
       GiroDer90();
       delay(500);
-            Adelante30();
-            delay(500);
-            iMovimiento = 4;
-            iDireccion += 2;
-            if (iDireccion == 5)
-    {
-      iDireccion = 1;
+      Adelante30();
+      delay(500);
+      iMovimiento = 4;
+      iDireccion += 2;
+      if (iDireccion == 5)
+      {
+        iDireccion = 1;
+      }
+      else if (iDireccion == 6)
+      {
+        iDireccion = 2;
+      }
+      setCoord(iDireccion, iMovimiento);
     }
-    else if (iDireccion == 6)
-    {
-      iDireccion = 2;
-    }
-    setCoord(iDireccion, iMovimiento);
   }
-}
-return Next;
+  return Next;
 }
 
 //busca y regresa el paso al cual quieres ir para moverte a una localizacion desconocida
@@ -1355,22 +1387,22 @@ void MoverseShido(int iActual, int iDestination)
     delay(500);
     GiroDer90();
     delay(500);
-          Adelante30();
-          delay(500);
-          iMovimiento = 4;
-          iDireccion += 2;
-          if (iDireccion == 5)
-  {
-    iDireccion = 1;
+    Adelante30();
+    delay(500);
+    iMovimiento = 4;
+    iDireccion += 2;
+    if (iDireccion == 5)
+    {
+      iDireccion = 1;
+    }
+    else if (iDireccion == 6)
+    {
+      iDireccion = 2;
+    }
+    setCoord(iDireccion, iMovimiento);
   }
-  else if (iDireccion == 6)
-  {
-    iDireccion = 2;
-  }
-  setCoord(iDireccion, iMovimiento);
-}
 
-else if (iActual + 100 == iDestination)
+  else if (iActual + 100 == iDestination)
   {
     GiroDer90();
     delay(500);
@@ -1447,40 +1479,87 @@ void Laberinto()
 }
 
 void loop() {
-  Serial.println(Encoder1());
+  Acejarse();
+  /*
+  delay(1000);
+  EncDerE.write(0);
+  int Enc = EncDerE.read();
+  Serial.println(EncDerE.read());
+  while (Enc > -880 )
+  {
+    Izquierda();
+    Enc = EncDerE.read();
+    Serial.println(EncDerE.read());
+  }
+  Detenerse();
+  */
+  /*
+  Acomodo();
+  //Serial.println(EncDerE.read());
+  delay(500);
+  lcd.clear();
+  delay(200);
+  lcd.setCursor(0, 0);
+  lcd.print("listo");
+  */
+
+  /*
+  Serial.println(EncDerE.read());
+  Serial.println(Enc2.read());
+  Serial.println();
+  delay(1000);
+  */
+  //Adelante30();
+  //delay(2000);
+
   /*
   lcd.clear();
   lcd.setCursor(0, 0);
-  therm1.read(); //IZQ ENF 
-  lcd.print(sonar1.ping_cm());
-  
-  lcd.setCursor(7, 0);
-  therm2.read(); //DER ATR
-  lcd.print(sonar2.ping_cm());
-  
+  lcd.println(SharpEn.distance());
+  lcd.setCursor(6, 0);
+  lcd.println(SharpDe.distance());
   lcd.setCursor(0, 1);
-  therm3.read(); //IZQ ATR
-  lcd.print(sonar3.ping_cm());
-  
-  lcd.setCursor(7, 1);
-  therm4.read();//DER ENF
-  lcd.print(sonar4.ping_cm());
+  lcd.println(SharpIz.distance());
+  lcd.println();
+  delay(500);
   */
-  //delay(1000);
-  //Adelante();
-  //Adelante30();
-  //GiroIzq90();
-  //Sharps;
-  //Ultrasonicos;
-  //Color;
-  //MPU;
-  //Acejarse();
-  //Acomodo();
-  //Victima();
-  //Negro();
-  //--DetectarRampa();
-  //Rampa();
-  //SeguirDerecha();
 
-  //Laberinto();
+  /*
+  Serial.println(sonar1.ping_cm());
+  Serial.println(sonar2.ping_cm());
+  Serial.println(sonar3.ping_cm());
+  Serial.println(sonar4.ping_cm());
+  Serial.println(sonar7.ping_cm());
+  Serial.println(sonar8.ping_cm());
+  Serial.println();
+  delay(500);
+  */
+
+  /*
+  therm1.read();
+  therm2.read();
+  therm3.read();
+  therm4.read();
+  Serial.println(therm1.object());
+  Serial.println(therm2.object());
+  Serial.println(therm3.object());
+  Serial.println(therm4.object());
+  Serial.println();
+  delay(500);
+  */
+
+  /*
+  Serial.println(Enc2.read()); //ENFRETNE
+  Serial.println(EncDerE.read()); //ATRAS
+  Serial.println();
+  delay(500);
+  */
+
+  /*
+  Dispensador.write(111);
+  delay(1000);
+  Dispensador.write(81);
+  delay(1000);
+  */
+
 }

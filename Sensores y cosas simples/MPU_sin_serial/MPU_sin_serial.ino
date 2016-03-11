@@ -55,11 +55,11 @@ void setup() {
     Serial.println(F("Initializing DMP..."));
     devStatus = mpu.dmpInitialize();
 
-    mpu.setXGyroOffset(22);
-    mpu.setYGyroOffset(-8);
-    mpu.setZGyroOffset(86);
-    mpu.setZAccelOffset(1422); // 1688 factory default for my test chip
-
+    mpu.setXGyroOffset(4);
+  mpu.setYGyroOffset(-6);
+  mpu.setZGyroOffset(101);
+  mpu.setZAccelOffset(1357); // 1688 factory default for my test chip
+  
     if (devStatus == 0) {
         // turn on the DMP, now that it's ready
         Serial.println(F("Enabling DMP..."));

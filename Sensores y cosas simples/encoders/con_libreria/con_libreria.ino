@@ -10,7 +10,7 @@
 //   Best Performance: both pins have interrupt capability
 //   Good Performance: only the first pin has interrupt capability
 //   Low Performance:  neither pin has interrupt capability
-Encoder myEnc1(2, 3);
+Encoder myEnc1(18, 19); //18
 
 //   avoid using pins with LEDs attached
 
@@ -23,7 +23,7 @@ long oldPosition  = -999;
 
 
 void loop() {
-  long newPosition = myEnc.read();
+  long newPosition = myEnc1.read();
 
 
   if (newPosition != oldPosition) {
