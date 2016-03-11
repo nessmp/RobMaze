@@ -92,6 +92,31 @@ SharpIR SharpDe(Der, 25, 93, model);
 
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
 
+//////////////////
+///ULTRASONICOS///
+//////////////////
+
+byte Trigger1 = 28;
+byte Echo1 = 26;
+
+NewPing sonar1(Trigger1, Echo1, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar1.ping_cm();
+
+byte Trigger2 = 38;
+byte Echo2 = 36;
+
+NewPing sonar2(Trigger2, Echo2, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar1.ping_cm();
+
+
+byte Trigger7 = 23;
+byte Echo7 = 25;
+
+NewPing sonar7(Trigger7, Echo7, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
+
+byte Trigger8 = 24;
+byte Echo8 = 22;
+
+NewPing sonar8(Trigger8, Echo8, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
+
 void setup() {
   Serial.begin(115200);
 
@@ -107,7 +132,7 @@ void setup() {
 
   therm4.begin(0x4C);
   therm4.setUnit(TEMP_C);
-  
+
   //MOTOR
   pinMode(motDerE1, OUTPUT);
   pinMode(motDerE2, OUTPUT);
@@ -242,6 +267,21 @@ void Izquierda()
   analogWrite(motIzqA2, 148);
 }
 
+void IzquierdaLento()
+{
+  analogWrite(motDerE1, 110);
+  analogWrite(motDerE2, 0);
+
+  analogWrite(motDerA1, 170);
+  analogWrite(motDerA2, 0);
+
+  analogWrite(motIzqE1, 0);
+  analogWrite(motIzqE2, 100);
+
+  analogWrite(motIzqA1, 0);
+  analogWrite(motIzqA2, 100);
+}
+
 void Derecha()
 {
   analogWrite(motDerE1, 0);
@@ -254,6 +294,21 @@ void Derecha()
   analogWrite(motIzqE2, 0);
 
   analogWrite(motIzqA1, 148);
+  analogWrite(motIzqA2, 0);
+}
+
+void DerechaLento()
+{
+  analogWrite(motDerE1, 0);
+  analogWrite(motDerE2, 110);
+
+  analogWrite(motDerA1, 0);
+  analogWrite(motDerA2, 170);
+
+  analogWrite(motIzqE1, 100);
+  analogWrite(motIzqE2, 0);
+
+  analogWrite(motIzqA1, 100);
   analogWrite(motIzqA2, 0);
 }
 
@@ -317,19 +372,28 @@ void GiroDer90()
   Detenerse();
 }
 
-void Adelante30()
+void Adelante10()
 {
-  delay(500);
   EncDerE.write(0);
   int Enc = EncDerE.read();
+  int const10 = const30 / 3;
 
-  while (Enc < const30)
+  while (Enc < const10)
   {
     Adelante();
-    //Victima();
     Enc = EncDerE.read();
-    //Victima();
   }
+  Detenerse();
+}
+
+void Adelante30()
+{
+  Adelante10();
+  Detectar();
+  Adelante10();
+  Detectar();
+  Adelante10();
+  Detectar();
   Detenerse();
 }
 
@@ -395,6 +459,35 @@ bool ParedEnf()
   return Pared;
 }
 
+void Detectar()
+{
+  therm1.read();
+  therm2.read();
+  therm3.read();
+  therm4.read();
+  int Therm1 = therm1.object();
+  int Therm2 = therm2.object(); //Derecha
+  int Therm3 = therm3.object();
+  int Therm4 = therm4.object(); //Derecha
+  int Temp = 23;
+  //Serial.println(therm2.object());
+  if (Therm1 > Temp || Therm2 > Temp || Therm3 > Temp || Therm4 > Temp)
+  {
+    Detenerse();
+    for (int iI = 113; iI > 75; iI--)
+    {
+      Dispensador.write(iI);
+      delay(1);
+    }
+    delay(1000);
+    for (int iI = 75; iI < 113; iI++)
+    {
+      Dispensador.write(iI);
+      delay(1);
+    }
+  }
+}
+
 void SeguirDerecha()
 {
   bool ParedD = ParedDer();
@@ -421,29 +514,31 @@ void SeguirDerecha()
     delay(100);
     Detenerse();
     delay(1000);
-    
+
   }
   else if (ParedD == true && ParedE == true)
   {
     GiroIzq90();
     delay(100);
-   
   }
-  
+  Acejarse();
+  //Detectar(0);
 }
 
 void Acejarse()
 {
-  Serial.println(SharpDe.distance());
-  if (ParedDer())
+  lcd.print(SharpDe.distance());
+  //Serial.println(SharpDe.distance());
+  int Dist = SharpDe.distance();
+  if (Dist < 24)
   {
-    Serial.println("entro 1 if");
-    int Dist = SharpDe.distance();
+    //Serial.println("entro 1 if");
+    Dist = SharpDe.distance();
 
     do {
-      if (Dist < 8)
+      if (Dist < 7)
       {
-        while (Dist < 8)
+        while (Dist < 7)
         {
           IzquierdaM();
           Dist = SharpDe.distance();
@@ -459,11 +554,65 @@ void Acejarse()
           Serial.println(SharpDe.distance());
         }
       }
+      else if (Dist == 8 || Dist == 7 || Dist == 9)
+        break;
       Detenerse();
-    } while (Dist != 8);
+    } while (Dist != 8 || Dist != 7 || Dist != 9);
   }
-} 
-void loop() 
+  /*
+  int DistU1 = sonar1.ping_cm();
+  Serial.println(DistU1);
+  int DistU2 = sonar2.ping_cm();
+  Serial.println(DistU2);
+  int DistS = SharpEn.distance();
+  Serial.println(DistS);
+  Serial.println();
+  if (DistU1 < 5 || DistU2 < 5)
+  {
+    while (DistS > 9)
+    {
+      Atras();
+      DistS = SharpEn.distance();
+    }
+    Detenerse();
+  }
+  lcd.clear();
+  lcd.print("Salio loop");
+  */
+
+  int Dist2 = SharpIz.distance();
+  if (Dist2 < 24)
+  {
+    //Serial.println("entro 1 if");
+    Dist2 = SharpIz.distance();
+
+    do {
+      if (Dist2 < 7)
+      {
+        while (Dist2 < 7)
+        {
+          DerechaM();
+          Dist2 = SharpIz.distance();
+          Serial.println(SharpIz.distance());
+        }
+      }
+      else if (Dist2 > 9)
+      {
+        while (Dist2 > 9)
+        {
+          IzquierdaM();
+          Dist2 = SharpIz.distance();
+          Serial.println(SharpIz.distance());
+        }
+      }
+      else if (Dist2 == 8 || Dist2 == 7 || Dist2 == 9)
+        break;
+      Detenerse();
+    } while (Dist2 != 8 || Dist2 != 7 || Dist2 != 9);
+  }
+}
+
+void loop()
 {
-    SeguirDerecha();
+  SeguirDerecha();
 }
