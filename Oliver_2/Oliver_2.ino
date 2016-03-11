@@ -330,6 +330,54 @@ bool ParedEnf()
   return Pared;
 }
 
+bool ParedEnf()
+{
+  bool Pared = true;
+  int Sharp = SharpEn.distance();
+  if (Sharp > 14)
+  {
+    Pared = false;
+  }
+  return Pared;
+}
+
+void SeguirDerecha()
+{
+  bool ParedD = ParedDer();
+  bool ParedE = ParedEnf();
+  delay(100);
+  ParedD = ParedDer();
+  ParedE = ParedEnf();
+  delay(100);
+  ParedD = ParedDer();
+  ParedE = ParedEnf();
+
+  if (ParedD == false)
+  {
+    GiroDer90();
+    delay(200);
+    Adelante30();
+    delay(1000);
+    Detenerse();
+    delay(500);
+  }
+  else if (ParedE == false)
+  {
+    Adelante30();
+    delay(100);
+    Detenerse();
+    delay(1000);
+    
+  }
+  else if (ParedD == true && ParedE == true)
+  {
+    GiroIzq90();
+    delay(100);
+   
+  }
+  
+}
+
 void loop() {
     Dispensador.write(113);
     delay(1000);
