@@ -544,7 +544,7 @@ double MPUR()
       iReturn = ypr[2] * 180 / M_PI;
 #endif
     }
-  } while (iReturn == 99999 || iReturn == -31073);
+  } while (iReturn == 99999 || iReturn == -31073 || iReturn > 1000);
   return iReturn;
 }
 
@@ -652,6 +652,19 @@ void IzquierdaM()
 
   analogWrite(motIzqA1, 160);
   analogWrite(motIzqA2, 0);
+}
+
+void IzquierdaM30()
+{
+  EncDerE.write(0);
+  IzquierdaM();
+  int Enc = EncDerE.read();
+  while (Enc < 8600)
+  {
+    Serial.println(Enc);
+    Enc = EncDerE.read();
+  }
+  Detenerse();
 }
 
 void GiroDer90()
@@ -779,7 +792,7 @@ bool RampaArriba()
   Serial.println(U4);
   Serial.println(Sharp);
   int Revision = 0;
-  
+
   if (SharpEnf < 9 && SharpIzq < 9)
   {
     if (Sharp < 18 && (U3 == 0 || U4 == 0))
@@ -826,24 +839,25 @@ void RampaAbajoIzq()
   int SharpEnf = SharpEn.distance();
   int SharpIzq = SharpIz.distance();
   int Roll = 0;
-  if (SharpDer < 8 && SharpEnf < 5 && SharpIzq > 15)
+  if (SharpEnf < 9 && SharpDer < 9)
   {
-    IzquierdaM();
-    delay(1200);
+    IzquierdaM30();
+    delay(50);
     Roll = MPUR();
-    if (Roll > 15)
+    lcd.setCursor(0, 1);
+    lcd.print(Roll);
+    if (Roll < -8)
     {
       IzquierdaM();
-      while (Roll > 15)
-      {
-        Roll = MPUR();
-      }
-      Detenerse();
+      delay(5000);
     }
     else
     {
-      Acejarse();
+      delay(100);
+      GiroIzq90();
+      delay(100);
     }
+    Detenerse();
   }
 }
 
@@ -891,16 +905,27 @@ void Detectar()
   if (Therm1 > Temp || Therm2 > Temp || Therm3 > Temp || Therm4 > Temp)
   {
     Detenerse();
+    lcd.clear();
+    lcd.print("VICTIMA");
+    lcd.setCursor(0, 1);
+    lcd.print("DETECTADA");
+    for (int iI = 75; iI < 113; iI++)
+    {
+      Dispensador.write(iI);
+      delay(1);
+    }
+    delay(500);
     for (int iI = 113; iI > 75; iI--)
     {
       Dispensador.write(iI);
       delay(1);
     }
-    delay(1000);
-    for (int iI = 75; iI < 113; iI++)
+    for (int iI = 0; iI < 10; iI++)
     {
-      Dispensador.write(iI);
-      delay(1);
+      lcd.noBacklight();
+      delay(250);
+      lcd.backlight();
+      delay(250);
     }
   }
 }
@@ -947,6 +972,7 @@ void Acomodo()
   }
 }
 
+<<<<<<< HEAD
  void AcejarseDerecha()
  {
  int Dist = SharpDe.distance();
@@ -1103,6 +1129,8 @@ lcd.clear();
   lcd.print("sale");
 }
 
+=======
+>>>>>>> origin/master
 void Revisiones()
 {
   Acejarse();
@@ -1117,7 +1145,7 @@ void Revisiones()
     delay(29);
     if (Rampa == false)
     {
-      //RampaAbajoIzq();
+      RampaAbajoIzq();
     }
   }
 }
@@ -1160,9 +1188,13 @@ void SeguirDerecha()
 
 void loop()
 {
+<<<<<<< HEAD
 AcejarseEnfrente();
  delay(3000); 
  
   /*Serial.print(SharpEn.distance());Serial.print("\t"); Serial.println(sonar1.ping_cm());
   delay(250);*/
+=======
+  SeguirDerecha();
+>>>>>>> origin/master
 }
