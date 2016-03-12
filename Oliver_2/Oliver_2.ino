@@ -1,4 +1,5 @@
 ///////EL ATTACH PARA LOS LACK OF PROGRESS ESTAN EN EL PIN #3//////////
+//Cambios
 
 #include <Encoder.h> //para que crees...
 #include <NewPing.h>
@@ -12,6 +13,35 @@
 #define MAX_DISTANCE 12
 #define model 1080 //modelo del sharp GP2Y0A21Y
 #define OUTPUT_READABLE_YAWPITCHROLL //Yaw Pitch Roll del MPU
+
+//////////////////
+///////MPU////////
+//////////////////
+
+MPU6050 mpu;
+#define OUTPUT_READABLE_YAWPITCHROLL
+
+bool dmpReady = false;  // set true if DMP init was successful
+uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
+uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
+uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
+uint16_t fifoCount;     // count of all bytes currently in FIFO
+uint8_t fifoBuffer[64]; // FIFO storage buffer
+
+Quaternion q;           // [w, x, y, z]         quaternion container
+VectorInt16 aa;         // [x, y, z]            accel sensor measurements
+VectorInt16 aaReal;     // [x, y, z]            gravity-free accel sensor measurements
+VectorInt16 aaWorld;    // [x, y, z]            world-frame accel sensor measurements
+VectorFloat gravity;    // [x, y, z]            gravity vector
+float euler[3];         // [psi, theta, phi]    Euler angle container
+float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+
+uint8_t teapotPacket[14] = { '$', 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0x00, 0x00, '\r', '\n' };
+
+volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
+void dmpDataReady() {
+  mpuInterrupt = true;
+}
 
 //////////////////
 /////MOTORES//////
@@ -64,6 +94,10 @@ byte Enf = A0;
 byte Izq = A1;
 byte Der =  A2;
 
+SharpIR SharpEn(Enf, 25, 93, model);
+SharpIR SharpIz(Izq, 25, 93, model);
+SharpIR SharpDe(Der, 25, 93, model);
+
 /////////////////
 //////SERVO//////
 /////////////////
@@ -76,19 +110,15 @@ const int PulsoMaximo = 2550;
 //////////////////
 //////COLOR//////
 //////////////////
+const byte s0 = 13;
+const byte s1 = 12;
+const byte s2 = 29;
+const byte s3 = 1;
 const byte out = 14;
 
-int red = 0;
-int green = 0;
-int blue = 0;
-String colon = "";
-
-const int sensibilidad = 30;
-
-
-SharpIR SharpEn(Enf, 25, 93, model);
-SharpIR SharpIz(Izq, 25, 93, model);
-SharpIR SharpDe(Der, 25, 93, model);
+//////////////////
+////////LCD///////
+//////////////////
 
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
 
@@ -119,6 +149,50 @@ NewPing sonar8(Trigger8, Echo8, MAX_DISTANCE);  //llamar a la funcion para saber
 
 void setup() {
   Serial.begin(115200);
+  
+  //MPU
+  #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+  Wire.begin();
+  TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz). Comment this line if having compilation difficulties with TWBR.
+#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+  Fastwire::setup(400, true);
+#endif
+
+  Serial.println(F("Initializing I2C devices..."));
+  mpu.initialize();
+
+  // verify connection
+  Serial.println(F("Testing device connections..."));
+  Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+
+  // load and configure the DMP
+  Serial.println(F("Initializing DMP..."));
+  devStatus = mpu.dmpInitialize();
+
+  mpu.setXGyroOffset(4);
+  mpu.setYGyroOffset(-6);
+  mpu.setZGyroOffset(101);
+  mpu.setZAccelOffset(1357); // 1688 factory default for my test chip
+
+  if (devStatus == 0) {
+    // turn on the DMP, now that it's ready
+    Serial.println(F("Enabling DMP..."));
+    mpu.setDMPEnabled(true);
+
+    Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
+    attachInterrupt(0, dmpDataReady, RISING);
+    mpuIntStatus = mpu.getIntStatus();
+
+    Serial.println(F("DMP ready! Waiting for first interrupt..."));
+    dmpReady = true;
+
+    packetSize = mpu.dmpGetFIFOPacketSize();
+  } else {
+
+    Serial.print(F("DMP Initialization failed (code "));
+    Serial.print(devStatus);
+    Serial.println(F(")"));
+  }
 
   //CALOR
   therm1.begin(0x1C);
@@ -166,69 +240,164 @@ void setup() {
 
   //SERVO
   Dispensador.attach(pinservo, PulsoMinimo, PulsoMaximo);
+
+  //COLOR
+  pinMode(s0, OUTPUT);
+  pinMode(s1, OUTPUT);
+  pinMode(s2, OUTPUT);
+  pinMode(s3, OUTPUT);
+  pinMode(out , INPUT);
+
+  digitalWrite(s0, LOW); //HIGH, HIGH dif de 20
+  digitalWrite(s1, HIGH);
+
+  digitalWrite(s2, HIGH);
+  digitalWrite(s3, LOW);
 }
 
-//COLOR
-String Color()
+/*
+double MPUY()
 {
-  String color = "Negro";
+  double iReturn;
+  do{
 
-  int cont;
-
-  // digitalWrite(s2, LOW);
-  //digitalWrite(s3, LOW);
-  //count OUT, pRed, RED
-  
-  red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-  // digitalWrite(s3, HIGH);
-  //count OUT, pBLUE, BLUE
-  blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-  //  digitalWrite(s2, HIGH);
-  //count OUT, pGreen, GREEN
-  green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
-  
-  Serial.println();
-  cont = 0;
-  //Serial.println("red: ");
-    //Serial.println(red);
-    //Serial.println("green: ");
-    //Serial.println(green);
-    //Serial.println("blue: ");
-   //Serial.println(blue);
-  
-  for (int i = 0; i < 5; i++)
-  {
-
-    if (red < 6 || green < 6 || blue < 6)
-    {
-      cont++;
+    // wait for MPU interrupt or extra packet(s) available
+    while (!mpuInterrupt && fifoCount < packetSize) {
+      // other program behavior stuff here
+      // .
+      // .
+      // .
+      // if you are really paranoid you can frequently test in between other
+      // stuff to see if mpuInterrupt is true, and if so, "break;" from the
+      // while() loop to immediately process the MPU data
+      // .
+      // .
+      // .
     }
 
-    red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+    // reset interrupt flag and get INT_STATUS byte
+    mpuInterrupt = false;
+    mpuIntStatus = mpu.getIntStatus();
 
-    blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+    // get current FIFO count
+    fifoCount = mpu.getFIFOCount();
 
-    green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+    // check for overflow (this should never happen unless our code is too inefficient)
+    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+      // reset so we can continue cleanly
+      mpu.resetFIFO();
+      //Serial.println(F("FIFO overflow!"));
+      iReturn = 99999;
+      Serial.println("HOLIS");
 
-    Serial.println("red: ");
-    Serial.println(red);
-    Serial.println("green: ");
-    Serial.println(green);
-    Serial.println("blue: ");
-    Serial.println(blue);
-    delay(1000);
-  }
-  
-  if (cont > 0)
+      // otherwise, check for DMP data ready interrupt (this should happen frequently)
+    } else if (mpuIntStatus & 0x02) {
+      // wait for correct available data length, should be a VERY short wait
+      while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+      // read a packet from FIFO
+      mpu.getFIFOBytes(fifoBuffer, packetSize);
+
+      // track FIFO count here in case there is > 1 packet available
+      // (this lets us immediately read more without waiting for an interrupt)
+      fifoCount -= packetSize;
+
+#ifdef OUTPUT_READABLE_YAWPITCHROLL
+      // display Euler angles in degrees
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      mpu.dmpGetGravity(&gravity, &q);
+      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+      //Serial.print("ypr\t");
+      //Serial.print(ypr[0] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.print(ypr[1] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.println(ypr[2] * 180 / M_PI);
+      iReturn = ypr[0] * 180 / M_PI;
+#endif
+    }
+  }while(iReturn == 99999 || iReturn == -31073 || iReturn == 675283008.00);
+  return iReturn;
+}
+*/
+
+double MPUP()
+{
+  double iReturn;
+  do{
+
+    // wait for MPU interrupt or extra packet(s) available
+    while (!mpuInterrupt && fifoCount < packetSize) {
+      // other program behavior stuff here
+      // .
+      // .
+      // .
+      // if you are really paranoid you can frequently test in between other
+      // stuff to see if mpuInterrupt is true, and if so, "break;" from the
+      // while() loop to immediately process the MPU data
+      // .
+      // .
+      // .
+    }
+
+    // reset interrupt flag and get INT_STATUS byte
+    mpuInterrupt = false;
+    mpuIntStatus = mpu.getIntStatus();
+
+    // get current FIFO count
+    fifoCount = mpu.getFIFOCount();
+
+    // check for overflow (this should never happen unless our code is too inefficient)
+    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+      // reset so we can continue cleanly
+      mpu.resetFIFO();
+      //Serial.println(F("FIFO overflow!"));
+      iReturn = 99999;
+
+      // otherwise, check for DMP data ready interrupt (this should happen frequently)
+    } else if (mpuIntStatus & 0x02) {
+      // wait for correct available data length, should be a VERY short wait
+      while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+      // read a packet from FIFO
+      mpu.getFIFOBytes(fifoBuffer, packetSize);
+
+      // track FIFO count here in case there is > 1 packet available
+      // (this lets us immediately read more without waiting for an interrupt)
+      fifoCount -= packetSize;
+
+#ifdef OUTPUT_READABLE_YAWPITCHROLL
+      // display Euler angles in degrees
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      mpu.dmpGetGravity(&gravity, &q);
+      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+      //Serial.print("ypr\t");
+      //Serial.print(ypr[0] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.print(ypr[1] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.println(ypr[2] * 180 / M_PI);
+      iReturn = ypr[1] * 180 / M_PI;
+#endif
+    }
+  }while(iReturn == 99999 || iReturn == -31073);
+  return iReturn;
+}
+
+bool Negro()
+{
+  bool iReturn = false;
+  int color = pulseIn(out, LOW);
+  if (color > 2800)
   {
-    color = "Blanco";
+    iReturn = true;
   }
-  else if (cont = 0)
+  color = pulseIn(out, LOW);
+  if (color > 2800)
   {
-    color = "Negro";
+    iReturn = true;
   }
-
-  return color;
+  return iReturn;
 }
 
 //MOTORES
@@ -277,21 +446,6 @@ void Izquierda()
   analogWrite(motIzqA2, 148);
 }
 
-void IzquierdaLento()
-{
-  analogWrite(motDerE1, 110);
-  analogWrite(motDerE2, 0);
-
-  analogWrite(motDerA1, 170);
-  analogWrite(motDerA2, 0);
-
-  analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 100);
-
-  analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 100);
-}
-
 void Derecha()
 {
   analogWrite(motDerE1, 0);
@@ -304,21 +458,6 @@ void Derecha()
   analogWrite(motIzqE2, 0);
 
   analogWrite(motIzqA1, 148);
-  analogWrite(motIzqA2, 0);
-}
-
-void DerechaLento()
-{
-  analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 110);
-
-  analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 170);
-
-  analogWrite(motIzqE1, 100);
-  analogWrite(motIzqE2, 0);
-
-  analogWrite(motIzqA1, 100);
   analogWrite(motIzqA2, 0);
 }
 
@@ -369,7 +508,8 @@ void IzquierdaM()
 
 void GiroDer90()
 {
-
+  lcd.clear();
+  lcd.print("GiroDer90");
   delay(1000);
   EncDerE.write(0);
   int Enc = EncDerE.read();
@@ -398,6 +538,8 @@ void Adelante10()
 
 void Adelante30()
 {
+  lcd.clear();
+  lcd.print("Adelante30");
   Adelante10();
   Detectar();
   Adelante10();
@@ -409,6 +551,8 @@ void Adelante30()
 
 void Atras30()
 {
+  lcd.clear();
+  lcd.print("Atras30");
   EncDerE.write(0);
   int Enc = EncDerE.read();
   while (Enc > const30 * -1)
@@ -422,6 +566,8 @@ void Atras30()
 
 void GiroIzq90()
 {
+  lcd.clear();
+  lcd.print("GiroIzq90");
   delay(1000);
   EncDerE.write(0);
   int Enc = EncDerE.read();
@@ -471,10 +617,11 @@ bool ParedEnf()
 
 void HoyoNegro()
 {
-  String color = Color();
+  lcd.clear();
+  lcd.print("HoyoNegro");
   int DistIzq = SharpIz.distance();
 
-  if (color == "Negro")
+  if (Negro())
   {
     Atras30();
     delay(500);
@@ -557,12 +704,56 @@ void SeguirDerecha()
     delay(100);
   }
   Acejarse();
-  delay(500);
+  delay(300);
+  Acomodo();
+  HoyoNegro();
+}
+
+void Acomodo()
+{
+  lcd.clear();
+  lcd.print("Acomodo");
+  delay(29);
+  int U1 = sonar7.ping_cm();
+  delay(29);
+  int Sharp = SharpIz.distance();
+  int U2 = sonar8.ping_cm();
+  delay(29);
+  int DifU = U1 - U2;
+  int Dif1 = Sharp - U1;
+  int Dif2 = Sharp - U2;
+
+  if (DifU >= 2 || DifU <= -2)
+  {
+    do {
+      if (DifU >= 2)
+      {
+        Derecha();
+        delay(80);
+      }
+      if (DifU <= -2)
+      {
+        Izquierda();
+        delay(80);
+      }
+      Detenerse();
+      delay(100);
+      U1 = sonar7.ping_cm();
+      delay(29);
+      Sharp = SharpIz.distance();
+      U2 = sonar8.ping_cm();
+      delay(29);
+      DifU = U1 - U2;
+      Dif1 = Sharp - U1;
+      Dif2 = Sharp - U2;
+    } while (DifU >= 2 || DifU <= -2);
+  }
 }
 
 void Acejarse()
 {
-  lcd.print(SharpDe.distance());
+  lcd.clear();
+  lcd.print("Acejarse");
   //Serial.println(SharpDe.distance());
   int Dist = SharpDe.distance();
   if (Dist < 24)
@@ -594,26 +785,21 @@ void Acejarse()
       Detenerse();
     } while (Dist != 8 || Dist != 7 || Dist != 9);
   }
-  /*
-  int DistU1 = sonar1.ping_cm();
-  Serial.println(DistU1);
-  int DistU2 = sonar2.ping_cm();
-  Serial.println(DistU2);
-  int DistS = SharpEn.distance();
-  Serial.println(DistS);
-  Serial.println();
-  if (DistU1 < 5 || DistU2 < 5)
+
+  int Ult1 = sonar1.ping_cm();
+  int Ult2 = sonar2.ping_cm();
+  int Sharp = SharpEn.distance();
+  if (Sharp > 6 && (Ult1 != 0 && Ult2 != 0))
   {
-    while (DistS > 9)
-    {
+    do {
       Atras();
-      DistS = SharpEn.distance();
-    }
-    Detenerse();
+      delay(200);
+      Detenerse();
+      Ult1 = sonar1.ping_cm();
+      Ult2 = sonar2.ping_cm();
+      //Sharp = SharpEn.distance();
+    } while (Ult1 < 4 && Ult2 < 4);
   }
-  lcd.clear();
-  lcd.print("Salio loop");
-  */
 
   int Dist2 = SharpIz.distance();
   if (Dist2 < 24)
@@ -649,6 +835,9 @@ void Acejarse()
 
 void loop()
 {
-  SeguirDerecha();
-  delay(500);
+  Serial.println(MPUP());
+  delay(29);
+  Serial.println("Loop");
+  //lcd.backlight();
+  //SeguirDerecha();
 }
