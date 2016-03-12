@@ -136,6 +136,17 @@ byte Echo2 = 36;
 
 NewPing sonar2(Trigger2, Echo2, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar1.ping_cm();
 
+byte Trigger3 = 42;
+byte Echo3 = 40;
+
+
+NewPing sonar3(Trigger3, Echo3, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
+
+byte Trigger4 = 51;
+byte Echo4 = 53;
+
+NewPing sonar4(Trigger4, Echo4, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
+
 
 byte Trigger7 = 23;
 byte Echo7 = 25;
@@ -149,14 +160,15 @@ NewPing sonar8(Trigger8, Echo8, MAX_DISTANCE);  //llamar a la funcion para saber
 
 void setup() {
   Serial.begin(115200);
-  
+
   //MPU
-  #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
   Wire.begin();
   TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz). Comment this line if having compilation difficulties with TWBR.
 #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
   Fastwire::setup(400, true);
 #endif
+  while (!Serial); // wait for Leonardo enumeration, others continue immediately
 
   Serial.println(F("Initializing I2C devices..."));
   mpu.initialize();
@@ -255,11 +267,11 @@ void setup() {
   digitalWrite(s3, LOW);
 }
 
-/*
+
 double MPUY()
 {
   double iReturn;
-  do{
+  do {
 
     // wait for MPU interrupt or extra packet(s) available
     while (!mpuInterrupt && fifoCount < packetSize) {
@@ -288,7 +300,6 @@ double MPUY()
       mpu.resetFIFO();
       //Serial.println(F("FIFO overflow!"));
       iReturn = 99999;
-      Serial.println("HOLIS");
 
       // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } else if (mpuIntStatus & 0x02) {
@@ -302,29 +313,53 @@ double MPUY()
       // (this lets us immediately read more without waiting for an interrupt)
       fifoCount -= packetSize;
 
+#ifdef OUTPUT_READABLE_QUATERNION
+      // display quaternion values in easy matrix form: w x y z
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      Serial.print("quat\t");
+      Serial.print(q.w);
+      Serial.print("\t");
+      Serial.print(q.x);
+      Serial.print("\t");
+      Serial.print(q.y);
+      Serial.print("\t");
+      Serial.println(q.z);
+#endif
+
+#ifdef OUTPUT_READABLE_EULER
+      // display Euler angles in degrees
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      mpu.dmpGetEuler(euler, &q);
+      Serial.print("euler\t");
+      Serial.print(euler[0] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.print(euler[1] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.println(euler[2] * 180 / M_PI);
+#endif
+
 #ifdef OUTPUT_READABLE_YAWPITCHROLL
       // display Euler angles in degrees
       mpu.dmpGetQuaternion(&q, fifoBuffer);
       mpu.dmpGetGravity(&gravity, &q);
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-      //Serial.print("ypr\t");
-      //Serial.print(ypr[0] * 180 / M_PI);
-      //Serial.print("\t");
-      //Serial.print(ypr[1] * 180 / M_PI);
-      //Serial.print("\t");
-      //Serial.println(ypr[2] * 180 / M_PI);
+      Serial.print("ypr\t");
+      Serial.print(ypr[0] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.print(ypr[1] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.println(ypr[2] * 180 / M_PI);
       iReturn = ypr[0] * 180 / M_PI;
 #endif
     }
-  }while(iReturn == 99999 || iReturn == -31073 || iReturn == 675283008.00);
+  } while (iReturn == 99999 || iReturn == -31073);
   return iReturn;
 }
-*/
 
 double MPUP()
 {
   double iReturn;
-  do{
+  do {
 
     // wait for MPU interrupt or extra packet(s) available
     while (!mpuInterrupt && fifoCount < packetSize) {
@@ -366,21 +401,46 @@ double MPUP()
       // (this lets us immediately read more without waiting for an interrupt)
       fifoCount -= packetSize;
 
+#ifdef OUTPUT_READABLE_QUATERNION
+      // display quaternion values in easy matrix form: w x y z
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      Serial.print("quat\t");
+      Serial.print(q.w);
+      Serial.print("\t");
+      Serial.print(q.x);
+      Serial.print("\t");
+      Serial.print(q.y);
+      Serial.print("\t");
+      Serial.println(q.z);
+#endif
+
+#ifdef OUTPUT_READABLE_EULER
+      // display Euler angles in degrees
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      mpu.dmpGetEuler(euler, &q);
+      Serial.print("euler\t");
+      Serial.print(euler[0] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.print(euler[1] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.println(euler[2] * 180 / M_PI);
+#endif
+
 #ifdef OUTPUT_READABLE_YAWPITCHROLL
       // display Euler angles in degrees
       mpu.dmpGetQuaternion(&q, fifoBuffer);
       mpu.dmpGetGravity(&gravity, &q);
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-      //Serial.print("ypr\t");
-      //Serial.print(ypr[0] * 180 / M_PI);
-      //Serial.print("\t");
-      //Serial.print(ypr[1] * 180 / M_PI);
-      //Serial.print("\t");
-      //Serial.println(ypr[2] * 180 / M_PI);
+      Serial.print("ypr\t");
+      Serial.print(ypr[0] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.print(ypr[1] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.println(ypr[2] * 180 / M_PI);
       iReturn = ypr[1] * 180 / M_PI;
 #endif
     }
-  }while(iReturn == 99999 || iReturn == -31073);
+  } while (iReturn == 99999 || iReturn < 0);
   return iReturn;
 }
 
@@ -397,6 +457,94 @@ bool Negro()
   {
     iReturn = true;
   }
+  return iReturn;
+}
+
+double MPUR()
+{
+  double iReturn;
+  do {
+
+    // wait for MPU interrupt or extra packet(s) available
+    while (!mpuInterrupt && fifoCount < packetSize) {
+      // other program behavior stuff here
+      // .
+      // .
+      // .
+      // if you are really paranoid you can frequently test in between other
+      // stuff to see if mpuInterrupt is true, and if so, "break;" from the
+      // while() loop to immediately process the MPU data
+      // .
+      // .
+      // .
+    }
+
+    // reset interrupt flag and get INT_STATUS byte
+    mpuInterrupt = false;
+    mpuIntStatus = mpu.getIntStatus();
+
+    // get current FIFO count
+    fifoCount = mpu.getFIFOCount();
+
+    // check for overflow (this should never happen unless our code is too inefficient)
+    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+      // reset so we can continue cleanly
+      mpu.resetFIFO();
+      //Serial.println(F("FIFO overflow!"));
+      iReturn = 99999;
+
+      // otherwise, check for DMP data ready interrupt (this should happen frequently)
+    } else if (mpuIntStatus & 0x02) {
+      // wait for correct available data length, should be a VERY short wait
+      while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+      // read a packet from FIFO
+      mpu.getFIFOBytes(fifoBuffer, packetSize);
+
+      // track FIFO count here in case there is > 1 packet available
+      // (this lets us immediately read more without waiting for an interrupt)
+      fifoCount -= packetSize;
+
+#ifdef OUTPUT_READABLE_QUATERNION
+      // display quaternion values in easy matrix form: w x y z
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      Serial.print("quat\t");
+      Serial.print(q.w);
+      Serial.print("\t");
+      Serial.print(q.x);
+      Serial.print("\t");
+      Serial.print(q.y);
+      Serial.print("\t");
+      Serial.println(q.z);
+#endif
+
+#ifdef OUTPUT_READABLE_EULER
+      // display Euler angles in degrees
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      mpu.dmpGetEuler(euler, &q);
+      Serial.print("euler\t");
+      Serial.print(euler[0] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.print(euler[1] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.println(euler[2] * 180 / M_PI);
+#endif
+
+#ifdef OUTPUT_READABLE_YAWPITCHROLL
+      // display Euler angles in degrees
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      mpu.dmpGetGravity(&gravity, &q);
+      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+      Serial.print("ypr\t");
+      Serial.print(ypr[0] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.print(ypr[1] * 180 / M_PI);
+      Serial.print("\t");
+      Serial.println(ypr[2] * 180 / M_PI);
+      iReturn = ypr[2] * 180 / M_PI;
+#endif
+    }
+  } while (iReturn == 99999 || iReturn == -31073);
   return iReturn;
 }
 
@@ -615,14 +763,100 @@ bool ParedEnf()
   return Pared;
 }
 
-void HoyoNegro()
+bool RampaArriba()
 {
+  bool Rampa = false;
+  lcd.clear();
+  lcd.print("RampaArriba");
+  int U3 = sonar3.ping_cm();
+  delay(30);
+  int U4 = sonar4.ping_cm();
+  delay(29);
+  int Sharp = SharpDe.distance();
+  int SharpEnf = SharpEn.distance();
+  int SharpIzq = SharpIz.distance();
+  Serial.println(U3);
+  Serial.println(U4);
+  Serial.println(Sharp);
+  int Revision = 0;
+  
+  if (SharpEnf < 9 && SharpIzq < 9)
+  {
+    if (Sharp < 18 && (U3 == 0 || U4 == 0))
+    {
+      Rampa = true;
+    }
+    Serial.println(Rampa);
+    if (Rampa == true)
+    {
+      GiroDer90();
+      delay(200);
+      Adelante30();
+      delay(150);
+      Revision = MPUP();
+      lcd.print(Revision);
+      delay(10);
+      Revision = MPUP();
+      lcd.print(Revision);
+      delay(500);
+      if (Revision > 18)
+      {
+        Rampa = true;
+        Adelante();
+        delay(10000);
+        Detenerse();
+        delay(600);
+        Acejarse();
+      }
+      else
+      {
+        Rampa = false;
+        Acejarse();
+      }
+    }
+  }
+  return Rampa;
+}
+
+void RampaAbajoIzq()
+{
+  lcd.clear();
+  lcd.print("RampaAbajoIzq");
+  int SharpDer = SharpDe.distance();
+  int SharpEnf = SharpEn.distance();
+  int SharpIzq = SharpIz.distance();
+  int Roll = 0;
+  if (SharpDer < 8 && SharpEnf < 5 && SharpIzq > 15)
+  {
+    IzquierdaM();
+    delay(1200);
+    Roll = MPUR();
+    if (Roll > 15)
+    {
+      IzquierdaM();
+      while (Roll > 15)
+      {
+        Roll = MPUR();
+      }
+      Detenerse();
+    }
+    else
+    {
+      Acejarse();
+    }
+  }
+}
+
+bool HoyoNegro()
+{
+  bool Hoyo = false;
   lcd.clear();
   lcd.print("HoyoNegro");
   int DistIzq = SharpIz.distance();
 
   if (Negro())
   {
+    Hoyo = true;
     Atras30();
     delay(500);
     DistIzq = SharpIz.distance();
@@ -639,6 +873,7 @@ void HoyoNegro()
       GiroIzq90();
     }
   }
+  return Hoyo;
 }
 
 void Detectar()
@@ -670,44 +905,6 @@ void Detectar()
   }
 }
 
-void SeguirDerecha()
-{
-  bool ParedD = ParedDer();
-  bool ParedE = ParedEnf();
-  delay(100);
-  ParedD = ParedDer();
-  ParedE = ParedEnf();
-  delay(100);
-  ParedD = ParedDer();
-  ParedE = ParedEnf();
-
-  if (ParedD == false)
-  {
-    GiroDer90();
-    delay(200);
-    Adelante30();
-    delay(1000);
-    Detenerse();
-    delay(500);
-  }
-  else if (ParedE == false)
-  {
-    Adelante30();
-    delay(100);
-    Detenerse();
-    delay(1000);
-
-  }
-  else if (ParedD == true && ParedE == true)
-  {
-    GiroIzq90();
-    delay(100);
-  }
-  Acejarse();
-  delay(300);
-  Acomodo();
-  HoyoNegro();
-}
 
 void Acomodo()
 {
@@ -761,7 +958,7 @@ void Acejarse()
     //Serial.println("entro 1 if");
     Dist = SharpDe.distance();
 
-    do {
+    while (Dist != 8 || Dist != 7 || Dist != 9) {
       if (Dist < 7)
       {
         while (Dist < 7)
@@ -783,31 +980,16 @@ void Acejarse()
       else if (Dist == 8 || Dist == 7 || Dist == 9)
         break;
       Detenerse();
-    } while (Dist != 8 || Dist != 7 || Dist != 9);
+    }
   }
-
-  int Ult1 = sonar1.ping_cm();
-  int Ult2 = sonar2.ping_cm();
-  int Sharp = SharpEn.distance();
-  if (Sharp > 6 && (Ult1 != 0 && Ult2 != 0))
-  {
-    do {
-      Atras();
-      delay(200);
-      Detenerse();
-      Ult1 = sonar1.ping_cm();
-      Ult2 = sonar2.ping_cm();
-      //Sharp = SharpEn.distance();
-    } while (Ult1 < 4 && Ult2 < 4);
-  }
-
+  delay(200);
   int Dist2 = SharpIz.distance();
   if (Dist2 < 24)
   {
     //Serial.println("entro 1 if");
     Dist2 = SharpIz.distance();
 
-    do {
+    while (Dist2 != 8 || Dist2 != 7 || Dist2 != 9) {
       if (Dist2 < 7)
       {
         while (Dist2 < 7)
@@ -829,15 +1011,84 @@ void Acejarse()
       else if (Dist2 == 8 || Dist2 == 7 || Dist2 == 9)
         break;
       Detenerse();
-    } while (Dist2 != 8 || Dist2 != 7 || Dist2 != 9);
+    }
   }
+  delay(200);
+  int SharpEnf = SharpEn.distance();
+  if (SharpEnf > 7 && SharpEnf < 19)
+  {
+    Adelante();
+    while (SharpEnf > 7 && SharpEnf < 19)
+    {
+      SharpEnf = SharpEn.distance();
+      int U = sonar1.ping_cm();
+      if (U < 4)
+      {
+        break;
+      }
+    }
+    Detenerse();
+  }
+}
+
+void Revisiones()
+{
+  Acejarse();
+  delay(300);
+  Acomodo();
+  delay(50);
+  bool Hoyo = HoyoNegro();
+  delay(50);
+  if (Hoyo == false)
+  {
+    bool Rampa = RampaArriba();
+    delay(29);
+    if (Rampa == false)
+    {
+      //RampaAbajoIzq();
+    }
+  }
+}
+
+void SeguirDerecha()
+{
+  bool ParedD = ParedDer();
+  bool ParedE = ParedEnf();
+  delay(100);
+  ParedD = ParedDer();
+  ParedE = ParedEnf();
+  delay(100);
+  ParedD = ParedDer();
+  ParedE = ParedEnf();
+
+  if (ParedD == false)
+  {
+    GiroDer90();
+    delay(200);
+    Adelante30();
+    delay(1000);
+    Detenerse();
+    delay(500);
+  }
+  else if (ParedE == false)
+  {
+    Adelante30();
+    delay(100);
+    Detenerse();
+    delay(1000);
+
+  }
+  else if (ParedD == true && ParedE == true)
+  {
+    GiroIzq90();
+    delay(100);
+  }
+  Revisiones();
 }
 
 void loop()
 {
-  Serial.println(MPUP());
-  delay(29);
-  Serial.println("Loop");
-  //lcd.backlight();
-  //SeguirDerecha();
+  lcd.backlight();
+  SeguirDerecha();
+  delay(2000);
 }
