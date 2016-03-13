@@ -1598,7 +1598,7 @@ int Go(int &iParameter)
     for (int iI = 0; iI < iPossibility[iCopyCounter]; iI++)
     {
       iMinor[iI] = GetPass(iRun[iCounter][iI]);
-      if (iMinor[iI] < iTemporal)
+      if (iMinor[iI] < iTemporal && iMinor[iI] > iGetHere)
       {
         iTemporal = iMinor[iI];
         iHelper = iI;

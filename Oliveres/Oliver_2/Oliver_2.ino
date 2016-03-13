@@ -147,7 +147,6 @@ byte Echo4 = 53;
 
 NewPing sonar4(Trigger4, Echo4, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
 
-
 byte Trigger7 = 23;
 byte Echo7 = 25;
 
@@ -793,7 +792,7 @@ bool RampaArriba()
   Serial.println(Sharp);
   int Revision = 0;
 
-  if (SharpEnf < 9 && SharpIzq < 9)
+  if (SharpEnf < 11 && SharpIzq < 14)
   {
     if (Sharp < 18 && (U3 == 0 || U4 == 0))
     {
@@ -820,6 +819,12 @@ bool RampaArriba()
         Detenerse();
         delay(600);
         Acejarse();
+        delay(100);
+        GiroDer90();
+        delay(100);
+        Adelante30();
+        delay(50);
+        Acejarse();
       }
       else
       {
@@ -839,17 +844,28 @@ void RampaAbajoIzq()
   int SharpEnf = SharpEn.distance();
   int SharpIzq = SharpIz.distance();
   int Roll = 0;
-  if (SharpEnf < 9 && SharpDer < 9)
+  if (SharpEnf < 11 && SharpDer < 12)
   {
     IzquierdaM30();
     delay(50);
     Roll = MPUR();
     lcd.setCursor(0, 1);
     lcd.print(Roll);
-    if (Roll < -8)
+    Roll = MPUR();
+    delay(500);
+    Roll = MPUR();
+    if (Roll < -6)
     {
       IzquierdaM();
-      delay(5000);
+      delay(8000);
+      Acejarse();
+      delay(100);
+      GiroIzq90();
+      delay(100);
+      GiroIzq90();
+      delay(100);
+      Adelante30();
+      delay(50);
     }
     else
     {
@@ -900,7 +916,7 @@ void Detectar()
   int Therm2 = therm2.object(); //Derecha
   int Therm3 = therm3.object();
   int Therm4 = therm4.object(); //Derecha
-  int Temp = 23;
+  int Temp = 27;
   //Serial.println(therm2.object());
   if (Therm1 > Temp || Therm2 > Temp || Therm3 > Temp || Therm4 > Temp)
   {
@@ -933,8 +949,46 @@ void Detectar()
 
 void Acomodo()
 {
-  lcd.clear();
-  lcd.print("Acomodo");
+  int iCounter = 0;
+  delay(29);
+  int U3 = sonar3.ping_cm();
+  delay(29);
+  int Sharp2 = SharpDe.distance();
+  delay(29);
+  int U4 = sonar4.ping_cm();
+  delay(29);
+  int DifU2 = U3 - U4;
+  int Dif3 = Sharp2 - U3;
+  int Dif4 = Sharp2 - U4;
+  Serial.println(U3);
+  Serial.println(U4);
+  Serial.println(DifU2);
+  if (DifU2 >= 2 || DifU2 <= -2 && iCounter == 0)
+  {
+    do {
+      if (DifU2 >= 2)
+      {
+        Derecha();
+        delay(80);
+      }
+      if (DifU2 <= -2)
+      {
+        Izquierda();
+        delay(80);
+      }
+      Detenerse();
+      delay(100);
+      U3 = sonar7.ping_cm();
+      delay(29);
+      Sharp2 = SharpIz.distance();
+      U4 = sonar8.ping_cm();
+      delay(29);
+      DifU2 = U3 - U4;
+      Dif3 = Sharp2 - U3;
+      Dif4 = Sharp2 - U4;
+      iCounter++;
+    } while (DifU2 >= 2 || DifU2 <= -2);
+  }
   delay(29);
   int U1 = sonar7.ping_cm();
   delay(29);
@@ -945,7 +999,7 @@ void Acomodo()
   int Dif1 = Sharp - U1;
   int Dif2 = Sharp - U2;
 
-  if (DifU >= 2 || DifU <= -2)
+  if (DifU >= 2 || DifU <= -2 && iCounter == 0)
   {
     do {
       if (DifU >= 2)
@@ -979,28 +1033,28 @@ void AcejarseDerecha()
   //Serial.println("entro 1 if");
   Dist = SharpDe.distance();
 
-  while (Dist != 8 || Dist != 7 || Dist != 9) {
-    if (Dist < 7)
+  while (Dist != 7 || Dist != 6 || Dist != 8) {
+    if (Dist < 6)
     {
       IzquierdaM();
-      while (Dist < 7)
+      while (Dist < 6)
       {
 
         Dist = SharpDe.distance();
         Serial.println(SharpDe.distance());
       }
     }
-    else if (Dist > 9)
+    else if (Dist > 8)
     {
       DerechaM();
-      while (Dist > 9)
+      while (Dist > 8)
       {
 
         Dist = SharpDe.distance();
         Serial.println(SharpDe.distance());
       }
     }
-    else if (Dist == 8 || Dist == 7 || Dist == 9)
+    else if (Dist == 7 || Dist == 6 || Dist == 8)
       break;
     Detenerse();
   }
@@ -1123,6 +1177,8 @@ void Acejarse()
 }
 void Revisiones()
 {
+  Detectar();
+  delay(100);
   Acejarse();
   delay(300);
   Acomodo();
@@ -1178,6 +1234,5 @@ void SeguirDerecha()
 
 void loop()
 {
-  lcd.backlight();
-  SeguirDerecha();
+  Acomodo();
 }
