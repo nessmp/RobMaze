@@ -147,6 +147,7 @@ byte Echo4 = 53;
 
 NewPing sonar4(Trigger4, Echo4, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
 
+
 byte Trigger7 = 23;
 byte Echo7 = 25;
 
@@ -452,7 +453,7 @@ bool Negro()
     iReturn = true;
   }
   color = pulseIn(out, LOW);
-  if (color > 2800)
+  if (color > 2600)
   {
     iReturn = true;
   }
@@ -792,7 +793,7 @@ bool RampaArriba()
   Serial.println(Sharp);
   int Revision = 0;
 
-  if (SharpEnf < 11 && SharpIzq < 14)
+  if (SharpEnf < 9 && SharpIzq < 9)
   {
     if (Sharp < 18 && (U3 == 0 || U4 == 0))
     {
@@ -819,12 +820,6 @@ bool RampaArriba()
         Detenerse();
         delay(600);
         Acejarse();
-        delay(100);
-        GiroDer90();
-        delay(100);
-        Adelante30();
-        delay(50);
-        Acejarse();
       }
       else
       {
@@ -844,28 +839,17 @@ void RampaAbajoIzq()
   int SharpEnf = SharpEn.distance();
   int SharpIzq = SharpIz.distance();
   int Roll = 0;
-  if (SharpEnf < 11 && SharpDer < 12)
+  if (SharpEnf < 9 && SharpDer < 9)
   {
     IzquierdaM30();
     delay(50);
     Roll = MPUR();
     lcd.setCursor(0, 1);
     lcd.print(Roll);
-    Roll = MPUR();
-    delay(500);
-    Roll = MPUR();
-    if (Roll < -6)
+    if (Roll < -8)
     {
       IzquierdaM();
-      delay(8000);
-      Acejarse();
-      delay(100);
-      GiroIzq90();
-      delay(100);
-      GiroIzq90();
-      delay(100);
-      Adelante30();
-      delay(50);
+      delay(5000);
     }
     else
     {
@@ -1026,9 +1010,6 @@ void Acomodo()
   }
 }
 
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
 void AcejarseDerecha()
 {
   int Dist = SharpDe.distance();
@@ -1036,187 +1017,114 @@ void AcejarseDerecha()
   //Serial.println("entro 1 if");
   Dist = SharpDe.distance();
 
-  while (Dist != 7 || Dist != 6 || Dist != 8) {
-    if (Dist < 6)
+  while (Dist != 8 || Dist != 7 || Dist != 9) {
+    if (Dist < 7)
     {
       IzquierdaM();
-      while (Dist < 6)
-=======
-=======
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-=======
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-<<<<<<< HEAD
- void AcejarseDerecha()
- {
- int Dist = SharpDe.distance();
-  
-    //Serial.println("entro 1 if");
-    Dist = SharpDe.distance();
-
-    while (Dist != 8 || Dist != 7 || Dist != 9) {
-      if (Dist < 7)
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-=======
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-=======
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
+      while (Dist < 7)
       {
-        IzquierdaM();
-        while (Dist < 7)
-        {
-          
-          Dist = SharpDe.distance();
-          Serial.println(SharpDe.distance());
-        }
+
+        Dist = SharpDe.distance();
+        Serial.println(SharpDe.distance());
       }
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
     }
-    else if (Dist > 8)
+    else if (Dist > 9)
     {
       DerechaM();
-      while (Dist > 8)
-=======
-      else if (Dist > 9)
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-=======
-      else if (Dist > 9)
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-=======
-      else if (Dist > 9)
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
+      while (Dist > 9)
       {
-        DerechaM();
-        while (Dist > 9)
-        {
-          
-          Dist = SharpDe.distance();
-          Serial.println(SharpDe.distance());
-        }
+
+        Dist = SharpDe.distance();
+        Serial.println(SharpDe.distance());
       }
-      else if (Dist == 8 || Dist == 7 || Dist == 9)
-        break;
-      Detenerse();
     }
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-    else if (Dist == 7 || Dist == 6 || Dist == 8)
+    else if (Dist == 8 || Dist == 7 || Dist == 9)
       break;
     Detenerse();
   }
 
 }
-=======
-  
- }
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-=======
-  
- }
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
 
-  //izquierda
-  void AcejarseIzquierda()
-  {
-   int Dist2 = SharpIz.distance();
-  
-    //Serial.println("entro 1 if");
-    Dist2 = SharpIz.distance();
+//izquierda
+void AcejarseIzquierda()
+{
+  int Dist2 = SharpIz.distance();
 
-=======
-  
- }
+  //Serial.println("entro 1 if");
+  Dist2 = SharpIz.distance();
 
-  //izquierda
-  void AcejarseIzquierda()
-  {
-   int Dist2 = SharpIz.distance();
-  
-    //Serial.println("entro 1 if");
-    Dist2 = SharpIz.distance();
-
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-    while (Dist2 != 8 || Dist2 != 7 || Dist2 != 9) {
-      if (Dist2 < 7)
-      {
-         DerechaM();
-        while (Dist2 < 7)
-        {
-         
-          Dist2 = SharpIz.distance();
-          Serial.println(SharpIz.distance());
-        }
-      }
-      else if (Dist2 > 9)
-      {
-        IzquierdaM();
-        while (Dist2 > 9)
-        {
-          
-          Dist2 = SharpIz.distance();
-          Serial.println(SharpIz.distance());
-        }
-      }
-      else if (Dist2 == 8 || Dist2 == 7 || Dist2 == 9)
-        break;
-      Detenerse();
-    }
-  
-
-  }
-  //enfrente
- void AcejarseEnfrente()
-  {
-  int SharpEnf = SharpEn.distance();
- int U = sonar1.ping_cm();
- Serial.print(SharpEnf);Serial.print("\t");Serial.println(U);
-    if (SharpEnf < 5 || (U<4 && U!=0))
+  while (Dist2 != 8 || Dist2 != 7 || Dist2 != 9) {
+    if (Dist2 < 7)
     {
+      DerechaM();
+      while (Dist2 < 7)
+      {
+
+        Dist2 = SharpIz.distance();
+        Serial.println(SharpIz.distance());
+      }
+    }
+    else if (Dist2 > 9)
+    {
+      IzquierdaM();
+      while (Dist2 > 9)
+      {
+
+        Dist2 = SharpIz.distance();
+        Serial.println(SharpIz.distance());
+      }
+    }
+    else if (Dist2 == 8 || Dist2 == 7 || Dist2 == 9)
+      break;
+    Detenerse();
+  }
+
+
+}
+
+//enfrente
+void AcejarseEnfrente()
+{
+  int SharpEnf = SharpEn.distance();
+  int U = sonar1.ping_cm();
+  Serial.print(SharpEnf); Serial.print("\t"); Serial.println(U);
+  if (SharpEnf < 5 || (U < 4 && U != 0))
+  {
     Atras();
-    while (SharpEnf < 5 || U<4)
+    while (SharpEnf < 5 || U < 4)
     {
       SharpEnf = SharpEn.distance();
       U = sonar1.ping_cm();
-      if (U >= 4 || U==0)
+      if (U >= 4 || U == 0)
       {
         break;
       }
       delay(10);
     }
     Detenerse();
-    }
+  }
 
-else 
-{
-  
-   Adelante();
+  else
+  {
+
+    Adelante();
     while (SharpEnf > 6 && SharpEnf < 14)
     {
       SharpEnf = SharpEn.distance();
       int U = sonar1.ping_cm();
-      if (U < 4 && U!=0)
+      if (U < 4 && U != 0)
       {
         break;
       }
     }
     Detenerse();
+  }
 }
-    
-   
-}
-
-
-
 
 void Acejarse()
 {
   lcd.clear();
-  lcd.print("entra");
+  lcd.print("acejarse");
   bool Der = ParedDer();
   delay(100);
   bool Enf = ParedEnf();
@@ -1250,24 +1158,18 @@ void Acejarse()
   {
     AcejarseEnfrente();
   }
-lcd.clear();
-  lcd.print("sale");
 }
-
-=======
->>>>>>> origin/master
 void Revisiones()
 {
-  Detectar();
   delay(100);
-  Acejarse();
-  delay(300);
-  Acomodo();
-  delay(50);
   bool Hoyo = HoyoNegro();
-  delay(50);
   if (Hoyo == false)
   {
+    Acejarse();
+    delay(300);
+    Acomodo();
+    delay(50);
+    delay(50);
     bool Rampa = RampaArriba();
     delay(29);
     if (Rampa == false)
@@ -1309,35 +1211,13 @@ void SeguirDerecha()
   {
     GiroIzq90();
     delay(100);
+    Revisiones();
   }
   Revisiones();
 }
 
 void loop()
 {
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-  Acomodo();
-=======
-=======
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-=======
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-<<<<<<< HEAD
-AcejarseEnfrente();
- delay(3000); 
- 
-  /*Serial.print(SharpEn.distance());Serial.print("\t"); Serial.println(sonar1.ping_cm());
-  delay(250);*/
-=======
+  lcd.backlight();
   SeguirDerecha();
->>>>>>> origin/master
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
-<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-=======
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
-=======
->>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
 }
