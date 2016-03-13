@@ -1027,6 +1027,7 @@ void Acomodo()
 }
 
 <<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
+<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
 void AcejarseDerecha()
 {
   int Dist = SharpDe.distance();
@@ -1040,6 +1041,8 @@ void AcejarseDerecha()
       IzquierdaM();
       while (Dist < 6)
 =======
+=======
+>>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
 <<<<<<< HEAD
  void AcejarseDerecha()
  {
@@ -1050,6 +1053,9 @@ void AcejarseDerecha()
 
     while (Dist != 8 || Dist != 7 || Dist != 9) {
       if (Dist < 7)
+<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
+>>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
+=======
 >>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
       {
         IzquierdaM();
@@ -1061,11 +1067,15 @@ void AcejarseDerecha()
         }
       }
 <<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
+<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
     }
     else if (Dist > 8)
     {
       DerechaM();
       while (Dist > 8)
+=======
+      else if (Dist > 9)
+>>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
 =======
       else if (Dist > 9)
 >>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
@@ -1083,12 +1093,17 @@ void AcejarseDerecha()
       Detenerse();
     }
 <<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
+<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
     else if (Dist == 7 || Dist == 6 || Dist == 8)
       break;
     Detenerse();
   }
 
 }
+=======
+  
+ }
+>>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
 =======
   
  }
@@ -1277,8 +1292,11 @@ void SeguirDerecha()
 void loop()
 {
 <<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
+<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
   Acomodo();
 =======
+=======
+>>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
 <<<<<<< HEAD
 AcejarseEnfrente();
  delay(3000); 
@@ -1288,5 +1306,8 @@ AcejarseEnfrente();
 =======
   SeguirDerecha();
 >>>>>>> origin/master
+<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
+>>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
+=======
 >>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
 }
