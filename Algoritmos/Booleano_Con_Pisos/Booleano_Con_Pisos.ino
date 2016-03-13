@@ -480,7 +480,9 @@ bool Negro()
 {
   bool iReturn = false;
   int color = pulseIn(out, LOW);
-  if (color > 2800)
+  Serial.println("Entro color");
+  Serial.println(color);
+  if (color > 2000)
   {
     iReturn = true;
   }
@@ -604,10 +606,10 @@ void Adelante()
   analogWrite(motDerA1, 220); //255  //205
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 148); //178  //132
+  analogWrite(motIzqE1, 162); //178  //132
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 148); //178  //132
+  analogWrite(motIzqA1, 162); //178  //132
   analogWrite(motIzqA2, 0);
 }
 
@@ -859,7 +861,7 @@ bool RampaArriba()
   bool Rampa = false;
   lcd.clear();
   lcd.print("RampaArriba");
-  delay(1000);
+  //delay(1000);
   int U3 = sonar3.ping_cm();
   delay(30);
   int U4 = sonar4.ping_cm();
@@ -964,6 +966,7 @@ void RampaAbajoIzq()
 
 bool HoyoNegro()
 {
+  Serial.println("Entro hoyo negro");
   bool Hoyo = false;
   lcd.clear();
   lcd.print(iX);
