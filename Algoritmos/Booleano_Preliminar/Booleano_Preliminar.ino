@@ -915,31 +915,6 @@ void RampaAbajoIzq()
       delay(400);
       Detenerse();
       delay(70);
-      /*GiroIzq90();
-      delay(100);
-      Estampe();
-      delay(80);
-      Acejarse();
-      delay(80);*/
-    }
-    /*
-    if(iOption == 1)
-    {
-      iOption = 3;
-    }
-    else if(iOption == 2)
-    {
-      iOption == 1;
-    }
-    else if(iOption == 3)
-    {
-      iOption == 4;
-    }
-    else if(iOption == 4)
-    {
-      iOption == 2;
-    }
-    */
     Detenerse();
   }
 }
