@@ -1026,6 +1026,7 @@ void Acomodo()
   }
 }
 
+<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
 void AcejarseDerecha()
 {
   int Dist = SharpDe.distance();
@@ -1038,109 +1039,145 @@ void AcejarseDerecha()
     {
       IzquierdaM();
       while (Dist < 6)
-      {
+=======
+<<<<<<< HEAD
+ void AcejarseDerecha()
+ {
+ int Dist = SharpDe.distance();
+  
+    //Serial.println("entro 1 if");
+    Dist = SharpDe.distance();
 
-        Dist = SharpDe.distance();
-        Serial.println(SharpDe.distance());
+    while (Dist != 8 || Dist != 7 || Dist != 9) {
+      if (Dist < 7)
+>>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
+      {
+        IzquierdaM();
+        while (Dist < 7)
+        {
+          
+          Dist = SharpDe.distance();
+          Serial.println(SharpDe.distance());
+        }
       }
+<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
     }
     else if (Dist > 8)
     {
       DerechaM();
       while (Dist > 8)
+=======
+      else if (Dist > 9)
+>>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
       {
-
-        Dist = SharpDe.distance();
-        Serial.println(SharpDe.distance());
+        DerechaM();
+        while (Dist > 9)
+        {
+          
+          Dist = SharpDe.distance();
+          Serial.println(SharpDe.distance());
+        }
       }
+      else if (Dist == 8 || Dist == 7 || Dist == 9)
+        break;
+      Detenerse();
     }
+<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
     else if (Dist == 7 || Dist == 6 || Dist == 8)
       break;
     Detenerse();
   }
 
 }
+=======
+  
+ }
+>>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
 
-//izquierda
-void AcejarseIzquierda()
-{
-  int Dist2 = SharpIz.distance();
-
-  //Serial.println("entro 1 if");
-  Dist2 = SharpIz.distance();
-
-  while (Dist2 != 8 || Dist2 != 7 || Dist2 != 9) {
-    if (Dist2 < 7)
-    {
-      DerechaM();
-      while (Dist2 < 7)
-      {
-
-        Dist2 = SharpIz.distance();
-        Serial.println(SharpIz.distance());
-      }
-    }
-    else if (Dist2 > 9)
-    {
-      IzquierdaM();
-      while (Dist2 > 9)
-      {
-
-        Dist2 = SharpIz.distance();
-        Serial.println(SharpIz.distance());
-      }
-    }
-    else if (Dist2 == 8 || Dist2 == 7 || Dist2 == 9)
-      break;
-    Detenerse();
-  }
-
-
-}
-
-//enfrente
-void AcejarseEnfrente()
-{
-  int SharpEnf = SharpEn.distance();
-  int U = sonar1.ping_cm();
-  Serial.print(SharpEnf); Serial.print("\t"); Serial.println(U);
-  if (SharpEnf < 5 || (U < 4 && U != 0))
+  //izquierda
+  void AcejarseIzquierda()
   {
+   int Dist2 = SharpIz.distance();
+  
+    //Serial.println("entro 1 if");
+    Dist2 = SharpIz.distance();
+
+    while (Dist2 != 8 || Dist2 != 7 || Dist2 != 9) {
+      if (Dist2 < 7)
+      {
+         DerechaM();
+        while (Dist2 < 7)
+        {
+         
+          Dist2 = SharpIz.distance();
+          Serial.println(SharpIz.distance());
+        }
+      }
+      else if (Dist2 > 9)
+      {
+        IzquierdaM();
+        while (Dist2 > 9)
+        {
+          
+          Dist2 = SharpIz.distance();
+          Serial.println(SharpIz.distance());
+        }
+      }
+      else if (Dist2 == 8 || Dist2 == 7 || Dist2 == 9)
+        break;
+      Detenerse();
+    }
+  
+
+  }
+  //enfrente
+ void AcejarseEnfrente()
+  {
+  int SharpEnf = SharpEn.distance();
+ int U = sonar1.ping_cm();
+ Serial.print(SharpEnf);Serial.print("\t");Serial.println(U);
+    if (SharpEnf < 5 || (U<4 && U!=0))
+    {
     Atras();
-    while (SharpEnf < 5 || U < 4)
+    while (SharpEnf < 5 || U<4)
     {
       SharpEnf = SharpEn.distance();
       U = sonar1.ping_cm();
-      if (U >= 4 || U == 0)
+      if (U >= 4 || U==0)
       {
         break;
       }
       delay(10);
     }
     Detenerse();
-  }
+    }
 
-  else
-  {
-
-    Adelante();
+else 
+{
+  
+   Adelante();
     while (SharpEnf > 6 && SharpEnf < 14)
     {
       SharpEnf = SharpEn.distance();
       int U = sonar1.ping_cm();
-      if (U < 4 && U != 0)
+      if (U < 4 && U!=0)
       {
         break;
       }
     }
     Detenerse();
-  }
 }
+    
+   
+}
+
+
+
 
 void Acejarse()
 {
   lcd.clear();
-  lcd.print("acejarse");
+  lcd.print("entra");
   bool Der = ParedDer();
   delay(100);
   bool Enf = ParedEnf();
@@ -1174,7 +1211,12 @@ void Acejarse()
   {
     AcejarseEnfrente();
   }
+lcd.clear();
+  lcd.print("sale");
 }
+
+=======
+>>>>>>> origin/master
 void Revisiones()
 {
   Detectar();
@@ -1234,5 +1276,17 @@ void SeguirDerecha()
 
 void loop()
 {
+<<<<<<< HEAD:Oliveres/Oliver_2/Oliver_2.ino
   Acomodo();
+=======
+<<<<<<< HEAD
+AcejarseEnfrente();
+ delay(3000); 
+ 
+  /*Serial.print(SharpEn.distance());Serial.print("\t"); Serial.println(sonar1.ping_cm());
+  delay(250);*/
+=======
+  SeguirDerecha();
+>>>>>>> origin/master
+>>>>>>> parent of fe711ea... OLIVER:Oliver_2/Oliver_2.ino
 }
