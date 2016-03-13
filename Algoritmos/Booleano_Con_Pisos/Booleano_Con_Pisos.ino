@@ -83,7 +83,7 @@ Encoder Enc2(17, 27);
 
 long oldPosition  = -999;
 
-int const90 = 3600;
+int const90 = 3450;
 
 const int const30 = 6000;
 
@@ -613,6 +613,21 @@ void Adelante()
   analogWrite(motIzqA2, 0);
 }
 
+void AdelanteRampa()
+{
+  analogWrite(motDerE1, 192); //190
+  analogWrite(motDerE2, 0);
+
+  analogWrite(motDerA1, 240); //255  //205
+  analogWrite(motDerA2, 0);
+
+  analogWrite(motIzqE1, 192); //178  //132
+  analogWrite(motIzqE2, 0);
+
+  analogWrite(motIzqA1, 192); //178  //132
+  analogWrite(motIzqA2, 0);
+}
+
 void Izquierda()
 {
   analogWrite(motDerE1, 160);
@@ -622,10 +637,10 @@ void Izquierda()
   analogWrite(motDerA2, 0);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 148);
+  analogWrite(motIzqE2, 162);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 148);
+  analogWrite(motIzqA2, 162);
 }
 
 void Derecha()
@@ -636,10 +651,10 @@ void Derecha()
   analogWrite(motDerA1, 0);
   analogWrite(motDerA2, 220);
 
-  analogWrite(motIzqE1, 148);
+  analogWrite(motIzqE1, 162);
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 148);
+  analogWrite(motIzqA1, 162);
   analogWrite(motIzqA2, 0);
 }
 
@@ -899,7 +914,7 @@ bool RampaArriba()
       if (Revision > 18)
       {
         Rampa = true;
-        Adelante();
+        AdelanteRampa();
         delay(10000);
         Detenerse();
         delay(600);
@@ -978,7 +993,7 @@ bool HoyoNegro()
   //lcd.clear();
   //lcd.print("HoyoNegro");
   int DistIzq = SharpIz.distance();
-
+  iAnterior = iOption;
   if (Negro())
   {
     Hoyo = true;
