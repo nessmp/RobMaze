@@ -17,11 +17,15 @@
 ////Algoritmo/////
 //////////////////
 
-bool bPos[50][50];
+bool bPos[2][50][50];
 int iX = 20;
 int iY = 20;
 int iOption = 1;
 int iAnterior = 1;
+bool bAbriba = false;
+int iAbriba = 0;
+int iXCopia = iX;
+int iYCopia = iY;
 
 //////////////////
 ///////MPU////////
@@ -216,14 +220,18 @@ void setup() {
   }
 
   //ALGORITMO
-  for (int iI = 0; iI < 50; iI++)
+  for(int iK = 0; iK < 2; iK++)
   {
-    for (int iJ = 0; iJ < 50; iJ++)
-    {
-      bPos[iI][iJ] = false;
+    for (int iI = 0; iI < 50; iI++)
+   {
+     for (int iJ = 0; iJ < 50; iJ++)
+      {
+        bPos[iK][iI][iJ] = false;
+       }
     }
   }
-  bPos[20][20] = true;
+
+  bPos[0][20][20] = true;
 
   //CALOR
   therm1.begin(0x1C);
@@ -864,12 +872,21 @@ bool RampaArriba()
       delay(500);
       if (Revision > 18)
       {
-        Rampa = true;
+        if(Rampa == false)
+        {
+          Rampa = true;
+        }
+        else
+        {
+          Rampa = false;
+        }
         Adelante();
         delay(10000);
         Detenerse();
         delay(600);
         Acejarse();
+        bAbriba = 1;
+        iAbriba++;
       }
       else
       {
@@ -900,6 +917,21 @@ void RampaAbajoIzq()
     {
       IzquierdaM();
       delay(5000);
+      GiroIzq90();
+      delay(80);
+      GiroIzq90();
+      Estamparse();
+      delay(80);
+      Acejarse();
+      if(Rampa == false)
+        {
+          Rampa = true;
+        }
+      else
+      {
+          Rampa = false;
+      }
+      iAbriba++;
     }
     else
     {
@@ -1283,7 +1315,7 @@ void Pos1()
   bool ParedE = ParedEnf();
   bool ParedI = ParedIzq();
 
-  if (ParedD == false && bPos[iX + 1] [iY] == false)
+  if (ParedD == false && bPos[bAbriba][iX + 1] [iY] == false)
   {
     delay(80);
     GiroDer90();
@@ -1295,7 +1327,7 @@ void Pos1()
     bPos[iX][iY] = true;
     iOption = 2;
   }
-  else if (ParedE == false && bPos[iX][1 + iY] == false)
+  else if (ParedE == false && bPos[bAbriba][iX][1 + iY] == false)
   {
     delay(80);
     Adelante30();
@@ -1304,7 +1336,7 @@ void Pos1()
     bPos[iX][iY] = true;
     iOption = 1;
   }
-  else if (ParedI == false && bPos[iX - 1] [iY] == false)
+  else if (ParedI == false && bPos[bAbriba][iX - 1] [iY] == false)
   {
     delay(80);
     GiroIzq90();
@@ -1348,7 +1380,7 @@ void Pos2()
   bool ParedE = ParedEnf();
   bool ParedI = ParedIzq();
 
-  if (ParedD == false && bPos[iX] [iY - 1] == false)
+  if (ParedD == false && bPos[bAbriba][iX] [iY - 1] == false)
   {
     delay(80);
     GiroDer90();
@@ -1360,7 +1392,7 @@ void Pos2()
     bPos[iX][iY] = true;
     iOption = 4;
   }
-  else if (ParedE == false && bPos[iX + 1][iY] == false)
+  else if (ParedE == false && bPos[bAbriba][iX + 1][iY] == false)
   {
     delay(80);
     Adelante30();
@@ -1369,7 +1401,7 @@ void Pos2()
     bPos[iX][iY] = true;
     iOption = 2;
   }
-  else if (ParedI == false && bPos[iX] [iY + 1] == false)
+  else if (ParedI == false && bPos[bAbriba][iX] [iY + 1] == false)
   {
     delay(80);
     GiroIzq90();
@@ -1413,7 +1445,7 @@ void Pos3()
   bool ParedE = ParedEnf();
   bool ParedI = ParedIzq();
 
-  if (ParedD == false && bPos[iX] [iY + 1] == false)
+  if (ParedD == false && bPos[bAbriba][iX] [iY + 1] == false)
   {
     delay(80);
     GiroDer90();
@@ -1425,7 +1457,7 @@ void Pos3()
     bPos[iX][iY] = true;
     iOption = 1;
   }
-  else if (ParedE == false && bPos[iX - 1][iY] == false)
+  else if (ParedE == false && bPos[bAbriba][iX - 1][iY] == false)
   {
     delay(80);
     Adelante30();
@@ -1434,7 +1466,7 @@ void Pos3()
     bPos[iX][iY] = true;
     iOption = 3;
   }
-  else if (ParedI == false && bPos[iX] [iY - 1] == false)
+  else if (ParedI == false && bPos[bAbriba][iX] [iY - 1] == false)
   {
     delay(80);
     GiroIzq90();
@@ -1478,7 +1510,7 @@ void Pos4()
   bool  ParedE = ParedEnf();
   bool ParedI = ParedIzq();
 
-  if (ParedD == false && bPos[iX - 1] [iY] == false)
+  if (ParedD == false && bPos[bAbriba][iX - 1] [iY] == false)
   {
     delay(80);
     GiroDer90();
@@ -1490,7 +1522,7 @@ void Pos4()
     bPos[iX][iY] = true;
     iOption = 3;
   }
-  else if (ParedE == false && bPos[iX][1 - iY] == false)
+  else if (ParedE == false && bPos[bAbriba][iX][1 - iY] == false)
   {
     delay(80);
     Adelante30();
@@ -1499,7 +1531,7 @@ void Pos4()
     bPos[iX][iY] = true;
     iOption = 4;
   }
-  else if (ParedI == false && bPos[iX + 1] [iY] == false)
+  else if (ParedI == false && bPos[bAbriba][iX + 1] [iY] == false)
   {
     delay(80);
     GiroIzq90();
@@ -1539,6 +1571,11 @@ void Pos4()
 
 void Algoritmo()
 {
+  if (bAbriba == true && iAbriba == 1)
+  {
+    iX = 20;
+    iY = 20;
+  }
   iAnterior = iOption;
   lcd.clear();
   lcd.print(iX);
@@ -1565,6 +1602,8 @@ void Algoritmo()
   }
   Revisiones();
   delay(500);
+  iXCopia = iX;
+  iYCopia = iY;
 }
 
 void loop()
