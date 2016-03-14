@@ -25,6 +25,9 @@ int iOption = 1;
 int iAnterior = 1;
 bool bNegro[10][10];
 
+bool bVictimaDetectada = false;
+bool bInicio = false;
+
 //////////////////
 ///////MPU////////
 //////////////////
@@ -84,9 +87,9 @@ Encoder Enc2(17, 27);
 
 long oldPosition  = -999;
 
-int const90 = 3450;
+int const90 = 3000;
 
-const int const30 = 6000;
+const int const30 = 5000;
 
 //////////////////
 //////CALOR///////
@@ -614,10 +617,10 @@ void Adelante()
   analogWrite(motDerA1, 220); //255  //205
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 162); //178  //132
+  analogWrite(motIzqE1, 182); //178  //132
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 162); //178  //132
+  analogWrite(motIzqA1, 172); //178  //132
   analogWrite(motIzqA2, 0);
 }
 
@@ -636,7 +639,7 @@ void AdelanteRampa()
   analogWrite(motIzqA2, 0);
 }
 
-void Izquierda()
+void Izquierda() //160 220 182 172
 {
   analogWrite(motDerE1, 160);
   analogWrite(motDerE2, 0);
@@ -645,10 +648,10 @@ void Izquierda()
   analogWrite(motDerA2, 0);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 162);
+  analogWrite(motIzqE2, 182);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 162);
+  analogWrite(motIzqA2, 172);
 }
 
 void Derecha()
@@ -659,14 +662,14 @@ void Derecha()
   analogWrite(motDerA1, 0);
   analogWrite(motDerA2, 220);
 
-  analogWrite(motIzqE1, 162);
+  analogWrite(motIzqE1, 182);
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 162);
+  analogWrite(motIzqA1, 172);
   analogWrite(motIzqA2, 0);
 }
 
-void Atras()
+void Atras()  //160 220 182 172
 {
   analogWrite(motDerE1, 0); //190
   analogWrite(motDerE2, 160);
@@ -675,39 +678,39 @@ void Atras()
   analogWrite(motDerA2, 220);
 
   analogWrite(motIzqE1, 0); //178  //132
-  analogWrite(motIzqE2, 148);
+  analogWrite(motIzqE2, 182);
 
   analogWrite(motIzqA1, 0); //178  //132
-  analogWrite(motIzqA2, 148);
+  analogWrite(motIzqA2, 172);
 }
 
-void DerechaM()
+void DerechaM() //160 220 182 172
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 180);
+  analogWrite(motDerE2, 190);
 
-  analogWrite(motDerA1, 200);
+  analogWrite(motDerA1, 197);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 150);
+  analogWrite(motIzqE1, 148);
   analogWrite(motIzqE2, 0);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 160);
+  analogWrite(motIzqA2, 166);
 }
 
-void IzquierdaM()
+void IzquierdaM()//160 220 182 172
 {
-  analogWrite(motDerE1, 180);
+  analogWrite(motDerE1, 170);
   analogWrite(motDerE2, 0);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 200);
+  analogWrite(motDerA2, 197);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 150);
+  analogWrite(motIzqE2, 148);
 
-  analogWrite(motIzqA1, 160);
+  analogWrite(motIzqA1, 166);
   analogWrite(motIzqA2, 0);
 }
 
@@ -825,6 +828,7 @@ void Adelante30()
   Adelante10();
   Detectar();
   Detenerse();
+  bVictimaDetectada = false;
 }
 
 void Atras30()
@@ -955,7 +959,7 @@ void RampaAbajoIzq()
   int SharpEnf = SharpEn.distance();
   int SharpIzq = SharpIz.distance();
   int Roll = 0;
-  if (SharpEnf < 10 && SharpDer < 14)
+  if (SharpEnf < 10 && SharpDer < 14 && SharpIzq > 14)
   {
     IzquierdaM30();
     delay(50);
@@ -1007,6 +1011,7 @@ bool HoyoNegro()
     Hoyo = true;
     Atras30();
     bNegro [iX][iY] = true;
+    bPos [iX][iY] = true;
     delay(100);
     Estampe();
     delay(80);
@@ -1044,8 +1049,9 @@ void Detectar()
   int Therm4 = therm4.object(); //Derecha
   int Temp = 27;
   //Serial.println(therm2.object());
-  if (Therm1 > Temp || Therm2 > Temp || Therm3 > Temp || Therm4 > Temp)
+  if ((Therm1 > Temp || Therm2 > Temp || Therm3 > Temp || Therm4 > Temp) && bVictimaDetectada == false)
   {
+    bVictimaDetectada = true;
     Detenerse();
     lcd.clear();
     lcd.print("VICTIMA");
@@ -1308,6 +1314,7 @@ void Acejarse()
 
 void Revisiones()
 {
+  delay(80);
   bool Hoyo = HoyoNegro();
   if (Hoyo == false)
   {
@@ -1741,7 +1748,7 @@ void Pos4()
     bPos[iX][iY] = true;
     iOption = 3;
   }
-  else if (ParedE == false && bPos[iX][1 - iY] == false)
+  else if (ParedE == false && bPos[iX][iY - 1] == false)
   {
     delay(80);
     Adelante30();
@@ -1781,7 +1788,7 @@ void Pos4()
   }
   else
   {
-    if (ParedD == false && bNegro[iX - 1] [iY] != true)
+    if (ParedD == false && bNegro[iX - 1] [iY] == false)
     {
       delay(80);
       GiroDer90();
@@ -1792,15 +1799,15 @@ void Pos4()
       delay(80);
       Adelante30();
       iX -= 1;
-      iOption = 3;
+      iOption = 1;
     }
-    else if (ParedE == false && bNegro[iX][1 - iY] != true)
+    else if (ParedE == false && bNegro[iX][iY - 1] == false)
     {
       delay(80);
       Adelante30();
       delay(80);
       iY -= 1;
-      iOption = 4;
+      iOption = 3;
     }
     else if (ParedI == false && bNegro[iX + 1] [iY] == false)
     {
@@ -1813,12 +1820,12 @@ void Pos4()
       delay(80);
       Adelante30();
       iX += 1;
-      iOption = 2;
+      iOption = 4;
     }
     else
     {
       GiroDer90();
-      delay(80);
+      delay(800);
       GiroDer90();
       iOption = 1;
     }
@@ -1827,8 +1834,6 @@ void Pos4()
 
 void Algoritmo()
 {
-  delay(80);
-  Revisiones();
   iAnterior = iOption;
   lcd.clear();
   lcd.print(iX);
@@ -1854,29 +1859,27 @@ void Algoritmo()
     Pos4();
   }
   delay(80);
-  bool Rampa = RampaArriba();
-  if (Rampa == false)
-  {
-    RampaAbajoIzq();
-  }
+  Revisiones();
   //delay(500);
 }
 
 void loop()
 {
-  /*
-  Serial.println(SharpIz.distance());
-  Serial.println(sonar7.ping_cm());
-  Serial.println(sonar8.ping_cm());
-  Serial.println(SharpEn.distance());
-  Serial.println(SharpDe.distance());
-  Serial.println();
-  delay(500);
-  */
   lcd.clear();
+  if (bInicio == false)
+  {
+    bool Rampa = RampaArriba();
+    delay(29);
+    if (Rampa == false)
+    {
+      RampaAbajoIzq();
+    }
+    bInicio = true;
+    delay(200);
+  }
   lcd.backlight();
   Algoritmo();
-  
+
   /*
   lcd.clear();
   therm1.read();
