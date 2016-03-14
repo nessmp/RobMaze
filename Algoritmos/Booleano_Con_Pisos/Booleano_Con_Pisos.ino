@@ -955,7 +955,7 @@ void RampaAbajoIzq()
   int SharpEnf = SharpEn.distance();
   int SharpIzq = SharpIz.distance();
   int Roll = 0;
-  if (SharpEnf < 9 && SharpDer < 9)
+  if (SharpEnf < 10 && SharpDer < 14)
   {
     IzquierdaM30();
     delay(50);
@@ -1062,6 +1062,7 @@ void Detectar()
       Dispensador.write(iI);
       delay(1);
     }
+    delay(500);
     for (int iI = 0; iI < 10; iI++)
     {
       lcd.noBacklight();
@@ -1307,17 +1308,14 @@ void Acejarse()
 
 void Revisiones()
 {
-  delay(100);
   bool Hoyo = HoyoNegro();
   if (Hoyo == false)
   {
+    delay(80);
     Estampe();
-    delay(300);
+    delay(200);
     Acejarse();
-    delay(300);
-    Acomodo();
-    delay(50);
-    delay(50);
+    delay(200);
     bool Rampa = RampaArriba();
     delay(29);
     if (Rampa == false)
@@ -1444,7 +1442,6 @@ void Pos1()
     delay(80);
     Estampe();
     delay(80);
-    delay(80);
     Acejarse();
     delay(80);
     Adelante30();
@@ -1461,7 +1458,6 @@ void Pos1()
     delay(80);
     Estampe();
     delay(80);
-    delay(60);
     Acejarse();
     delay(80);
     Adelante30();
@@ -1498,7 +1494,6 @@ void Pos1()
       delay(80);
       Estampe();
       delay(80);
-      delay(80);
       Acejarse();
       delay(80);
       Adelante30();
@@ -1508,8 +1503,9 @@ void Pos1()
     else
     {
       GiroDer90();
-      delay(100);
+      delay(80);
       GiroDer90();
+      delay(80);
       iOption = 4;
     }
   }
@@ -1612,8 +1608,9 @@ void Pos2()
     else
     {
       GiroDer90();
-      delay(100);
+      delay(80);
       GiroDer90();
+      delay(80);
       iOption = 3;
     }
   }
@@ -1716,7 +1713,7 @@ void Pos3()
     else
     {
       GiroDer90();
-      delay(100);
+      delay(800);
       GiroDer90();
       iOption = 2;
     }
@@ -1821,7 +1818,7 @@ void Pos4()
     else
     {
       GiroDer90();
-      delay(100);
+      delay(80);
       GiroDer90();
       iOption = 1;
     }
@@ -1830,6 +1827,7 @@ void Pos4()
 
 void Algoritmo()
 {
+  delay(80);
   Revisiones();
   iAnterior = iOption;
   lcd.clear();
@@ -1838,7 +1836,7 @@ void Algoritmo()
   lcd.print(iY);
   lcd.setCursor(0, 1);
   lcd.print(iOption);
-  delay(500);
+  //delay(500);
   if (iOption == 1)
   {
     Pos1();
@@ -1855,19 +1853,39 @@ void Algoritmo()
   {
     Pos4();
   }
-  delay(500);
+  delay(80);
+  bool Rampa = RampaArriba();
+  if (Rampa == false)
+  {
+    RampaAbajoIzq();
+  }
+  //delay(500);
 }
 
 void loop()
 {
+  /*
+  Serial.println(SharpIz.distance());
+  Serial.println(sonar7.ping_cm());
+  Serial.println(sonar8.ping_cm());
+  Serial.println(SharpEn.distance());
+  Serial.println(SharpDe.distance());
+  Serial.println();
+  delay(500);
+  */
+  lcd.clear();
   lcd.backlight();
-  /*Estampe();
-  delay(80);
-  Acejarse();
-  delay(80);
-  Adelante30();
-  lcd.noBacklight();
-  delay(2000);*/
   Algoritmo();
+  
+  /*
+  lcd.clear();
+  therm1.read();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print(therm1.object());
+  lcd.setCursor(0, 1);
+  lcd.print(Negro());
+  delay(1000);
+  */
 }
 
