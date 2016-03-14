@@ -825,7 +825,7 @@ void Atras30()
   lcd.print("Atras30");
   EncDerE.write(0);
   int Enc = EncDerE.read();
-  while (Enc > const30 * -1)
+  while (Enc > (const30 * -1)+500)
   {
     Atras();
     Enc = EncDerE.read();
@@ -1726,6 +1726,10 @@ void Algoritmo()
 void loop()
 {
   lcd.backlight();
-  Algoritmo();
+  //Algoritmo();
+  Adelante30();
+  Acejarse();
+   lcd.noBacklight();
+  delay(1000);
 }
 
