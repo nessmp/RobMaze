@@ -969,7 +969,8 @@ void RampaAbajoIzq()
     if (Roll < -8)
     {
       IzquierdaM();
-      delay(5000);
+      delay(4000);
+      lcd.clear();
       GiroIzq90();
       delay(80);
       GiroIzq90();
@@ -1306,7 +1307,7 @@ void Acejarse()
   {
     AcejarseIzquierda();
   }
-  else if (Enf)
+  if (Enf)
   {
     AcejarseEnfrente();
   }
@@ -1371,6 +1372,29 @@ void SeguirDerecha()
 
 void Estampe()
 {
+  int iSharpE = SharpEn.distance();
+  if (iSharpE < 25)
+  {
+    if (iSharpE > 10 && iSharpE < 18)
+    {
+      Atras();
+      delay(200);
+      Detenerse();
+      delay(80);
+    }
+    iSharpE = SharpEn.distance();
+    if (iSharpE > 8)
+    {
+      Adelante();
+      while (iSharpE > 8)
+      {
+        iSharpE = SharpEn.distance();
+      }
+      Detenerse();
+    }
+  }
+  delay(80);
+  
   bool ParedD = ParedDer();
   bool ParedE = ParedEnf();
   bool ParedI = ParedIzq();
@@ -1378,11 +1402,6 @@ void Estampe()
   ParedD = ParedDer();
   ParedE = ParedEnf();
   ParedI = ParedIzq();
-
-
-
-
-
 
   if (ParedI)
   {
