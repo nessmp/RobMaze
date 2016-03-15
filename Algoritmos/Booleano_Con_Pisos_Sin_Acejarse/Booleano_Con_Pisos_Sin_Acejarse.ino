@@ -632,15 +632,15 @@ void Adelante()
   analogWrite(motIzqA2, 0);
 }
 
-void Atras()  
+void Atras()
 {
-  analogWrite(motDerE1, 0); 
+  analogWrite(motDerE1, 0);
   analogWrite(motDerE2, 190);
 
-  analogWrite(motDerA1, 0); 
+  analogWrite(motDerA1, 0);
   analogWrite(motDerA2, 240);
 
-  analogWrite(motIzqE1, 0); 
+  analogWrite(motIzqE1, 0);
   analogWrite(motIzqE2, 192);
 
   analogWrite(motIzqA1, 0);
@@ -649,16 +649,16 @@ void Atras()
 
 void AdelanteRampa()
 {
-  analogWrite(motDerE1, 180); 
+  analogWrite(motDerE1, 190);
   analogWrite(motDerE2, 0);
 
-  analogWrite(motDerA1, 220); 
+  analogWrite(motDerA1, 220);
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 198); 
+  analogWrite(motIzqE1, 230);
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 198); 
+  analogWrite(motIzqA1, 230);
   analogWrite(motIzqA2, 0);
 }
 
@@ -940,7 +940,7 @@ bool RampaArriba()
         delay(10000);
         Detenerse();
         delay(600);
-        Acejarse();
+        //Acejarse();
         delay(80);
         GiroDer90();
         delay(90);
@@ -948,13 +948,13 @@ bool RampaArriba()
         delay(80);
         Estampe();
         delay(20);
-        Acejarse();
+        //Acejarse();
         Reset();
       }
       else
       {
         Rampa = false;
-        Acejarse();
+        //Acejarse();
       }
     }
   }
@@ -989,7 +989,7 @@ void RampaAbajoIzq()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       delay(80);
@@ -1032,7 +1032,7 @@ bool HoyoNegro()
     delay(100);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     if (iAnterior == 1)
     {
       iY -= 1;
@@ -1176,7 +1176,8 @@ void Acomodo()
   }
 }
 
-void AcejarseDerecha()
+/*
+void //AcejarseDerecha()
 {
   int Dist = SharpDe.distance();
 
@@ -1213,7 +1214,7 @@ void AcejarseDerecha()
 }
 
 //izquierda
-void AcejarseIzquierda()
+void //AcejarseIzquierda()
 {
   int Dist2 = SharpIz.distance();
 
@@ -1250,7 +1251,7 @@ void AcejarseIzquierda()
 }
 
 //enfrente
-void AcejarseEnfrente()
+void //AcejarseEnfrente()
 {
   int SharpEnf = SharpEn.distance();
   int U = sonar1.ping_cm();
@@ -1288,10 +1289,10 @@ void AcejarseEnfrente()
   }
 }
 
-void Acejarse()
+void //Acejarse()
 {
   lcd.clear();
-  lcd.print("acejarse");
+  lcd.print("//Acejarse");
   bool Der = ParedDer();
   delay(100);
   bool Enf = ParedEnf();
@@ -1303,31 +1304,32 @@ void Acejarse()
 
   if (Izq && Enf)
   {
-    AcejarseIzquierda();
+    //AcejarseIzquierda();
     delay(200);
-    AcejarseEnfrente();
+    //AcejarseEnfrente();
   }
 
   else if (Der && Enf)
   {
-    AcejarseDerecha();
+    //AcejarseDerecha();
     delay(200);
-    AcejarseEnfrente();
+    //AcejarseEnfrente();
   }
 
   else if (Der)
   {
-    AcejarseDerecha();
+    //AcejarseDerecha();
   }
   else if (Izq)
   {
-    AcejarseIzquierda();
+    //AcejarseIzquierda();
   }
   if (Enf)
   {
-    AcejarseEnfrente();
+    //AcejarseEnfrente();
   }
 }
+*/
 
 void Revisiones()
 {
@@ -1338,7 +1340,7 @@ void Revisiones()
     delay(80);
     Estampe();
     delay(200);
-    Acejarse();
+    //Acejarse();
     delay(200);
     bool Rampa = RampaArriba();
     delay(29);
@@ -1411,7 +1413,7 @@ void Estampe()
     }
   }
   delay(80);
-  
+
   bool ParedD = ParedDer();
   bool ParedE = ParedEnf();
   bool ParedI = ParedIzq();
@@ -1462,7 +1464,7 @@ void Pos1()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX += 1;
@@ -1485,7 +1487,7 @@ void Pos1()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX -= 1;
@@ -1501,7 +1503,7 @@ void Pos1()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY -= 1;
@@ -1516,7 +1518,7 @@ void Pos1()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iX += 1;
@@ -1537,7 +1539,7 @@ void Pos1()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iX -= 1;
@@ -1567,7 +1569,7 @@ void Pos2()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY -= 1;
@@ -1590,7 +1592,7 @@ void Pos2()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY += 1;
@@ -1606,7 +1608,7 @@ void Pos2()
     delay(80);
     Estampe();
     delay(60);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX -= 1;
@@ -1621,7 +1623,7 @@ void Pos2()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iY -= 1;
@@ -1642,7 +1644,7 @@ void Pos2()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iY += 1;
@@ -1672,7 +1674,7 @@ void Pos3()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY += 1;
@@ -1695,7 +1697,7 @@ void Pos3()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY -= 1;
@@ -1711,7 +1713,7 @@ void Pos3()
     delay(80);
     Estampe();
     delay(60);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX += 1;
@@ -1726,7 +1728,7 @@ void Pos3()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iY += 1;
@@ -1747,7 +1749,7 @@ void Pos3()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iY -= 1;
@@ -1777,7 +1779,7 @@ void Pos4()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX -= 1;
@@ -1800,7 +1802,7 @@ void Pos4()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX += 1;
@@ -1816,7 +1818,7 @@ void Pos4()
     delay(80);
     Estampe();
     delay(60);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY += 1;
@@ -1831,7 +1833,7 @@ void Pos4()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iX -= 1;
@@ -1852,7 +1854,7 @@ void Pos4()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iX += 1;
@@ -1901,6 +1903,7 @@ void Algoritmo()
 
 void loop()
 {
+  
   lcd.clear();
   if (bInicio == false)
   {
