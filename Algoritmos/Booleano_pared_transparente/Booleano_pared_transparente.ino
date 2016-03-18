@@ -97,7 +97,7 @@ long oldPosition  = -999;
 
 int const90 = 3480;
 
-const int const30 = 6000;
+const int const30 = 5500;
 
 //////////////////
 //////CALOR///////
@@ -869,46 +869,54 @@ void Atras30()
 
 bool ParedDer()
 {
-  bool Pared = false;
+  bool Pared = true;
   int Sharp = SharpDe.distance();
   int U3 = sonar3.ping_cm();
   int U4 = sonar4.ping_cm();
-
-  if(Sharp < 24 || U3 != 0 || U4 != 0)
+  Serial.println(Sharp);
+  if (Sharp >= 18)
   {
-    Pared = true;
+    Pared = false;
   }
   return Pared;
 }
 
 bool ParedIzq()
 {
-  bool Pared = false;
+  bool Pared = true;
   int Sharp = SharpIz.distance();
-  int U3 = sonar7.ping_cm();
-  int U4 = sonar8.ping_cm();
-
-  if(Sharp < 24 || U3 != 0 || U4 != 0)
+  Serial.println(Sharp);
+  if (Sharp >= 18)
   {
-    Pared = true;
+    Pared = false;
   }
   return Pared;
 }
 
 bool ParedEnf()
 {
-  bool Pared = false;
+  bool Pared = true;
   int Sharp = SharpEn.distance();
-  int U3 = sonar1.ping_cm();
-  int U4 = sonar2.ping_cm();
-
-  if(Sharp < 19 || U3 != 0 || U4 != 0)
+  if (Sharp > 19)
   {
-    Pared = true;
+    Pared = false;
   }
   return Pared;
 }
 
+bool RampaArriba()
+{
+  lcd.clear();
+  lcd.backlight();
+  lcd.print(sonar1.ping_cm());
+  lcd.print("-");
+  lcd.print(sonar2.ping_cm());
+  lcd.print("-");
+  lcd.print(SharpEn.distance());
+  delay(1000);
+}
+
+/*
 bool RampaArriba()
 {
   bool Rampa = false;
@@ -932,7 +940,7 @@ bool RampaArriba()
   //delay(1000);
   if (ParedIzq() && ParedEnf())
   {
-    if (Sharp < 21 && ( U4 == 0))
+    if (Sharp < 21 && (U4 == 0 || U3 == 0))
     {
       Rampa = true;
       //Serial.print("Rampa: ");
@@ -959,7 +967,7 @@ bool RampaArriba()
         delay(10000);
         Detenerse();
         delay(600);
-        Acejarse();
+        //Acejarse();
         delay(80);
         GiroDer90();
         delay(90);
@@ -967,7 +975,7 @@ bool RampaArriba()
         delay(80);
         Estampe();
         delay(20);
-        Acejarse();
+        //Acejarse();
         Reset();
       }
       else
@@ -989,12 +997,13 @@ bool RampaArriba()
         {
           iOption = 3;
         }
-        Acejarse();
+        //Acejarse();
       }
     }
   }
   return Rampa;
 }
+*/
 
 void RampaAbajoIzq()
 {
@@ -1026,7 +1035,7 @@ void RampaAbajoIzq()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       //delay(80);
       Adelante30();
       delay(80);
@@ -1070,7 +1079,7 @@ bool HoyoNegro()
     delay(100);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     if (iAnterior == 1)
     {
       iY -= 1;
@@ -1215,8 +1224,8 @@ void Acomodo()
   }
 }
 
-
-void AcejarseDerecha()
+/*
+void //AcejarseDerecha()
 {
   int Dist = SharpDe.distance();
 
@@ -1253,7 +1262,7 @@ void AcejarseDerecha()
 }
 
 //izquierda
-void AcejarseIzquierda()
+void //AcejarseIzquierda()
 {
   int Dist2 = SharpIz.distance();
 
@@ -1290,7 +1299,7 @@ void AcejarseIzquierda()
 }
 
 //enfrente
-void AcejarseEnfrente()
+void //AcejarseEnfrente()
 {
   int SharpEnf = SharpEn.distance();
   int U = sonar1.ping_cm();
@@ -1328,7 +1337,7 @@ void AcejarseEnfrente()
   }
 }
 
-void Acejarse()
+void //Acejarse()
 {
   lcd.clear();
   lcd.print("//Acejarse");
@@ -1343,32 +1352,32 @@ void Acejarse()
 
   if (Izq && Enf)
   {
-    AcejarseIzquierda();
+    //AcejarseIzquierda();
     delay(200);
-    AcejarseEnfrente();
+    //AcejarseEnfrente();
   }
 
   else if (Der && Enf)
   {
-    AcejarseDerecha();
+    //AcejarseDerecha();
     delay(200);
-    AcejarseEnfrente();
+    //AcejarseEnfrente();
   }
 
   else if (Der)
   {
-    AcejarseDerecha();
+    //AcejarseDerecha();
   }
   else if (Izq)
   {
-    AcejarseIzquierda();
+    //AcejarseIzquierda();
   }
   if (Enf)
   {
-    AcejarseEnfrente();
+    //AcejarseEnfrente();
   }
 }
-
+*/
 
 void Revisiones()
 {
@@ -1379,7 +1388,7 @@ void Revisiones()
     delay(80);
     Estampe();
     delay(200);
-    Acejarse();
+    //Acejarse();
     delay(200);
     bool Rampa = RampaArriba();
     delay(29);
@@ -1503,7 +1512,7 @@ void Pos1()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX += 1;
@@ -1526,7 +1535,7 @@ void Pos1()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX -= 1;
@@ -1544,7 +1553,7 @@ void Pos1()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY -= 1;
@@ -1559,7 +1568,7 @@ void Pos1()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iX += 1;
@@ -1580,7 +1589,7 @@ void Pos1()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iX -= 1;
@@ -1610,7 +1619,7 @@ void Pos2()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     //delay(80);
     Adelante30();
     iY -= 1;
@@ -1633,7 +1642,7 @@ void Pos2()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY += 1;
@@ -1649,7 +1658,7 @@ void Pos2()
     delay(80);
     Estampe();
     delay(60);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX -= 1;
@@ -1664,7 +1673,7 @@ void Pos2()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iY -= 1;
@@ -1685,7 +1694,7 @@ void Pos2()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iY += 1;
@@ -1715,7 +1724,7 @@ void Pos3()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY += 1;
@@ -1738,7 +1747,7 @@ void Pos3()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY -= 1;
@@ -1754,7 +1763,7 @@ void Pos3()
     delay(80);
     Estampe();
     delay(60);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX += 1;
@@ -1769,7 +1778,7 @@ void Pos3()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iY += 1;
@@ -1790,7 +1799,7 @@ void Pos3()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iY -= 1;
@@ -1820,7 +1829,7 @@ void Pos4()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX -= 1;
@@ -1843,7 +1852,7 @@ void Pos4()
     delay(80);
     Estampe();
     delay(80);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iX += 1;
@@ -1859,7 +1868,7 @@ void Pos4()
     delay(80);
     Estampe();
     delay(60);
-    Acejarse();
+    //Acejarse();
     delay(80);
     Adelante30();
     iY += 1;
@@ -1874,7 +1883,7 @@ void Pos4()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iX -= 1;
@@ -1895,7 +1904,7 @@ void Pos4()
       delay(80);
       Estampe();
       delay(80);
-      Acejarse();
+      //Acejarse();
       delay(80);
       Adelante30();
       iX += 1;

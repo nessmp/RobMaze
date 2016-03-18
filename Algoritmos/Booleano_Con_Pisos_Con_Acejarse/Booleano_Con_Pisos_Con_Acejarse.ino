@@ -641,6 +641,20 @@ void Adelante()
   analogWrite(motIzqA1, 192); //172  //192
   analogWrite(motIzqA2, 0);
 }
+void AdelanteLento()
+{
+  analogWrite(motDerE1, 190); //160  //190
+  analogWrite(motDerE2, 0);
+
+  analogWrite(motDerA1, 240); //220  //240
+  analogWrite(motDerA2, 0);
+
+  analogWrite(motIzqE1, 192); //182  //192
+  analogWrite(motIzqE2, 0);
+
+  analogWrite(motIzqA1, 192); //172  //192
+  analogWrite(motIzqA2, 0);
+}
 
 void Atras()
 {
@@ -715,6 +729,20 @@ void DerechaM() //160 220 182 172
 
   analogWrite(motIzqA1, 0);
   analogWrite(motIzqA2, 166);
+}
+void DerechaMLento() //160 220 182 172
+{
+  analogWrite(motDerE1, 0);
+  analogWrite(motDerE2, 140);
+
+  analogWrite(motDerA1, 147);
+  analogWrite(motDerA2, 0);
+
+  analogWrite(motIzqE1, 98);
+  analogWrite(motIzqE2, 0);
+
+  analogWrite(motIzqA1, 0);
+  analogWrite(motIzqA2, 116);
 }
 
 void IzquierdaM()//160 220 182 172
@@ -1330,6 +1358,7 @@ void AcejarseEnfrente()
 
 void Acejarse()
 {
+  /*
   lcd.clear();
   lcd.print("//Acejarse");
   bool Der = ParedDer();
@@ -1361,12 +1390,13 @@ void Acejarse()
   }
   else if (Izq)
   {
-    AcejarseIzquierda();
+    fIzquierda();
   }
   if (Enf)
   {
     AcejarseEnfrente();
   }
+  */
 }
 
 
@@ -1990,10 +2020,5 @@ void loop()
   }
   lcd.backlight();
   Algoritmo();
-
-  /*
-  lcd.backlight();
-  Calibracion();
-  */
 }
 
