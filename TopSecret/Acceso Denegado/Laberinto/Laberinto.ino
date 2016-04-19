@@ -118,6 +118,7 @@ int GetPossibility()
   //variable a regresar
   int iReturn = 0;
 
+  /*
   //comprueba la Der
   int DistDerA = UltDA.ping_cm();
   int DistDerB = UltDB.ping_cm();
@@ -153,6 +154,7 @@ int GetPossibility()
     bDireccion[3] = true;
     iReturn++;
   }
+  */
   return iReturn;
 }
 
