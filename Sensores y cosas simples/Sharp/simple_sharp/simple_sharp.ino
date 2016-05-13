@@ -1,9 +1,4 @@
-///
-/// Utilización del sensor de distancia Sharp 2Y0A21
-/// by RafaG
-///
- 
-// Pines de lectura
+
 int ir_sensor0 = A0;
 
  

@@ -118,43 +118,34 @@ int GetPossibility()
   //variable a regresar
   int iReturn = 0;
 
-  /*
+  
   //comprueba la Der
-  int DistDerA = UltDA.ping_cm();
-  int DistDerB = UltDB.ping_cm();
-  if (DistDerA > 30 || DistDerB > 30)
+  if (ParedDer())
   {
     bDireccion[0] = true;
     iReturn++;
   }
 
   //comprueba Enf
-  int iDistEA = UltEA.ping_cm();
-  int iDistEB = UltEB.ping_cm();
-  if (iDistEA > 30 || iDistEB > 30)
+  if (ParedEnf())
   {
     bDireccion[1] = true;
     iReturn++;
   }
 
   //comprueba la Izq
-  int iDistIzqA = UltIA.ping_cm();
-  int iDistIzqB = UltIB.ping_cm();
-  if (iDistIzqB > 30 || iDistIzqB > 30)
+  if (PAredIzq())
   {
     bDireccion[2] = true;
     iRetrun++;
   }
 
   //comprueba atras
-  int iDistAA = UltAA.ping_cm();
-  int iDistAB = UltAB.ping_cm();
-  if (iDistAA > 30 || iDistAB > 30)
+  if (ParedAtr())
   {
     bDireccion[3] = true;
     iReturn++;
   }
-  */
   return iReturn;
 }
 
