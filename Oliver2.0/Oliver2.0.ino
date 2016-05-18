@@ -93,7 +93,7 @@ Encoder Enc2(17, 27);
 
 long oldPosition  = -999;
 
-int const90 = 4200;
+int const90 = 3750;
 
 const int const30 = 5800;
 
@@ -628,47 +628,32 @@ void Detenerse()
 
 void Adelante()
 {
-  analogWrite(motDerE1, 244); //160  //190
+  analogWrite(motDerE1, 190); //160  //190
   analogWrite(motDerE2, 0);
-
-  analogWrite(motDerA1, 244); //220  //240
+  
+  analogWrite(motDerA1, 210); //220  //240
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 167); //182  //192
+  analogWrite(motIzqE1, 185); //182  //192
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 167); //172  //192
+  analogWrite(motIzqA1, 180); //172  //192
   analogWrite(motIzqA2, 0);
 }
 
 void Atras()
 {
-  analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 240);
+  analogWrite(motDerE1, 0); //160  //190
+  analogWrite(motDerE2, 190);
+  
+  analogWrite(motDerA1, 0); //220  //240
+  analogWrite(motDerA2, 210);
 
-  analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 240);
+  analogWrite(motIzqE1, 0); //182  //192
+  analogWrite(motIzqE2, 200);
 
-  analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 186);
-
-  analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 186);
-}
-
-void AdelanteRampa()
-{
-  analogWrite(motDerE1, 190);
-  analogWrite(motDerE2, 0);
-
-  analogWrite(motDerA1, 220);
-  analogWrite(motDerA2, 0);
-
-  analogWrite(motIzqE1, 230);
-  analogWrite(motIzqE2, 0);
-
-  analogWrite(motIzqA1, 230);
-  analogWrite(motIzqA2, 0);
+  analogWrite(motIzqA1, 0); //172  //192
+  analogWrite(motIzqA2, 200);
 }
 
 void Izquierda()
@@ -1018,17 +1003,20 @@ bool HoyoNegro()
 void Detectar()
 {
   therm1.read();
-  therm2.read();
+  //therm2.read();
   therm3.read();
   therm4.read();
   int Therm1 = therm1.object();
-  int Therm2 = therm2.object(); //Derecha
+  //int Therm2 = therm2.object(); //Derecha
   int Therm3 = therm3.object();
   int Therm4 = therm4.object(); //Derecha
-  Serial.println(Therm2);
+  Serial.println(Therm1);
+  //Serial.println(Therm2);
+  Serial.println(Therm3);
+  Serial.println(Therm4);
   int Temp = 27;
   //Serial.println(therm2.object());
-  if ((Therm1 > CalibCalor || Therm2 > CalibCalor || Therm3 > CalibCalor || Therm4 > CalibCalor) && bVictimaDetectada == false)
+  if ((Therm1 > CalibCalor || /*Therm2 > CalibCalor ||*/ Therm3 > CalibCalor || Therm4 > CalibCalor) && bVictimaDetectada == false)
   {
     bVictimaDetectada = true;
     Detenerse();
