@@ -8,7 +8,7 @@ IRTherm therm;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  therm.begin(0x1C);
+  therm.begin(0x2C);
   therm.setUnit(TEMP_C);
   lcd.begin(16,2);
   lcd.backlight();

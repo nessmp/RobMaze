@@ -11,28 +11,22 @@
 #define model 1080 //modelo del sharp GP2Y0A21Y
 #define OUTPUT_READABLE_YAWPITCHROLL //Yaw Pitch Roll del MPU
 
+int iPos[40][40];
+int iPossibility[100];
+int iRun[100][4];
+int iDirecc = 1;
+int iX = 20;
+int iY = 20;
+int iPaso = -1;
+
+bool bVictimaDetectada = false;
+
 //////////////////
 ///Calibracion////
 //////////////////
 
 int CalibCalor = 40;
 int CalibNegro = 1000;
-
-//////////////////
-////Algoritmo/////
-//////////////////
-
-bool bPos[20][20];
-int iX = 20;
-int iY = 20;
-int iOption = 1;
-int iAnterior = 1;
-bool bNegro[10][10];
-bool bAbriba = false;
-int iAbriba = 0;
-
-bool bVictimaDetectada = false;
-bool bInicio = false;
 
 //////////////////
 ///////MPU////////
@@ -95,14 +89,14 @@ long oldPosition  = -999;
 
 int const90 = 3750;
 
-const int const30 = 5800;
+const int const30 = 5500;
 
 //////////////////
 //////CALOR///////
 //////////////////
 
 IRTherm therm1; //IZQUIERDA ADELANTE
-// IRTherm //therm2; //DERECHA ATRAS
+
 IRTherm therm3; //IZQUIERDA ATRAS
 IRTherm therm4; //DERECHA ENFRENTE
 
@@ -146,27 +140,8 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I
 ///ULTRASONICOS///
 //////////////////
 
-//Ultrasonico especial para distancia larga hacia en frente
-byte Trigger1L = 28;
-byte Echo1L = 26;
-
-NewPing sonar1L(Trigger1L, Echo1L, 200);  //llamar a la funcion para saber la distancia con sonar1.ping_cm();
-
-//Ultrasonicos normales, distancias cortas
-
-byte Trigger1 = 28;
-byte Echo1 = 26;
-
-NewPing sonar1(Trigger1, Echo1, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar1.ping_cm();
-
-byte Trigger2 = 38;
-byte Echo2 = 36;
-
-NewPing sonar2(Trigger2, Echo2, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar1.ping_cm();
-
 byte Trigger3 = 42;
 byte Echo3 = 40;
-
 
 NewPing sonar3(Trigger3, Echo3, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
 
@@ -187,7 +162,9 @@ byte Echo8 = 22;
 NewPing sonar8(Trigger8, Echo8, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar8.ping_cm();
 
 void setup() {
+  // put your setup code here, to run once:
   Serial.begin(115200);
+  //Serial.println("hola1");
 
   //MPU
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -198,15 +175,14 @@ void setup() {
 #endif
   while (!Serial); // wait for Leonardo enumeration, others continue immediately
 
-  Serial.println(F("Initializing I2C devices..."));
+  //Serial.println(F("Initializing I2C devices..."));
   mpu.initialize();
 
   // verify connection
-  Serial.println(F("Testing device connections..."));
-  Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
-
+  //Serial.println(F("Testing device connections..."));
+  //Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
   // load and configure the DMP
-  Serial.println(F("Initializing DMP..."));
+  //Serial.println(F("Initializing DMP..."));
   devStatus = mpu.dmpInitialize();
 
   mpu.setXGyroOffset(4);
@@ -216,30 +192,29 @@ void setup() {
 
   if (devStatus == 0) {
     // turn on the DMP, now that it's ready
-    Serial.println(F("Enabling DMP..."));
+    //Serial.println(F("Enabling DMP..."));
     mpu.setDMPEnabled(true);
 
-    Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
+    //Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
     attachInterrupt(0, dmpDataReady, RISING);
     mpuIntStatus = mpu.getIntStatus();
 
-    Serial.println(F("DMP ready! Waiting for first interrupt..."));
+    //Serial.println(F("DMP ready! Waiting for first interrupt..."));
     dmpReady = true;
 
     packetSize = mpu.dmpGetFIFOPacketSize();
   } else {
 
-    Serial.print(F("DMP Initialization failed (code "));
-    Serial.print(devStatus);
-    Serial.println(F(")"));
+    //Serial.print(F("DMP Initialization failed (code "));
+    //Serial.print(devStatus);
+    //Serial.println(F(")"));
   }
 
   //CALOR
   therm1.begin(0x1C);
   therm1.setUnit(TEMP_C);
 
- // //therm2.begin(0x2C); //derecha atras
-  //therm2.setUnit(TEMP_C);
+
 
   therm3.begin(0x3C);
   therm3.setUnit(TEMP_C);
@@ -276,7 +251,7 @@ void setup() {
   lcd.begin(16, 2);  // initialize the lcd for 16 chars 2 lines, turn on backlight
   lcd.noBacklight(); // finish with backlight on
   lcd.setCursor(0, 0); //Start at character 4 on line 0
-  lcd.print(";)");
+  //lcd.print("OLIVER 2.0");
 
   //SERVO
   Dispensador.attach(pinservo, PulsoMinimo, PulsoMaximo);
@@ -293,37 +268,23 @@ void setup() {
 
   digitalWrite(s2, HIGH);
   digitalWrite(s3, LOW);
+  //Serial.println("hola");
 
-  for (int iI = 0; iI < 50; iI ++)
+  for (int iI = 0; iI < 40; iI++)
   {
-    for (int iJ = 0; iJ < 50; iJ++)
+    for (int iJ = 0; iJ < 40; iJ++)
     {
-      bPos[iI][iJ] = false;
+      iPos[iI][iJ] = 9999;
     }
   }
-  bPos[20][20] = true;
-  for (int iI = 0; iI < 10; iI++)
+  for (int iI = 0; iI < 100; iI++)
   {
-    for (int iJ = 0; iI < 10; iI++)
+    iPossibility[iI] = 9999;
+    for (int iJ = 0; iJ < 4; iJ++)
     {
-      bNegro[iI][iJ] = false;
+      iRun[iI][iJ] = 9999;
     }
   }
-  //Dispensador.write(127);
-}
-
-void Reset()
-{
-  iX = 20;
-  iY = 20;
-  for (int iI = 0; iI < 50; iI ++)
-  {
-    for (int iJ = 0; iJ < 50; iJ++)
-    {
-      bPos[iI][iJ] = false;
-    }
-  }
-  bPos[20][20] = true;
 }
 
 double MPUY()
@@ -356,7 +317,7 @@ double MPUY()
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
       // reset so we can continue cleanly
       mpu.resetFIFO();
-      //Serial.println(F("FIFO overflow!"));
+      ////Serial.println(F("FIFO overflow!"));
       iReturn = 99999;
 
       // otherwise, check for DMP data ready interrupt (this should happen frequently)
@@ -374,26 +335,26 @@ double MPUY()
 #ifdef OUTPUT_READABLE_QUATERNION
       // display quaternion values in easy matrix form: w x y z
       mpu.dmpGetQuaternion(&q, fifoBuffer);
-      Serial.print("quat\t");
-      Serial.print(q.w);
-      Serial.print("\t");
-      Serial.print(q.x);
-      Serial.print("\t");
-      Serial.print(q.y);
-      Serial.print("\t");
-      Serial.println(q.z);
+      //Serial.print("quat\t");
+      //Serial.print(q.w);
+      //Serial.print("\t");
+      //Serial.print(q.x);
+      //Serial.print("\t");
+      //Serial.print(q.y);
+      //Serial.print("\t");
+      //Serial.println(q.z);
 #endif
 
 #ifdef OUTPUT_READABLE_EULER
       // display Euler angles in degrees
       mpu.dmpGetQuaternion(&q, fifoBuffer);
       mpu.dmpGetEuler(euler, &q);
-      Serial.print("euler\t");
-      Serial.print(euler[0] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.print(euler[1] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.println(euler[2] * 180 / M_PI);
+      //Serial.print("euler\t");
+      //Serial.print(euler[0] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.print(euler[1] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.println(euler[2] * 180 / M_PI);
 #endif
 
 #ifdef OUTPUT_READABLE_YAWPITCHROLL
@@ -401,12 +362,12 @@ double MPUY()
       mpu.dmpGetQuaternion(&q, fifoBuffer);
       mpu.dmpGetGravity(&gravity, &q);
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-      Serial.print("ypr\t");
-      Serial.print(ypr[0] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.print(ypr[1] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.println(ypr[2] * 180 / M_PI);
+      //Serial.print("ypr\t");
+      //Serial.print(ypr[0] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.print(ypr[1] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.println(ypr[2] * 180 / M_PI);
       iReturn = ypr[0] * 180 / M_PI;
 #endif
     }
@@ -444,7 +405,7 @@ double MPUP()
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
       // reset so we can continue cleanly
       mpu.resetFIFO();
-      //Serial.println(F("FIFO overflow!"));
+      ////Serial.println(F("FIFO overflow!"));
       iReturn = 99999;
 
       // otherwise, check for DMP data ready interrupt (this should happen frequently)
@@ -462,26 +423,26 @@ double MPUP()
 #ifdef OUTPUT_READABLE_QUATERNION
       // display quaternion values in easy matrix form: w x y z
       mpu.dmpGetQuaternion(&q, fifoBuffer);
-      Serial.print("quat\t");
-      Serial.print(q.w);
-      Serial.print("\t");
-      Serial.print(q.x);
-      Serial.print("\t");
-      Serial.print(q.y);
-      Serial.print("\t");
-      Serial.println(q.z);
+      //Serial.print("quat\t");
+      //Serial.print(q.w);
+      //Serial.print("\t");
+      //Serial.print(q.x);
+      //Serial.print("\t");
+      //Serial.print(q.y);
+      //Serial.print("\t");
+      //Serial.println(q.z);
 #endif
 
 #ifdef OUTPUT_READABLE_EULER
       // display Euler angles in degrees
       mpu.dmpGetQuaternion(&q, fifoBuffer);
       mpu.dmpGetEuler(euler, &q);
-      Serial.print("euler\t");
-      Serial.print(euler[0] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.print(euler[1] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.println(euler[2] * 180 / M_PI);
+      //Serial.print("euler\t");
+      //Serial.print(euler[0] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.print(euler[1] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.println(euler[2] * 180 / M_PI);
 #endif
 
 #ifdef OUTPUT_READABLE_YAWPITCHROLL
@@ -489,12 +450,12 @@ double MPUP()
       mpu.dmpGetQuaternion(&q, fifoBuffer);
       mpu.dmpGetGravity(&gravity, &q);
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-      Serial.print("ypr\t");
-      Serial.print(ypr[0] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.print(ypr[1] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.println(ypr[2] * 180 / M_PI);
+      //Serial.print("ypr\t");
+      //Serial.print(ypr[0] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.print(ypr[1] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.println(ypr[2] * 180 / M_PI);
       iReturn = ypr[1] * 180 / M_PI;
 #endif
     }
@@ -532,7 +493,7 @@ double MPUR()
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
       // reset so we can continue cleanly
       mpu.resetFIFO();
-      //Serial.println(F("FIFO overflow!"));
+      ////Serial.println(F("FIFO overflow!"));
       iReturn = 99999;
 
       // otherwise, check for DMP data ready interrupt (this should happen frequently)
@@ -550,26 +511,26 @@ double MPUR()
 #ifdef OUTPUT_READABLE_QUATERNION
       // display quaternion values in easy matrix form: w x y z
       mpu.dmpGetQuaternion(&q, fifoBuffer);
-      Serial.print("quat\t");
-      Serial.print(q.w);
-      Serial.print("\t");
-      Serial.print(q.x);
-      Serial.print("\t");
-      Serial.print(q.y);
-      Serial.print("\t");
-      Serial.println(q.z);
+      //Serial.print("quat\t");
+      //Serial.print(q.w);
+      //Serial.print("\t");
+      //Serial.print(q.x);
+      //Serial.print("\t");
+      //Serial.print(q.y);
+      //Serial.print("\t");
+      //Serial.println(q.z);
 #endif
 
 #ifdef OUTPUT_READABLE_EULER
       // display Euler angles in degrees
       mpu.dmpGetQuaternion(&q, fifoBuffer);
       mpu.dmpGetEuler(euler, &q);
-      Serial.print("euler\t");
-      Serial.print(euler[0] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.print(euler[1] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.println(euler[2] * 180 / M_PI);
+      //Serial.print("euler\t");
+      //Serial.print(euler[0] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.print(euler[1] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.println(euler[2] * 180 / M_PI);
 #endif
 
 #ifdef OUTPUT_READABLE_YAWPITCHROLL
@@ -577,12 +538,12 @@ double MPUR()
       mpu.dmpGetQuaternion(&q, fifoBuffer);
       mpu.dmpGetGravity(&gravity, &q);
       mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-      Serial.print("ypr\t");
-      Serial.print(ypr[0] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.print(ypr[1] * 180 / M_PI);
-      Serial.print("\t");
-      Serial.println(ypr[2] * 180 / M_PI);
+      //Serial.print("ypr\t");
+      //Serial.print(ypr[0] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.print(ypr[1] * 180 / M_PI);
+      //Serial.print("\t");
+      //Serial.println(ypr[2] * 180 / M_PI);
       iReturn = ypr[2] * 180 / M_PI;
 #endif
     }
@@ -594,15 +555,15 @@ bool Negro()
 {
   bool iReturn = false;
   int color = pulseIn(out, LOW);
-  //Serial.println("Entro color");
-  Serial.println(color);
+  ////Serial.println("Entro color");
+  //Serial.println(color);
   if (color > CalibNegro)
   {
     iReturn = true;
   }
   color = pulseIn(out, LOW);
   lcd.setCursor(0, 1);
-  lcd.print(color);
+  //lcd.print(color);
   if (color > CalibNegro)
   {
     iReturn = true;
@@ -630,7 +591,7 @@ void Adelante()
 {
   analogWrite(motDerE1, 190); //160  //190
   analogWrite(motDerE2, 0);
-  
+
   analogWrite(motDerA1, 210); //220  //240
   analogWrite(motDerA2, 0);
 
@@ -645,7 +606,7 @@ void Atras()
 {
   analogWrite(motDerE1, 0); //160  //190
   analogWrite(motDerE2, 190);
-  
+
   analogWrite(motDerA1, 0); //220  //240
   analogWrite(motDerA2, 210);
 
@@ -723,7 +684,7 @@ void IzquierdaM30()
   int Enc = EncDerE.read();
   while (Enc < 8600)
   {
-    Serial.println(Enc);
+    //Serial.println(Enc);
     Enc = EncDerE.read();
   }
   Detenerse();
@@ -736,7 +697,7 @@ void DerechaM30()
   int Enc = EncDerE.read();
   while (Enc > -8600)
   {
-    //Serial.println(Enc);
+    ////Serial.println(Enc);
     Enc = EncDerE.read();
   }
   Detenerse();
@@ -746,7 +707,7 @@ void GiroDer18()
 {
   EncDerE.write(0);
   int Enc = EncDerE.read();
-  //Serial.println(EncDerE.read());
+  ////Serial.println(EncDerE.read());
   if (Enc < const90 / 5 )
   {
     Derecha();
@@ -760,8 +721,8 @@ void GiroDer18()
 
 void GiroDer90()
 {
-  lcd.clear();
-  lcd.print("GiroDer90");
+  //lcd.clear();
+  //lcd.print("GiroDer90");
   delay(500);
   GiroDer18();
   Detectar();
@@ -780,7 +741,7 @@ void GiroIzq18()
 {
   EncDerE.write(0);
   int Enc = EncDerE.read();
-  //Serial.println(EncDerE.read());
+  ////Serial.println(EncDerE.read());
   if (Enc > const90 / 5 * -1 )
   {
     Izquierda();
@@ -794,8 +755,8 @@ void GiroIzq18()
 
 void GiroIzq90()
 {
-  lcd.clear();
-  lcd.print("GiroIzq90");
+  //lcd.clear();
+  //lcd.print("GiroIzq90");
   delay(500);
   GiroIzq18();
   Detectar();
@@ -826,8 +787,8 @@ void Adelante10()
 
 void Adelante30()
 {
-  lcd.clear();
-  lcd.print("Adelante30");
+  //lcd.clear();
+  //lcd.print("Adelante30");
   Detectar();
   Adelante10();
   Detectar();
@@ -841,15 +802,15 @@ void Adelante30()
 
 void Atras30()
 {
-  lcd.clear();
-  lcd.print("Atras30");
+  //lcd.clear();
+  //lcd.print("Atras30");
   EncDerE.write(0);
   int Enc = EncDerE.read();
   while (Enc > (const30 * -1) + 500)
   {
     Atras();
     Enc = EncDerE.read();
-    Serial.println(Enc);
+    //Serial.println(Enc);
   }
   Detenerse();
 }
@@ -858,7 +819,7 @@ bool ParedDer()
 {
   bool Pared = true;
   int Sharp = SharpDe.distance();
-  Serial.println(Sharp);
+  ////Serial.println(Sharp);
   if (Sharp >= 18)
   {
     Pared = false;
@@ -870,7 +831,7 @@ bool ParedIzq()
 {
   bool Pared = true;
   int Sharp = SharpIz.distance();
-  Serial.println(Sharp);
+  ////Serial.println(Sharp);
   if (Sharp >= 18)
   {
     Pared = false;
@@ -882,7 +843,9 @@ bool ParedEnf()
 {
   bool Pared = true;
   int Sharp = SharpEn.distance();
-  if (Sharp > 19)
+  ////Serial.print("Sharp: ");
+  ////Serial.println(Sharp);
+  if (Sharp > 10)
   {
     Pared = false;
   }
@@ -891,25 +854,25 @@ bool ParedEnf()
 
 void RampaAbajoIzq()
 { /*
-   lcd.clear();
-   lcd.print("RampaAbajoIzq");
-   int SharpDer = SharpDe.distance();
-   int SharpEnf = SharpEn.distance();
-   int SharpIzq = SharpIz.distance();
-   int Roll = 0;
-   if (SharpEnf < 19 && SharpDer < 18 && SharpIzq > 14)
-   {
-     lcd.print("entro");
+    //lcd.clear();
+    //lcd.print("RampaAbajoIzq");
+    int SharpDer = SharpDe.distance();
+    int SharpEnf = SharpEn.distance();
+    int SharpIzq = SharpIz.distance();
+    int Roll = 0;
+    if (SharpEnf < 19 && SharpDer < 18 && SharpIzq > 14)
+    {
+     //lcd.print("entro");
      IzquierdaM30();
      delay(30);
      Roll = MPUR();
      lcd.setCursor(0, 1);
-     lcd.print(Roll);
+     //lcd.print(Roll);
      if (Roll < -7)
      {
        IzquierdaM();
        delay(5000);
-       lcd.clear();
+       //lcd.clear();
        Detenerse();
        delay(30);
        GiroIzq90();
@@ -953,49 +916,23 @@ void RampaAbajoIzq()
          //delay(30);
        }
      }
-   }
-   */
+    }
+  */
 }
 
 bool HoyoNegro()
 {
-  Serial.println("Entro hoyo negro");
+  //Serial.println("Entro hoyo negro");
   bool Hoyo = false;
-  lcd.clear();
-  lcd.print(iX);
-  lcd.print(", ");
-  lcd.print(iY);
-  lcd.setCursor(0, 1);
-  lcd.print(iOption);
   delay(30);
-  //lcd.clear();
-  //lcd.print("HoyoNegro");
+  ////lcd.clear();
+  ////lcd.print("HoyoNegro");
   int DistIzq = SharpIz.distance();
-  iAnterior = iOption;
   if (Negro())
   {
     Hoyo = true;
     Atras30();
-    bNegro [iX][iY] = true;
-    bPos [iX][iY] = true;
     Acomodo();
-    if (iAnterior == 1)
-    {
-      iY -= 1;
-    }
-    else if (iAnterior == 2)
-    {
-      iX -= 1;
-    }
-    else if (iAnterior == 3)
-    {
-      iX += 1;
-    }
-    else if (iAnterior == 4)
-    {
-      iY += 1;
-    }
-    //delay(30);
   }
   return Hoyo;
 }
@@ -1003,27 +940,25 @@ bool HoyoNegro()
 void Detectar()
 {
   therm1.read();
-  ////therm2.read();
+
   therm3.read();
   therm4.read();
   int Therm1 = therm1.object();
-  //int //therm2 = //therm2.object(); //Derecha
   int Therm3 = therm3.object();
   int Therm4 = therm4.object(); //Derecha
-  Serial.println(Therm1);
-  //Serial.println(//therm2);
-  Serial.println(Therm3);
-  Serial.println(Therm4);
+  ////Serial.println(Therm1);
+
+  ////Serial.println(Therm3);
+  ////Serial.println(Therm4);
   int Temp = 27;
-  //Serial.println(//therm2.object());
-  if ((Therm1 > CalibCalor || /*//therm2 > CalibCalor ||*/ Therm3 > CalibCalor || Therm4 > CalibCalor) && bVictimaDetectada == false)
+  if ((Therm1 > CalibCalor ||  Therm3 > CalibCalor || Therm4 > CalibCalor) && bVictimaDetectada == false)
   {
     bVictimaDetectada = true;
     Detenerse();
-    lcd.clear();
-    lcd.print("VICTIMA");
+    //lcd.clear();
+    //lcd.print("VICTIMA");
     lcd.setCursor(0, 1);
-    lcd.print("DETECTADA");
+    //lcd.print("DETECTADA");
     for (int iI = 75; iI < 113; iI++)
     {
       Dispensador.write(iI);
@@ -1058,9 +993,9 @@ void AcejarseDerecha()
 {
   int Dist = SharpDe.distance();
 
-  //Serial.println("entro 1 if");
+  ////Serial.println("entro 1 if");
   Dist = SharpDe.distance();
-  Serial.print("antes    "); Serial.println(Dist);
+  //Serial.print("antes    "); //Serial.println(Dist);
 
   while (Dist != 8 ) {
     if (Dist < 8)
@@ -1070,7 +1005,7 @@ void AcejarseDerecha()
       {
 
         Dist = SharpDe.distance();
-        Serial.print("1zq    "); Serial.println(Dist);
+        //Serial.print("1zq    "); //Serial.println(Dist);
       }
     }
     else if (Dist > 8)
@@ -1080,7 +1015,7 @@ void AcejarseDerecha()
       {
 
         Dist = SharpDe.distance();
-        Serial.print("der    "); Serial.println(Dist);
+        //Serial.print("der    "); //Serial.println(Dist);
       }
     }
     else if (Dist == 8)
@@ -1094,7 +1029,7 @@ void AcejarseIzquierda()
 {
   int Dist2 = SharpIz.distance();
 
-  //Serial.println("entro 1 if");
+  ////Serial.println("entro 1 if");
   Dist2 = SharpIz.distance();
 
   while (Dist2 != 8) {
@@ -1105,7 +1040,7 @@ void AcejarseIzquierda()
       {
 
         Dist2 = SharpIz.distance();
-        Serial.println(SharpIz.distance());
+        //Serial.println(SharpIz.distance());
       }
     }
     else if (Dist2 > 8)
@@ -1115,7 +1050,7 @@ void AcejarseIzquierda()
       {
 
         Dist2 = SharpIz.distance();
-        Serial.println(SharpIz.distance());
+        //Serial.println(SharpIz.distance());
       }
     }
     else if (Dist2 == 8)
@@ -1127,11 +1062,12 @@ void AcejarseIzquierda()
 //enfrente
 void AcejarseEnfrente()
 {
-  int SharpEnf = SharpEn.distance();
-  int U = sonar1.ping_cm();
-  Serial.print(SharpEnf); Serial.print("\t"); Serial.println(U);
-  if (SharpEnf < 5 || (U < 4 && U != 0))
-  {
+  /*
+    int SharpEnf = SharpEn.distance();
+    int U = sonar1.ping_cm();
+    //Serial.print(SharpEnf); //Serial.print("\t"); //Serial.println(U);
+    if (SharpEnf < 5 || (U < 4 && U != 0))
+    {
     Atras();
     while (SharpEnf < 5 || U < 4)
     {
@@ -1144,9 +1080,9 @@ void AcejarseEnfrente()
       delay(30);
     }
     Detenerse();
-  }
-  else
-  {
+    }
+    else
+    {
 
     Adelante();
     while (SharpEnf > 6 && SharpEnf < 14)
@@ -1159,12 +1095,13 @@ void AcejarseEnfrente()
       }
     }
     Detenerse();
-  }
+    }
+  */
 }
 
 void Blink()
 {
-  for(int iI = 0; iI < 4; iI++)
+  for (int iI = 0; iI < 4; iI++)
   {
     lcd.noBacklight();
     delay(100);
@@ -1185,16 +1122,16 @@ void Revisiones()
     RampaAbajoIzq();
     delay(30);
     /*
-    if (Rampa == false)
-    {
+      if (Rampa == false)
+      {
       RampaAbajoIzq();
-    }
+      }
     */
   }
   //Comentar esto si no se esta siguiendo la derecha
   /*
-  else
-  {
+    else
+    {
     GiroIzq90();
     if (ParedEnf())
     {
@@ -1205,525 +1142,13 @@ void Revisiones()
       Adelante30();
       Revisiones();
     }
-  }
+    }
   */
 }
-
-void SeguirDerecha()
-{
-  bool ParedD = ParedDer();
-  bool ParedE = ParedEnf();
-
-  if (ParedD == false)
-  {
-    GiroDer90();
-    Acomodo();
-    delay(30);
-    Adelante30();
-    Detenerse();
-    delay(30);
-  }
-  else if (ParedE == false)
-  {
-    Adelante30();
-    delay(30);
-    Detenerse();
-    delay(30);
-
-  }
-  else if (ParedD == true && ParedE == true)
-  {
-    GiroIzq90();
-    Acomodo();
-    delay(30);
-    //Revisiones();
-  }
-  Revisiones();
-  Acomodo();
-}
-
-/*
-      1
-      ^
-      |
-  3<-POS-> 2
-      |
-      v
-      4
-*/
-
-void Pos1()
-{
-  bool ParedD = ParedDer();
-  bool ParedE = ParedEnf();
-  bool ParedI = ParedIzq();
-
-  if (ParedD == false && bPos[iX + 1] [iY] == false)
-  {
-    //delay(80);
-    GiroDer90();
-    //delay(80);
-    Acomodo();
-    //delay(80);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iX += 1;
-    bPos[iX][iY] = true;
-    iOption = 2;
-  }
-  else if (ParedE == false && bPos[iX][iY + 1] == false)
-  {
-    //delay(80);
-    Adelante30();
-    //delay(80);
-    iY += 1;
-    bPos[iX][iY] = true;
-    iOption = 1;
-  }
-  else if (ParedI == false && bPos[iX - 1] [iY] == false)
-  {
-    //delay(80);
-    GiroIzq90();
-    //delay(80);
-    Acomodo();
-    //delay(80);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iX -= 1;
-    bPos[iX][iY] = true;
-    iOption = 3;
-  }
-  else if (ParedI == true && ParedE == true && ParedD == true)
-  {
-    //delay(80);
-    GiroDer90();
-    //delay(80);
-    Acomodo();
-    //delay(60);
-    GiroDer90();
-    //delay(80);
-    Acomodo();
-    //delay(80);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iY -= 1;
-    iOption = 4;
-  }
-  //En caso de que todo haya sido visitado se mueve a una aunque haya sido visitada con la unica condición que no sea negro
-  else
-  {
-    if (ParedD == false && bNegro[iX + 1] [iY] == false)
-    {
-      //delay(80);
-      GiroDer90();
-      //delay(80);
-      Acomodo();
-      //delay(80);
-      //Acomodo();
-      //delay(80);
-      Adelante30();
-      iX += 1;
-      iOption = 2;
-    }
-    else if (ParedE == false && bNegro[iX][iY + 1] == false)
-    {
-      //delay(80);
-      Adelante30();
-      //delay(80);
-      iY += 1;
-      iOption = 1;
-    }
-    else if (ParedI == false && bNegro[iX - 1] [iY] == false)
-    {
-      //delay(80);
-      GiroIzq90();
-      //delay(80);
-      Acomodo();
-      //delay(80);
-      //Acomodo();
-      //delay(80);
-      Adelante30();
-      iX -= 1;
-      iOption = 3;
-    }
-    else
-    {
-      GiroDer90();
-      //delay(80);
-      Acomodo();
-      GiroDer90();
-      //delay(80);
-      iOption = 4;
-    }
-  }
-}
-
-void Pos2()
-{
-  bool ParedD = ParedDer();
-  bool ParedE = ParedEnf();
-  bool ParedI = ParedIzq();
-
-  if (ParedD == false && bPos[iX] [iY - 1] == false)
-  {
-    //delay(80);
-    GiroDer90();
-    //delay(80);
-    Acomodo();
-    //delay(80);
-    //Acomodo();
-    ////delay(80);
-    Adelante30();
-    iY -= 1;
-    bPos[iX][iY] = true;
-    iOption = 4;
-  }
-  else if (ParedE == false && bPos[iX + 1][iY] == false)
-  {
-    //delay(80);
-    Adelante30();
-    //delay(80);
-    iX += 1;
-    bPos[iX][iY] = true;
-    iOption = 2;
-  }
-  else if (ParedI == false && bPos[iX] [iY + 1] == false)
-  {
-    //delay(80);
-    GiroIzq90();
-    //delay(80);
-    Acomodo();
-    //delay(80);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iY += 1;
-    bPos[iX][iY] = true;
-    iOption = 1;
-  }
-  else if (ParedI == true && ParedE == true && ParedD == true)
-  {
-    //delay(80);
-    GiroDer90();
-    Acomodo();
-    //delay(60);
-    GiroDer90();
-    //delay(80);
-    Acomodo();
-    //delay(60);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iX -= 1;
-    iOption = 3;
-  }
-  else
-  {
-    if (ParedD == false && bNegro[iX] [iY - 1] == false)
-    {
-      //delay(80);
-      GiroDer90();
-      //delay(80);
-      Acomodo();
-      //delay(80);
-      //Acomodo();
-      //delay(80);
-      Adelante30();
-      iY -= 1;
-      iOption = 4;
-    }
-    else if (ParedE == false && bNegro[iX + 1][iY] == false)
-    {
-      //delay(80);
-      Adelante30();
-      //delay(80);
-      iX += 1;
-      iOption = 2;
-    }
-    else if (ParedI == false && bNegro[iX] [iY + 1] == false)
-    {
-      //delay(80);
-      GiroIzq90();
-      //delay(80);
-      Acomodo();
-      //delay(80);
-      //Acomodo();
-      //delay(80);
-      Adelante30();
-      iY += 1;
-      iOption = 1;
-    }
-    else
-    {
-      GiroDer90();
-      //delay(80);
-      Acomodo();
-      GiroDer90();
-      //delay(80);
-      iOption = 3;
-    }
-  }
-}
-
-void Pos3()
-{
-  bool  ParedD = ParedDer();
-  bool ParedE = ParedEnf();
-  bool ParedI = ParedIzq();
-
-  if (ParedD == false && bPos[iX] [iY + 1] == false)
-  {
-    //delay(80);
-    GiroDer90();
-    //delay(80);
-    Acomodo();
-    //delay(80);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iY += 1;
-    bPos[iX][iY] = true;
-    iOption = 1;
-  }
-  else if (ParedE == false && bPos[iX - 1][iY] == false)
-  {
-    //delay(80);
-    Adelante30();
-    //delay(80);
-    iX -= 1;
-    bPos[iX][iY] = true;
-    iOption = 3;
-  }
-  else if (ParedI == false && bPos[iX] [iY - 1] == false)
-  {
-    //delay(80);
-    GiroIzq90();
-    //delay(80);
-    Acomodo();
-    //delay(80);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iY -= 1;
-    bPos[iX][iY] = true;
-    iOption = 4;
-  }
-  else if (ParedI == true && ParedE == true && ParedD == true)
-  {
-    //delay(80);
-    GiroDer90();
-    Acomodo();
-    //delay(60);
-    GiroDer90();
-    //delay(80);
-    Acomodo();
-    //delay(60);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iX += 1;
-    iOption = 2;
-  }
-  else
-  {
-    if (ParedD == false && bNegro[iX] [iY + 1] == false)
-    {
-      //delay(80);
-      GiroDer90();
-      //delay(80);
-      Acomodo();
-      //delay(80);
-      //Acomodo();
-      //delay(80);
-      Adelante30();
-      iY += 1;
-      iOption = 1;
-    }
-    else if (ParedE == false && bNegro[iX - 1][iY] == false)
-    {
-      //delay(80);
-      Adelante30();
-      //delay(80);
-      iX -= 1;
-      iOption = 3;
-    }
-    else if (ParedI == false && bNegro[iX] [iY - 1] == false)
-    {
-      //delay(80);
-      GiroIzq90();
-      //delay(80);
-      //Acomodo();
-      //delay(80);
-      Acomodo();
-      //delay(80);
-      Adelante30();
-      iY -= 1;
-      iOption = 4;
-    }
-    else
-    {
-      GiroDer90();
-      Acomodo();
-      //delay(800);
-      GiroDer90();
-      iOption = 2;
-    }
-  }
-}
-
-//Opcion si esta observando hacia abajo
-void Pos4()
-{
-  bool  ParedD = ParedDer();
-  bool  ParedE = ParedEnf();
-  bool ParedI = ParedIzq();
-
-  if (ParedD == false && bPos[iX - 1] [iY] == false)
-  {
-    //delay(80);
-    GiroDer90();
-    //delay(80);
-    Acomodo();
-    //delay(80);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iX -= 1;
-    bPos[iX][iY] = true;
-    iOption = 3;
-  }
-  else if (ParedE == false && bPos[iX][iY - 1] == false)
-  {
-    //delay(80);
-    Adelante30();
-    //delay(80);
-    iY -= 1;
-    bPos[iX][iY] = true;
-    iOption = 4;
-  }
-  else if (ParedI == false && bPos[iX + 1] [iY] == false)
-  {
-    //delay(80);
-    GiroIzq90();
-    //delay(80);
-    Acomodo();
-    //delay(80);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iX += 1;
-    bPos[iX][iY] = true;
-    iOption = 2;
-  }
-  else if (ParedI == true && ParedE == true && ParedD == true)
-  {
-    //delay(80);
-    GiroDer90();
-    Acomodo();
-    //delay(60);
-    GiroDer90();
-    //delay(80);
-    Acomodo();
-    //delay(60);
-    //Acomodo();
-    //delay(80);
-    Adelante30();
-    iY += 1;
-    iOption = 1;
-  }
-  else
-  {
-    if (ParedD == false && bNegro[iX - 1] [iY] == false)
-    {
-      //delay(80);
-      GiroDer90();
-      //delay(80);
-      Acomodo();
-      //delay(80);
-      //Acomodo();
-      //delay(80);
-      Adelante30();
-      iX -= 1;
-      iOption = 3;
-    }
-    else if (ParedE == false && bNegro[iX][iY - 1] == false)
-    {
-      //delay(80);
-      Adelante30();
-      //delay(80);
-      iY -= 1;
-      iOption = 4;
-    }
-    else if (ParedI == false && bNegro[iX + 1] [iY] == false)
-    {
-      //delay(80);
-      GiroIzq90();
-      //delay(80);
-      Acomodo();
-      //delay(80);
-      //Acomodo();
-      //delay(80);
-      Adelante30();
-      iX += 1;
-      iOption = 2;
-    }
-    else
-    {
-      GiroDer90();
-      Acomodo();
-      //delay(800);
-      GiroDer90();
-      iOption = 1;
-    }
-  }
-}
-
-void Algoritmo()
-{
-  iAnterior = iOption;
-  /*
-  lcd.clear();
-  lcd.print(iX);
-  lcd.print(", ");
-  lcd.print(iY);
-  lcd.setCursor(0, 1);
-  lcd.print(iOption);
-  */
-  //delay(500);
-  
-  //Derecha
-  if (iOption == 1)
-  {
-    Pos1();
-  }
-  //Enfrente
-  else if (iOption == 2)
-  {
-    Pos2();
-  }
-  //Izquierda
-  else if (iOption == 3)
-  {
-    Pos3();
-  }
-  //Atras
-  else if (iOption == 4)
-  {
-    Pos4();
-  }
-  //delay(80);
-  Revisiones();
-  Acomodo();
-  ////delay(500);
-}
-
 
 void Calibracion()
 {
-  lcd.clear();
+  //lcd.clear();
   therm1.read();
   //therm2.read();
   therm3.read();
@@ -1735,13 +1160,13 @@ void Calibracion()
   int Therm4 = therm4.object();
 
   lcd.setCursor(0, 0);
-  lcd.print(Therm1);
-  lcd.print("-");
-  lcd.print(Therm3);
-  lcd.print("-");
-  lcd.print(Therm4);
-  lcd.print("-");
-  //lcd.print(//therm2);
+  //lcd.print(Therm1);
+  //lcd.print("-");
+  //lcd.print(Therm3);
+  //lcd.print("-");
+  //lcd.print(Therm4);
+  //lcd.print("-");
+  ////lcd.print(//therm2);
 
   Negro();
 
@@ -1750,14 +1175,14 @@ void Calibracion()
 
 void UltIzq()
 {
-  lcd.clear();
+  //lcd.clear();
   delay(30);
   int U1 = sonar7.ping_cm();
   delay(30);
   int U2 = sonar8.ping_cm();
-  lcd.print(U1);
+  //lcd.print(U1);
   lcd.setCursor(0, 1);
-  lcd.print(U2);
+  //lcd.print(U2);
   //delay(1000);
   bool False = false;
   while (False == false)
@@ -1777,7 +1202,7 @@ void UltIzq()
     {
       EncDerE.write(0);
       int Enc = EncDerE.read();
-      //Serial.println(EncDerE.read());
+      ////Serial.println(EncDerE.read());
       Derecha();
       while (Enc < (const90 * 3 / 90))
       {
@@ -1798,14 +1223,14 @@ void UltIzq()
 
 void UltDer()
 {
-  lcd.clear();
+  //lcd.clear();
   delay(30);
   int U1 = sonar3.ping_cm();
   delay(30);
   int U2 = sonar4.ping_cm();
-  lcd.print(U1);
+  //lcd.print(U1);
   lcd.setCursor(0, 1);
-  lcd.print(U2);
+  //lcd.print(U2);
   //delay(1000);
   bool False = false;
   while (False == false)
@@ -1814,7 +1239,7 @@ void UltDer()
     {
       EncDerE.write(0);
       int Enc = EncDerE.read();
-      //Serial.println(EncDerE.read());
+      ////Serial.println(EncDerE.read());
       Izquierda();
       while (Enc > ((const90 * 3 / 90) * -1 ))
       {
@@ -1826,7 +1251,7 @@ void UltDer()
     {
       EncDerE.write(0);
       int Enc = EncDerE.read();
-      //Serial.println(EncDerE.read());
+      ////Serial.println(EncDerE.read());
       Derecha();
       while (Enc < (const90 * 3 / 90))
       {
@@ -1873,23 +1298,554 @@ void Acejarse2()
   }
 }
 
-void loop()
+//Consigue numero de posibles moviemientos
+int getPossibility(bool bDir[])
 {
-  Adelante();
-  /*
-  Detectar();
-  /*
-  if (bInicio == false)
-  {
-    RampaAbajoIzq();
-    bInicio = true;
-  }
-  lcd.clear();
-  lcd.backlight();
-  Algoritmo();
+  int iReturn = 1;
+  bDir[3] = true;
 
+  if (!ParedDer())
+  {
+    iReturn++;
+    bDir[0] = true;
+  }
+  if (!ParedEnf())
+  {
+    iReturn++;
+    bDir[1] = true;
+  }
+  if (!ParedIzq())
+  {
+    iReturn++;
+    bDir[2] = true;
+  }
+  return iReturn;
+}
+//Llena las variables del algoritmo
+void GetDatos()
+{
+  bool bDir[4] = {false, false, false, false};
+  iPaso++;
+  //Serial.print("iPaso: ");
+  //Serial.println(iPaso);
+  iPos[iX][iY] = iPaso;
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(iX);
+  lcd.print(iY);
+  lcd.setCursor(0, 1);
+  lcd.print(iPos[iX][iY]);
+  lcd.print("  ");
+  lcd.print(iDirecc);
+  //Serial.print("iX: ");
+  //Serial.println(iX);
+  //Serial.print("iY: ");
+  //Serial.println(iY);
+  //Serial.print("iPos: ");
+  //Serial.println(iPos[iX][iY]);
+  iPossibility[iPaso] = getPossibility(bDir);
+  //Serial.print("iPossibility: ");
+  //Serial.println(iPossibility[iPaso]);
+  //Serial.println("iDirecc: ");
+  //Serial.println(iDirecc);
+  //Serial.println("bDir");
+  //Serial.println(bDir[0]);
+  //Serial.println(bDir[1]);
+  //Serial.println(bDir[2]);
+  //Serial.println(bDir[3]);
+  for (int iI = 0; iI < iPossibility[iPaso]; iI++)
+  {
+    if (bDir[0] == true)
+    {
+      if (iDirecc == 1)
+      {
+        iRun[iPaso][iI] = ((iX + 1) * 100) + iY;
+      }
+      else if (iDirecc == 2)
+      {
+        iRun[iPaso][iI] = (iX * 100) + iY - 1;
+      }
+      else if (iDirecc == 3)
+      {
+        iRun[iPaso][iI] = (iX * 100) + iY + 1;
+      }
+      else if (iDirecc == 4)
+      {
+        iRun[iPaso][iI] = ((iX - 1) * 100) + iY;
+      }
+      bDir[0] = false;
+    }
+
+    else if (bDir[1] == true)
+    {
+      if (iDirecc == 1)
+      {
+        iRun[iPaso][iI] = (iX * 100) + iY + 1;
+      }
+      else if (iDirecc == 2)
+      {
+        iRun[iPaso][iI] = ((iX + 1) * 100) + iY;
+      }
+      else if (iDirecc == 3)
+      {
+        iRun[iPaso][iI] = ((iX - 1) * 100) + iY;
+      }
+      else if (iDirecc == 4)
+      {
+        iRun[iPaso][iI] = (iX * 100) + iY - 1;
+      }
+      bDir[1] = false;
+    }
+
+    else if (bDir[2] == true)
+    {
+      if (iDirecc == 1)
+      {
+        iRun[iPaso][iI] = ((iX - 1) * 100) + iY;
+      }
+      else if (iDirecc == 2)
+      {
+        iRun[iPaso][iI] = (iX * 100) + iY + 1;
+      }
+      else if (iDirecc == 3)
+      {
+        iRun[iPaso][iI] = (iX * 100) + iY - 1;
+      }
+      else if (iDirecc == 4)
+      {
+        iRun[iPaso][iI] = ((iX + 1) * 100) + iY;
+      }
+      bDir[2] = false;
+    }
+
+    else if (bDir[3] == true)
+    {
+      if (iDirecc == 1)
+      {
+        //Serial.println("ENTRO 1");
+        iRun[iPaso][iI] = (iX * 100) + iY - 1;
+      }
+      else if (iDirecc == 2)
+      {
+        //Serial.println("ENTRO 2");
+        iRun[iPaso][iI] = ((iX - 1) * 100) + iY;
+      }
+      else if (iDirecc == 3)
+      {
+        //Serial.println("ENTRO 3");
+        iRun[iPaso][iI] = ((iX + 1) * 100) + iY;
+      }
+      else if (iDirecc == 4)
+      {
+        //Serial.println("ENTRO 4");
+        iRun[iPaso][iI] = (iX * 100) + iY + 1;
+      }
+      bDir[3] = false;
+    }
+  }
+  //Serial.println("iRun 1: ");
+  //Serial.println(iRun[iPaso][0]);
+  //Serial.println("iRun 2: ");
+  //Serial.println(iRun[iPaso][1]);
+  //Serial.println("iRun 3: ");
+  //Serial.println(iRun[iPaso][2]);
+  //Serial.println("iRun 4: ");
+  //Serial.println(iRun[iPaso][3]);
+}
+
+//Regresa verdadero si ya se ha estado en la coordenada que se envia como paramtero
+bool BeenHere(int iCoord)
+{
+  bool bReturn = false;
+  int X = iCoord / 100;
+  int Y = iCoord % 100;
+  if (iPos[X][Y] != 9999)
+  {
+    bReturn = true;
+  }
+  return bReturn;
+}
+
+void extractionPoint()
+{
+  lcd.setCursor(6, 1);
+  lcd.print("regresando");
+  moveUntil(0);
+  Detenerse();
+  lcd.clear();
+  lcd.print("ABGESCHLOSSEN");
+  lcd.setCursor(0, 1);
+  lcd.print("RONDA TERMINADA");
+  delay(30000);
+}
+
+/*
+  Busca a donde moverse recorriendo los irun, regresa el paso para accesar al lugar desconocido y la opcion del irun como un solo numero
+  Hay que desifrar el numero que se regresa con / y % entre 100, siendo el resultado de / el # de paso y el resultado de % la opcion
+  del irun
+*/
+int WhereToGo()
+{
+  //Serial.println();
+  int iCPaso = iPaso;
+  int iCX = iX;
+  int iCY = iY;
+  int iHere = 9999;
+  //Serial.print("iCPaso: ");
+  //Serial.println(iCPaso);
+  //Serial.println(iCX);
+  //Serial.println(iCY);
+  //Serial.print("iPossibility[iCPaso]: ");
+  //Serial.println(iPossibility[iCPaso]);
+  for (int iJ = iCPaso; iJ >= 0; iJ--)
+  {
+    for (int iI = 0; iI < iPossibility[iJ]; iI++)
+    {
+      //Serial.print("iPossibility[iCPaso]: ");
+      //Serial.println(iPossibility[iCPaso]);
+      //Serial.print("iRun: ");
+      //Serial.print(iJ);
+      //Serial.print(" ");
+      //Serial.print(iI);
+      //Serial.print(": ");
+      //Serial.println(iRun[iJ][iI]);
+      bool bCheck = BeenHere(iRun[iJ][iI]);
+      if (bCheck == false)
+      {
+        //Serial.println("ENTRO BEEN HERE ");
+        iHere = iJ;
+      }
+      if (iHere != 9999)
+      {
+        //Serial.println("ENTRA BREAK");
+        break;
+      }
+    }
+    if (iHere != 9999)
+    {
+      //Serial.println("ENTRA BREAK");
+      break;
+    }
+  }
   /*
-  lcd.backlight();
-  Calibracion();
+    Aqui pondriamos la función de regresar al inicio en caso que iHere continue siendo 0
+    habiendo salido de los dos for loop, es decir habiendo revisado todas las opciones de
+    movimiento
   */
+  //Serial.print("iHere: ");
+  //Serial.println(iHere);
+  if (iHere == 9999)
+  {
+    //Serial.println("entra extraction point");
+    extractionPoint();
+  }
+  //Serial.print("iReturn: ");
+  //Serial.println(iHere);
+  return iHere;
+}
+
+//regresa el paso de la coordenada que le des como parametro
+int getPass(int iGetPass)
+{
+  int iReturn;
+  int X = iGetPass / 100;
+  int Y = iGetPass % 100;
+  iReturn = iPos[X][Y];
+  return iReturn;
+}
+
+//Se mueve de la coordenada actuar(iCoordAc) a la coordenada deseada(icCoord)
+void Move(int iCoordAc, int icCoord)
+{
+  //iCoordAc = tu coordenada actual
+  //icCoord = la coordenada a la cual quieres ir
+  //Serial.println();
+  //Serial.println("INICIA MOVE");
+  //Serial.print("iCoordAc: ");
+  //Serial.println(iCoordAc);
+  //Serial.println(icCoord);
+  //Serial.println(iDirecc);
+  if (iCoordAc == icCoord - 100)
+  {
+    //Serial.println("ENTRO IF #1");
+    if (iDirecc == 1)
+    {
+      GiroDer90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    else if (iDirecc == 2)
+    {
+      Adelante30();
+      Acomodo();
+    }
+    else if (iDirecc == 3)
+    {
+      GiroDer90();
+      Acomodo();
+      GiroDer90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    else if (iDirecc == 4)
+    {
+      GiroIzq90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    iX += 1;
+    iDirecc = 2;
+  }
+  else if (iCoordAc == icCoord - 1)
+  {
+    //Serial.println("ENTRO IF #2");
+    if (iDirecc == 1)
+    {
+      Adelante30();
+      Acomodo();
+    }
+    else if ( iDirecc == 2)
+    {
+      GiroIzq90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    else if (iDirecc == 3)
+    {
+      GiroDer90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    else if (iDirecc == 4)
+    {
+      GiroDer90();
+      Acomodo();
+      GiroDer90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    iY += 1;
+    iDirecc = 1;
+  }
+  else if (iCoordAc == icCoord + 100)
+  {
+    //Serial.println("ENTRO IF #3");
+    if (iDirecc == 1)
+    {
+      GiroIzq90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+
+    }
+    else if (iDirecc == 2)
+    {
+      GiroDer90();
+      Acomodo();
+      GiroDer90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    else if (iDirecc == 3)
+    {
+      Adelante30();
+      Acomodo();
+    }
+    else if (iDirecc == 4)
+    {
+      GiroDer90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    iX -= 1;
+    iDirecc = 3;
+  }
+  else if (iCoordAc == icCoord + 1)
+  {
+    //Serial.println("ENTRO IF #4");
+    if (iDirecc == 1)
+    {
+      GiroDer90();
+      Acomodo();
+      GiroDer90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    else if (iDirecc == 2)
+    {
+      GiroDer90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    else if (iDirecc == 3)
+    {
+      GiroIzq90();
+      Acomodo();
+      Adelante30();
+      Acomodo();
+    }
+    else if (iDirecc == 4)
+    {
+      Adelante30();
+      Acomodo();
+    }
+    iY -= 1;
+    iDirecc = 4;
+  }
+}
+
+//Funcion que llama a la funcion de movimiento hasta llegar al paso de iHere
+void moveUntil(int iHere)
+{
+  lcd.setCursor(6, 0);
+  lcd.print(iHere);
+  //Serial.println();
+  //Serial.print("iHere: ");
+  //Serial.println(iHere);
+  int iCPaso = iPaso;
+  //Serial.print("iCPaso: ");
+  //Serial.println(iCPaso);
+
+  //Se mueve hasta llegar al paso iHere
+  while (iCPaso != iHere)
+  {
+    int iClose = 9999;
+    int iPosib = 9999;
+    int icCoord = 9999;
+    int iCI = 9999;
+    int iCoordAc = 9999;
+    int iPass = 9999;
+    int iCc = 9999;
+    int iPassAntiguo = 9999;
+    Serial.println();
+
+    for (int iI = 0; iI < iPossibility[iCPaso]; iI++)
+    {
+      //Serial.print("iPossibility[iCPaso]: ");
+      //Serial.println(iPossibility[iCPaso]);
+      //Serial.print("iCPaso: ");
+      //Serial.println(iCPaso);
+      iPosib = getPass(iRun[iCPaso][iI]);
+      Serial.print("iPosib: ");
+      Serial.println(iPosib);
+      iPass = iPosib - iHere;
+      if (iPass < 0)
+      {
+        iPass *= -1;
+      }
+      Serial.print("iPass: ");
+      Serial.println(iPass);
+      Serial.print("iClose antes del if: ");
+      Serial.println(iClose);
+      iCc = iRun[iCPaso][iI];
+      Serial.print("iCc: ");
+      Serial.println(iCc);
+      lcd.setCursor(8, 0);
+      lcd.print(iPass);
+      if(iPass < iPassAntiguo)
+      {
+        iPassAntiguo = iPass;
+        Serial.println("ENTRO IF");
+        iClose = iPosib;
+        Serial.print("iClose: ");
+        Serial.println(iClose);
+        icCoord = iCc;
+        Serial.print("icCoord: ");
+        Serial.println(icCoord);
+        lcd.print(" ");
+        lcd.print(iClose);
+      }
+      //Serial.print("iPosib: ");
+      //Serial.println(iPosib);
+      //Serial.print("iPass: ");
+      //Serial.println(iPass);
+    }
+    iCoordAc = (iX * 100) + iY;
+    Serial.println(iCoordAc);
+    Serial.println(icCoord);
+    Move(iCoordAc, icCoord);
+    iCPaso = iClose;
+    lcd.setCursor(6, 1);
+    lcd.print("Paso: ");
+    lcd.print(iCPaso);
+  }
+}
+
+//Se mueve a la coordenada desconocida
+void exploreNewWorlds(int iHere)
+{
+  //Serial.println("INICIA EXPLORE NEW WORLDS");
+  //Serial.print("iHere: ");
+  //Serial.println(iHere);
+  //Serial.print("iPossibility[iHere]: ");
+  //Serial.println(iPossibility[iHere]);
+  int iCounter = 0;
+  for (int iI = 0; iI < iPossibility[iHere]; iI++)
+  {
+    int iCoordAc = 9999;
+    int icCoord = 9999;
+    bool bCheck = BeenHere(iRun[iHere][iI]);
+    if (bCheck == false && iCounter == 0)
+    {
+      icCoord = iRun[iHere][iI];
+      for (int iI = 0; iI < 40; iI++)
+      {
+        for (int iJ = 0; iJ < 40; iJ++)
+        {
+          if (iPos[iI][iJ] == iHere)
+          {
+            iCoordAc = (iI * 100) + iJ;
+          }
+          if (iCoordAc != 9999)
+          {
+            break;
+          }
+        }
+        if (iCoordAc != 9999)
+        {
+          break;
+        }
+      }
+      //Serial.print("iCoordAc: ");
+      //Serial.println(iCoordAc);
+      //Serial.print("icCoord: ");
+      //Serial.println(icCoord);
+      Move(iCoordAc, icCoord);
+      iCounter++;
+    }
+  }
+}
+
+void  SearchRouteAndMove()
+{
+  int iData = WhereToGo();
+  //Serial.print("iData: ");
+  //Serial.println(iData);
+  moveUntil(iData);
+  exploreNewWorlds(iData);
+}
+
+void Laberinto()
+{
+  GetDatos();
+  SearchRouteAndMove();
+  //Serial.println("--------------------------------------------------------------------");
+  //Serial.println("--------------------------------------------------------------------");
+  delay(1000);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  lcd.backlight();
+  Laberinto();
 }
