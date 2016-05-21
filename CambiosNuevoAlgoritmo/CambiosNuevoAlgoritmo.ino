@@ -1573,12 +1573,10 @@ void Move(int iCoordAc, int icCoord)
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 2)
     {
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 3)
     {
@@ -1587,14 +1585,12 @@ void Move(int iCoordAc, int icCoord)
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 4)
     {
       GiroIzq90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     iX += 1;
     iDirecc = 2;
@@ -1605,21 +1601,18 @@ void Move(int iCoordAc, int icCoord)
     if (iDirecc == 1)
     {
       Adelante30();
-      Acomodo();
     }
     else if ( iDirecc == 2)
     {
       GiroIzq90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 3)
     {
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 4)
     {
@@ -1628,7 +1621,6 @@ void Move(int iCoordAc, int icCoord)
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     iY += 1;
     iDirecc = 1;
@@ -1641,7 +1633,6 @@ void Move(int iCoordAc, int icCoord)
       GiroIzq90();
       Acomodo();
       Adelante30();
-      Acomodo();
 
     }
     else if (iDirecc == 2)
@@ -1651,19 +1642,16 @@ void Move(int iCoordAc, int icCoord)
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 3)
     {
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 4)
     {
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     iX -= 1;
     iDirecc = 3;
@@ -1678,30 +1666,27 @@ void Move(int iCoordAc, int icCoord)
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 2)
     {
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 3)
     {
       GiroIzq90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 4)
     {
       Adelante30();
-      Acomodo();
     }
     iY -= 1;
     iDirecc = 4;
   }
+  Acomodo();
 }
 
 //Funcion que llama a la funcion de movimiento hasta llegar al paso de iHere
@@ -1841,7 +1826,6 @@ void Laberinto()
   SearchRouteAndMove();
   //Serial.println("--------------------------------------------------------------------");
   //Serial.println("--------------------------------------------------------------------");
-  delay(1000);
 }
 
 void loop() {
