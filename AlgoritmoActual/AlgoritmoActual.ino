@@ -18,6 +18,7 @@ int iDirecc = 1;
 int iX = 20;
 int iY = 20;
 int iPaso = -1;
+int iPasoActual = 9999;
 
 bool bVictimaDetectada = false;
 
@@ -1340,6 +1341,7 @@ void GetDatos()
 {
   bool bDir[4] = {false, false, false, false};
   iPaso++;
+  iPasoActual = iPaso;
   //Serial.print("iPaso: ");
   //Serial.println(iPaso);
   iPos[iX][iY] = iPaso;
@@ -1501,7 +1503,7 @@ void extractionPoint()
 int WhereToGo()
 {
   //Serial.println();
-  int iCPaso = iPaso;
+  int iCPaso = iPasoActual;
   int iCX = iX;
   int iCY = iY;
   int iHere = 9999;
@@ -1579,6 +1581,8 @@ void Move(int iCoordAc, int icCoord)
   //Serial.println(iCoordAc);
   //Serial.println(icCoord);
   //Serial.println(iDirecc);
+  int iCX = iX;
+  int iCY = iY;
   if (iCoordAc == icCoord - 100)
   {
     //Serial.println("ENTRO IF #1");
@@ -1587,12 +1591,10 @@ void Move(int iCoordAc, int icCoord)
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 2)
     {
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 3)
     {
@@ -1601,14 +1603,12 @@ void Move(int iCoordAc, int icCoord)
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 4)
     {
       GiroIzq90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     iX += 1;
     iDirecc = 2;
@@ -1619,21 +1619,18 @@ void Move(int iCoordAc, int icCoord)
     if (iDirecc == 1)
     {
       Adelante30();
-      Acomodo();
     }
     else if ( iDirecc == 2)
     {
       GiroIzq90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 3)
     {
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 4)
     {
@@ -1642,7 +1639,6 @@ void Move(int iCoordAc, int icCoord)
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     iY += 1;
     iDirecc = 1;
@@ -1655,7 +1651,6 @@ void Move(int iCoordAc, int icCoord)
       GiroIzq90();
       Acomodo();
       Adelante30();
-      Acomodo();
 
     }
     else if (iDirecc == 2)
@@ -1665,19 +1660,16 @@ void Move(int iCoordAc, int icCoord)
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 3)
     {
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 4)
     {
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     iX -= 1;
     iDirecc = 3;
@@ -1692,30 +1684,62 @@ void Move(int iCoordAc, int icCoord)
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 2)
     {
       GiroDer90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 3)
     {
       GiroIzq90();
       Acomodo();
       Adelante30();
-      Acomodo();
     }
     else if (iDirecc == 4)
     {
       Adelante30();
-      Acomodo();
     }
     iY -= 1;
     iDirecc = 4;
   }
+  bool Hoyo = false;
+  Hoyo = HoyoNegro();
+  if(Hoyo == true)
+  {
+    bool bListo = false;
+    Atras30();
+    iX = iCX;
+    iY = iCY;
+    lcd.clear();
+    lcd.print(iX);
+    lcd.print(" ");
+    lcd.print(iY);
+    int iCPaso = iPos[iX][iY];
+    for(int iI = 0; iI < iPossibility[iCPaso]; iI++)
+    {
+      int iThis = iRun[iCPaso][iI];
+      if(iThis == icCoord)
+      {
+        for(int iJ = iI; iJ < 4; iJ++)
+        {
+          iRun[iCPaso][iJ] = iRun[iCPaso][1 + iJ];
+          bListo = true;
+        }
+      }
+      if(bListo == true)
+      {
+        break;
+      }
+    }
+    iRun[iPaso][3] = 9999;
+    iPossibility[iCPaso] -= 1;
+    lcd.setCursor(0, 1);
+    lcd.print("Search");
+    SearchRouteAndMove();
+  }
+  Acomodo();
 }
 
 //Funcion que llama a la funcion de movimiento hasta llegar al paso de iHere
@@ -1726,7 +1750,7 @@ void moveUntil(int iHere)
   //Serial.println();
   //Serial.print("iHere: ");
   //Serial.println(iHere);
-  int iCPaso = iPaso;
+  int iCPaso = iPasoActual;
   //Serial.print("iCPaso: ");
   //Serial.println(iCPaso);
 
@@ -1858,15 +1882,7 @@ void Laberinto()
 }
 
 void loop() {
-
+  // put your main code here, to run repeatedly:
   lcd.backlight();
   Laberinto();
-  //IzquierdaM30();
- // DerechaM30();
- // Serial.println(SharpEn.distance());
- 
-/* Acejarse2();
- lcd.backlight();
-  delay(100);
-  lcd.noBacklight();*/
 }
