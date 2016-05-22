@@ -79,7 +79,7 @@ const byte MotI = 255;
 const byte MotDM = 150;
 const byte MotIM = 90;
 
-byte Dif=0;
+byte Dif = 0;
 
 //////////////////
 /////ENCODERS/////
@@ -622,31 +622,31 @@ void Atras()
 
 void Izquierda()
 {
-  analogWrite(motDerE1, 220);
+  analogWrite(motDerE1, 220 + Dif);
   analogWrite(motDerE2, 0);
 
-  analogWrite(motDerA1, 220);
+  analogWrite(motDerA1, 220 + Dif);
   analogWrite(motDerA2, 0);
 
   analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 182);
+  analogWrite(motIzqE2, 182 + Dif);
 
   analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 220);
+  analogWrite(motIzqA2, 220 + Dif);
 }
 
 void Derecha()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 220);
+  analogWrite(motDerE2, 220 + Dif);
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 220);
+  analogWrite(motDerA2, 220 + Dif);
 
-  analogWrite(motIzqE1, 182);
+  analogWrite(motIzqE1, 182 + Dif);
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 220);
+  analogWrite(motIzqA1, 220 + Dif);
   analogWrite(motIzqA2, 0);
 }
 
@@ -683,7 +683,7 @@ void IzquierdaM()//160 220 182 172
 void IzquierdaM30()
 {
   EncDerE.write(0);
-  Dif=-50;
+  Dif = -50;
   IzquierdaM();
   int Enc = EncDerE.read();
   while (Enc < 70)
@@ -692,13 +692,13 @@ void IzquierdaM30()
     Enc = EncDerE.read();
   }
   Detenerse();
-  Dif=0;
+  Dif = 0;
 }
 
 void DerechaM30()
 {
   EncDerE.write(0);
-  Dif=-50;
+  Dif = -50;
   DerechaM();
   int Enc = EncDerE.read();
   while (Enc > -70)
@@ -707,7 +707,7 @@ void DerechaM30()
     Enc = EncDerE.read();
   }
   Detenerse();
-  Dif=0;
+  Dif = 0;
 }
 
 void GiroDer18()
@@ -726,6 +726,21 @@ void GiroDer18()
   Detenerse();
 }
 
+void GiroDer5()
+{
+  EncDerE.write(0);
+  int Enc = EncDerE.read();
+  ////Serial.println(EncDerE.read());
+  if (Enc < const90 / 18 )
+  {
+    Derecha();
+    while (Enc < const90 / 18 )
+    {
+      Enc = EncDerE.read();
+    }
+  }
+  Detenerse();
+}
 void GiroDer90()
 {
   //lcd.clear();
@@ -760,6 +775,21 @@ void GiroIzq18()
   Detenerse();
 }
 
+void GiroIzq5()
+{
+  EncDerE.write(0);
+  int Enc = EncDerE.read();
+  ////Serial.println(EncDerE.read());
+  if (Enc > const90 / 18 * -1 )
+  {
+    Izquierda();
+    while (Enc > const90 / 18 * -1 )
+    {
+      Enc = EncDerE.read();
+    }
+  }
+  Detenerse();
+}
 void GiroIzq90()
 {
   //lcd.clear();
@@ -938,8 +968,6 @@ bool HoyoNegro()
   if (Negro())
   {
     Hoyo = true;
-    Atras30();
-    Acomodo();
   }
   return Hoyo;
 }
@@ -1007,7 +1035,7 @@ void AcejarseDerecha()
   while (Dist != 8 ) {
     if (Dist < 8)
     {
-      
+
       while (Dist < 8)
       {
         IzquierdaM30();
@@ -1019,7 +1047,7 @@ void AcejarseDerecha()
     }
     else if (Dist > 8)
     {
-      
+
       while (Dist > 8)
       {
         DerechaM30();
@@ -1046,7 +1074,7 @@ void AcejarseIzquierda()
   while (Dist2 != 8) {
     if (Dist2 < 8)
     {
-      
+
       while (Dist2 < 8)
       {
         DerechaM30();
@@ -1058,7 +1086,7 @@ void AcejarseIzquierda()
     }
     else if (Dist2 > 8)
     {
-      
+
       while (Dist2 > 8)
       {
         IzquierdaM30();
@@ -1199,36 +1227,40 @@ void UltIzq()
   lcd.setCursor(0, 1);
   //lcd.print(U2);
   //delay(1000);
-  bool False = false;
-  while (False == false)
+
+  while ((U1 - U2) != 0)
   {
     if ((U1 - U2) < 0)
     {
       EncDerE.write(0);
       int Enc = EncDerE.read();
+      Dif = -50;
       Izquierda();
-      while (Enc > ((const90 * 3 / 90) * -1 ))
+      while (Enc > ((const90 * 1 / 90) * -1 ))
       {
         Enc = EncDerE.read();
       }
       Detenerse();
+      Dif = 0;
+      delay(90);
     }
     else if ((U1 - U2) > 0)
     {
       EncDerE.write(0);
       int Enc = EncDerE.read();
       ////Serial.println(EncDerE.read());
+      Dif = -50;
       Derecha();
-      while (Enc < (const90 * 3 / 90))
+      while (Enc < (const90 * 1 / 90))
       {
         Enc = EncDerE.read();
       }
+      Detenerse();
+      Dif = 0;
+      delay(90);
     }
-    else
-    {
-      False = true;
-    }
-    Detenerse();
+
+
     delay(30);
     U1 = sonar7.ping_cm();
     delay(30);
@@ -1247,36 +1279,41 @@ void UltDer()
   lcd.setCursor(0, 1);
   //lcd.print(U2);
   //delay(1000);
-  bool False = false;
-  while (False == false)
+
+  while ((U1 - U2) != 0)
   {
     if ((U1 - U2) < 0)
     {
       EncDerE.write(0);
       int Enc = EncDerE.read();
       ////Serial.println(EncDerE.read());
+      Dif = -50;
       Izquierda();
-      while (Enc > ((const90 * 3 / 90) * -1 ))
+      while (Enc > ((const90 * 1 / 90) * -1 ))
       {
         Enc = EncDerE.read();
       }
       Detenerse();
+      Dif = 0;
+      delay(90);
     }
     else if ((U1 - U2) > 0)
     {
       EncDerE.write(0);
       int Enc = EncDerE.read();
       ////Serial.println(EncDerE.read());
+      Dif = -50;
       Derecha();
-      while (Enc < (const90 * 3 / 90))
+      while (Enc < (const90 * 1 / 90))
       {
         Enc = EncDerE.read();
       }
       Detenerse();
+      Dif = 0;
+      delay(90);
     }
-    else {
-      False = true;
-    }
+
+
     delay(30);
     U1 = sonar3.ping_cm();
     delay(30);
@@ -1286,9 +1323,6 @@ void UltDer()
 
 void Ultacomodo()
 {
-  int iCounter = 0;
-  // while(iCounter < 2)
-  //{
   if (ParedIzq())
   {
     UltIzq();
@@ -1297,9 +1331,9 @@ void Ultacomodo()
   {
     UltDer();
   }
-  iCounter++;
-  //}
+ 
 }
+
 
 void Acejarse2()
 {
@@ -1706,7 +1740,7 @@ void Move(int iCoordAc, int icCoord)
   }
   bool Hoyo = false;
   Hoyo = HoyoNegro();
-  if(Hoyo == true)
+  if (Hoyo == true)
   {
     bool bListo = false;
     Atras30();
@@ -1717,18 +1751,18 @@ void Move(int iCoordAc, int icCoord)
     lcd.print(" ");
     lcd.print(iY);
     int iCPaso = iPos[iX][iY];
-    for(int iI = 0; iI < iPossibility[iCPaso]; iI++)
+    for (int iI = 0; iI < iPossibility[iCPaso]; iI++)
     {
       int iThis = iRun[iCPaso][iI];
-      if(iThis == icCoord)
+      if (iThis == icCoord)
       {
-        for(int iJ = iI; iJ < 4; iJ++)
+        for (int iJ = iI; iJ < 4; iJ++)
         {
           iRun[iCPaso][iJ] = iRun[iCPaso][1 + iJ];
           bListo = true;
         }
       }
-      if(bListo == true)
+      if (bListo == true)
       {
         break;
       }
@@ -1790,7 +1824,7 @@ void moveUntil(int iHere)
       Serial.println(iCc);
       lcd.setCursor(8, 0);
       lcd.print(iPass);
-      if(iPass < iPassAntiguo)
+      if (iPass < iPassAntiguo)
       {
         iPassAntiguo = iPass;
         Serial.println("ENTRO IF");
