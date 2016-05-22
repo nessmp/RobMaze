@@ -1286,17 +1286,8 @@ void UltDer()
   Serial.println(U2);
   lcd.print(U1);
   lcd.setCursor(0, 1);
-<<<<<<< HEAD
-  //lcd.print(U2);
-  //delay(1000);
 
   while ((U1 - U2) != 0)
-=======
-  lcd.print(U2);
-  delay(500);
-  bool False = false;
-  while (False == false)
->>>>>>> origin/master
   {
     if ((U1 - U2) < 0)
     {
@@ -1347,10 +1338,6 @@ void Ultacomodo()
   {
     UltDer();
   }
-<<<<<<< HEAD
- 
-=======
->>>>>>> origin/master
 }
 
 
