@@ -21,12 +21,13 @@ int iPaso = -1;
 int iPasoActual = 9999;
 
 bool bVictimaDetectada = false;
+bool bInicio = true;
 
 //////////////////
 ///Calibracion////
 //////////////////
 
-int CalibCalor = 40;
+int CalibCalor = 30;
 int CalibNegro = 1000;
 
 //////////////////
@@ -981,19 +982,22 @@ void Detectar()
   int Therm1 = therm1.object();
   int Therm3 = therm3.object();
   int Therm4 = therm4.object(); //Derecha
-  ////Serial.println(Therm1);
-
-  ////Serial.println(Therm3);
-  ////Serial.println(Therm4);
-  int Temp = 27;
+  Serial.println();
+  Serial.print("Izq Adelante: ");
+  Serial.println(Therm1);
+  Serial.print("Izq Atras: ");
+  Serial.println(Therm3);
+  Serial.print("Der Adelante: ");
+  Serial.println(Therm4);
+  //int Temp = 27;
   if ((Therm1 > CalibCalor ||  Therm3 > CalibCalor || Therm4 > CalibCalor) && bVictimaDetectada == false)
   {
     bVictimaDetectada = true;
     Detenerse();
-    //lcd.clear();
-    //lcd.print("VICTIMA");
+    lcd.clear();
+    lcd.print("VICTIMA");
     lcd.setCursor(0, 1);
-    //lcd.print("DETECTADA");
+    lcd.print("DETECTADA");
     for (int iI = 75; iI < 113; iI++)
     {
       Dispensador.write(iI);
@@ -1221,7 +1225,7 @@ void UltIzq()
   //lcd.clear();
   delay(30);
   int U1 = sonar7.ping_cm();
-  delay(30);
+  delay(50);
   int U2 = sonar8.ping_cm();
   //lcd.print(U1);
   lcd.setCursor(0, 1);
@@ -1275,12 +1279,24 @@ void UltDer()
   int U1 = sonar3.ping_cm();
   delay(30);
   int U2 = sonar4.ping_cm();
-  //lcd.print(U1);
+  Serial.println();
+  Serial.print("U1: ");
+  Serial.println(U1);
+  Serial.print("U2: ");
+  Serial.println(U2);
+  lcd.print(U1);
   lcd.setCursor(0, 1);
+<<<<<<< HEAD
   //lcd.print(U2);
   //delay(1000);
 
   while ((U1 - U2) != 0)
+=======
+  lcd.print(U2);
+  delay(500);
+  bool False = false;
+  while (False == false)
+>>>>>>> origin/master
   {
     if ((U1 - U2) < 0)
     {
@@ -1331,7 +1347,10 @@ void Ultacomodo()
   {
     UltDer();
   }
+<<<<<<< HEAD
  
+=======
+>>>>>>> origin/master
 }
 
 
@@ -1915,8 +1934,20 @@ void Laberinto()
   //Serial.println("--------------------------------------------------------------------");
 }
 
+void CalibrarCalor()
+{
+  therm3.read();
+  int Therm3 = therm3.object();
+  CalibCalor = Therm3 + 3;
+}
+
 void loop() {
   // put your main code here, to run repeatedly:
+  if (bInicio == true)
+  {
+    CalibrarCalor();
+    bInicio = false;
+  }
   lcd.backlight();
   Laberinto();
 }
