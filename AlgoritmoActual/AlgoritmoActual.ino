@@ -27,7 +27,7 @@ bool bInicio = true;
 ///Calibracion////
 //////////////////
 
-int CalibCalor = 30;
+int CalibCalor = 28;
 int CalibNegro = 1000;
 
 //////////////////
@@ -1750,6 +1750,7 @@ void Move(int iCoordAc, int icCoord)
   {
     bool bListo = false;
     Atras30();
+    Acomodo();
     iX = iCX;
     iY = iCY;
     lcd.clear();
@@ -1930,11 +1931,12 @@ void CalibrarCalor()
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if (bInicio == true)
-  {
-    CalibrarCalor();
-    bInicio = false;
-  }
+  //if (bInicio == true)
+  //{
+    //CalibrarCalor();
+    //bInicio = false;
+  //}
   lcd.backlight();
   Laberinto();
+  
 }
