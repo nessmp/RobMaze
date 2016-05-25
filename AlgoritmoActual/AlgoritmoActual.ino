@@ -1796,67 +1796,70 @@ void moveUntil(int iHere)
   //Serial.println(iCPaso);
 
   //Se mueve hasta llegar al paso iHere
-  while (iCPaso != iHere)
+  if (iCPaso != iHere)
   {
-    int iClose = 9999;
-    int iPosib = 9999;
-    int icCoord = 9999;
-    int iCI = 9999;
-    int iCoordAc = 9999;
-    int iPass = 9999;
-    int iCc = 9999;
-    int iPassAntiguo = 9999;
-    Serial.println();
-
-    for (int iI = 0; iI < iPossibility[iCPaso]; iI++)
+    while (iCPaso != iHere)
     {
-      //Serial.print("iPossibility[iCPaso]: ");
-      //Serial.println(iPossibility[iCPaso]);
-      //Serial.print("iCPaso: ");
-      //Serial.println(iCPaso);
-      iPosib = getPass(iRun[iCPaso][iI]);
-      Serial.print("iPosib: ");
-      Serial.println(iPosib);
-      iPass = iPosib - iHere;
-      if (iPass < 0)
+      int iClose = 9999;
+      int iPosib = 9999;
+      int icCoord = 9999;
+      int iCI = 9999;
+      int iCoordAc = 9999;
+      int iPass = 9999;
+      int iCc = 9999;
+      int iPassAntiguo = 9999;
+      Serial.println();
+
+      for (int iI = 0; iI < iPossibility[iCPaso]; iI++)
       {
-        iPass *= -1;
-      }
-      Serial.print("iPass: ");
-      Serial.println(iPass);
-      Serial.print("iClose antes del if: ");
-      Serial.println(iClose);
-      iCc = iRun[iCPaso][iI];
-      Serial.print("iCc: ");
-      Serial.println(iCc);
-      lcd.setCursor(8, 0);
-      lcd.print(iPass);
-      if (iPass < iPassAntiguo)
-      {
-        iPassAntiguo = iPass;
-        Serial.println("ENTRO IF");
-        iClose = iPosib;
-        Serial.print("iClose: ");
+        //Serial.print("iPossibility[iCPaso]: ");
+        //Serial.println(iPossibility[iCPaso]);
+        //Serial.print("iCPaso: ");
+        //Serial.println(iCPaso);
+        iPosib = getPass(iRun[iCPaso][iI]);
+        Serial.print("iPosib: ");
+        Serial.println(iPosib);
+        iPass = iPosib - iHere;
+        if (iPass < 0)
+        {
+          iPass *= -1;
+        }
+        Serial.print("iPass: ");
+        Serial.println(iPass);
+        Serial.print("iClose antes del if: ");
         Serial.println(iClose);
-        icCoord = iCc;
-        Serial.print("icCoord: ");
-        Serial.println(icCoord);
-        lcd.print(" ");
-        lcd.print(iClose);
+        iCc = iRun[iCPaso][iI];
+        Serial.print("iCc: ");
+        Serial.println(iCc);
+        lcd.setCursor(8, 0);
+        lcd.print(iPass);
+        if (iPass < iPassAntiguo)
+        {
+          iPassAntiguo = iPass;
+          Serial.println("ENTRO IF");
+          iClose = iPosib;
+          Serial.print("iClose: ");
+          Serial.println(iClose);
+          icCoord = iCc;
+          Serial.print("icCoord: ");
+          Serial.println(icCoord);
+          lcd.print(" ");
+          lcd.print(iClose);
+        }
+        //Serial.print("iPosib: ");
+        //Serial.println(iPosib);
+        //Serial.print("iPass: ");
+        //Serial.println(iPass);
       }
-      //Serial.print("iPosib: ");
-      //Serial.println(iPosib);
-      //Serial.print("iPass: ");
-      //Serial.println(iPass);
+      iCoordAc = (iX * 100) + iY;
+      Serial.println(iCoordAc);
+      Serial.println(icCoord);
+      Move(iCoordAc, icCoord);
+      iCPaso = iClose;
+      lcd.setCursor(6, 1);
+      lcd.print("Paso: ");
+      lcd.print(iCPaso);
     }
-    iCoordAc = (iX * 100) + iY;
-    Serial.println(iCoordAc);
-    Serial.println(icCoord);
-    Move(iCoordAc, icCoord);
-    iCPaso = iClose;
-    lcd.setCursor(6, 1);
-    lcd.print("Paso: ");
-    lcd.print(iCPaso);
   }
 }
 
@@ -1933,10 +1936,10 @@ void loop() {
   // put your main code here, to run repeatedly:
   //if (bInicio == true)
   //{
-    //CalibrarCalor();
-    //bInicio = false;
+  //CalibrarCalor();
+  //bInicio = false;
   //}
   lcd.backlight();
   Laberinto();
-  
+
 }
