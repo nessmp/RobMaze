@@ -1774,10 +1774,11 @@ void Move(int iCoordAc, int icCoord)
         break;
       }
     }
-    iRun[iPaso][3] = 9999;
+    iRun[iCPaso][3] = 9999;
     iPossibility[iCPaso] -= 1;
     lcd.setCursor(0, 1);
     lcd.print("Search");
+    iPasoActual = iCPaso;
     SearchRouteAndMove();
   }
   Acomodo();
@@ -1934,11 +1935,11 @@ void CalibrarCalor()
 
 void loop() {
   // put your main code here, to run repeatedly:
-  //if (bInicio == true)
-  //{
-  //CalibrarCalor();
-  //bInicio = false;
-  //}
+  if (bInicio == true)
+  {
+    CalibrarCalor();
+    bInicio = false;
+  }
   lcd.backlight();
   Laberinto();
 
