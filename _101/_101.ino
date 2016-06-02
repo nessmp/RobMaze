@@ -12,7 +12,7 @@ boolean blinkState = false; // state of the LED
 int calibrateOffsets = 1; // int to determine whether calibration takes place or not
 
 
-Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *myMotor = AFMS.getMotor(2);
 
 
@@ -27,7 +27,7 @@ void setup() {
   Serial.begin(9600);
   pinMode(A0, INPUT);
   AFMS.begin();
-    myMotor->setSpeed(255);
+  myMotor->setSpeed(255);
   myMotor->run(FORWARD);
   // turn on motor
   myMotor->run(RELEASE);
@@ -72,79 +72,129 @@ int distUlt()
   long distancia;
   long tiempo;
   // put your main code here, to run repeatedly:
-  digitalWrite(Trigger,LOW); /* Por cuestión de estabilización del sensor*/
+  digitalWrite(Trigger, LOW); /* Por cuestión de estabilización del sensor*/
   delayMicroseconds(5);
   digitalWrite(Trigger, HIGH); /* envío del pulso ultrasónico*/
   delayMicroseconds(10);
-  tiempo=pulseIn(Echo, HIGH); /* Función para medir la longitud del pulso entrante. Mide el tiempo que transcurrido entre el envío
+  tiempo = pulseIn(Echo, HIGH); /* Función para medir la longitud del pulso entrante. Mide el tiempo que transcurrido entre el envío
   del pulso ultrasónico y cuando el sensor recibe el rebote, es decir: desde que el pin 12 empieza a recibir el rebote, HIGH, hasta que
   deja de hacerlo, LOW, la longitud del pulso entrante*/
-  distancia= int(0.017*tiempo); /*fórmula para calcular la distancia obteniendo un valor entero*/
+  distancia = int(0.017 * tiempo); /*fórmula para calcular la distancia obteniendo un valor entero*/
   /*Monitorización en centímetros por el monitor serial*/
   return distancia;
 }
 
 int cm()
 {
-    int raw = analogRead(irPin);
-    float voltFromRaw = map(raw, 0, 1023, 0, 3300); //Cambiar 5000 por 3300
-    
-    int puntualDistance;
-    
-    puntualDistance = 27.728 * pow(voltFromRaw / 1000, -1.2045);  
-    
-     /*
-     * float volts = analogRead(IRpin)*0.0048828125;   // value from sensor * (5/1024) - if running 3.3.volts then change 5 to 3.3
-     *float distance = 65*pow(volts, -1.10);          // worked out from graph 65 = theretical distance / (1/Volts)S - luckylarry.co.uk
-     *Serial.println(distance);                       // print the distance
-     *delay(100);                                     // arbitary wait time.
-     */
+  int raw = analogRead(irPin);
+  float voltFromRaw = map(raw, 0, 1023, 0, 3300); //Cambiar 5000 por 3300
 
-    return puntualDistance;
+  int puntualDistance;
+
+  puntualDistance = 27.728 * pow(voltFromRaw / 1000, -1.2045);
+
+  /*
+    float volts = analogRead(IRpin)*0.0048828125;   // value from sensor * (5/1024) - if running 3.3.volts then change 5 to 3.3
+    float distance = 65*pow(volts, -1.10);          // worked out from graph 65 = theretical distance / (1/Volts)S - luckylarry.co.uk
+    Serial.println(distance);                       // print the distance
+    delay(100);                                     // arbitary wait time.
+  */
+
+  return puntualDistance;
 }
 
 int Sharp()
-{   
-    int _p = 0;
-    int _sum = 0;
-    int _avg = 25;
-    int _tol = 93 / 100;
-    int _previousDistance = 0;
-    
-    
-    for (int i=0; i<_avg; i++)
-    {    
-        int foo= cm();
-       
-        if (foo>=(_tol*_previousDistance))
-        {
-            _previousDistance=foo;
-            _sum=_sum+foo;
-            _p++;        
-        }  
+{
+  int _p = 0;
+  int _sum = 0;
+  int _avg = 25;
+  int _tol = 93 / 100;
+  int _previousDistance = 0;
+
+
+  for (int i = 0; i < _avg; i++)
+  {
+    int foo = cm();
+
+    if (foo >= (_tol * _previousDistance))
+    {
+      _previousDistance = foo;
+      _sum = _sum + foo;
+      _p++;
     }
-    
-    int accurateDistance=_sum/_p;
-    
-    return accurateDistance;
+  }
+
+  int accurateDistance = _sum / _p;
+
+  return accurateDistance;
 }
 
-void loop() {
-  CurieIMU.readMotionSensor(ax, ay, az, gx, gy, gz);
-  int DistUlt = distUlt();
-  int distanceSharp = Sharp();
-  if(ay < 10000)
+int cm30()
+{
+  int raw = analogRead(irPin);
+  float voltFromRaw = map(raw, 0, 1023, 0, 3300); //Cambiar 5000 por 3300
+
+  int puntualDistance;
+
+  puntualDistance = 11.83 * pow(voltFromRaw / 1000, -1.2045);
+
+  //puntualDistance += 1;
+  
+  /*
+    float volts = analogRead(IRpin)*0.0048828125;   // value from sensor * (5/1024) - if running 3.3.volts then change 5 to 3.3
+    float distance = 65*pow(volts, -1.10);          // worked out from graph 65 = theretical distance / (1/Volts)S - luckylarry.co.uk
+    Serial.println(distance);                       // print the distance
+    delay(100);                                     // arbitary wait time.
+  */
+
+  return puntualDistance;
+}
+
+int Sharp30()
+{
+  int _p = 0;
+  int _sum = 0;
+  int _avg = 25;
+  int _tol = 93 / 100;
+  int _previousDistance = 0;
+
+
+  for (int i = 0; i < _avg; i++)
   {
+    int foo = cm30();
+
+    if (foo >= (_tol * _previousDistance))
+    {
+      _previousDistance = foo;
+      _sum = _sum + foo;
+      _p++;
+    }
+  }
+
+  int accurateDistance = _sum / _p;
+
+  return accurateDistance;
+}
+void loop() {
+  Serial.println(Sharp30());
+  delay(500);
+  /*
+    CurieIMU.readMotionSensor(ax, ay, az, gx, gy, gz);
+    int DistUlt = distUlt();
+    int distanceSharp = Sharp();
+    if(ay < 10000)
+    {
     myMotor->run(FORWARD);
     Serial.print("Ultrasonico: ");
     Serial.println(DistUlt);
     Serial.print("Sharp: ");
     Serial.println(distanceSharp);
     Serial.println();
-  }
-  else if(ay > 10000)
-  {
+    }
+    else if(ay > 10000)
+    {
     myMotor->run(RELEASE);
-  }
-  delay(30);
+    }
+    delay(30);
+  */
 }

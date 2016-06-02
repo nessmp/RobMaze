@@ -11,14 +11,62 @@
 #define model 1080 //modelo del sharp GP2Y0A21Y
 #define OUTPUT_READABLE_YAWPITCHROLL //Yaw Pitch Roll del MPU
 
-int iPos[40][40];
-int iPossibility[100];
-int iRun[100][4];
-int iDirecc = 1;
-int iX = 20;
-int iY = 20;
-int iPaso = -1;
-int iPasoActual = 9999;
+//Max de arreglo de x
+byte const XX = 40;
+//Maximo de arreglo de y
+byte const YY = 40;
+//Maximo de arreglos de z
+byte const ZZ = 3;
+//Maximo de pasos posibles
+byte const maxPasos = 100;
+//Almacenara el numero de paso en la cordenada dictada por los corchetes
+byte Pos[ZZ][XX][YY];
+//Almacenara las posibilidades de movimiento en el paso del corchete
+byte Possibility[maxPasos];
+/*Almacenara las posibles coordenadas a las que se puede mover
+  estara cifrado, y = zz+xx+(yy + 1); x = zz+(xx + 1)+yy;
+  o = zz+(xx - 1)+yy; p = zz+xx+(yy - 1);
+  r = (zz - 1) + (xx - 1) + yy; b = (zz + 1) + (xx + 1) + yy;
+  s = (zz - 1) + (xx + 1) + yy; c = (zz + 1) + (xx - 1) + yy;
+  t = (zz - 1) + xx + (yy + 1); d = (zz + 1) + xx + (yy + 1);
+  u = (zz - 1) + xx + (yy - 1); e = (zz + 1) + xx + (yy - 1);
+*/
+char Run[maxPasos][4];
+/*Dirección a la cual esta viendo el robot, donde 1 siempre es
+  la dirección en donde empezo observando.
+                1
+                ^
+                |
+             3<- ->2
+                |
+                v
+                4
+*/
+byte Direcc = 1;
+//Paso en el que se quedo
+byte Paso = 0;
+//Paso en el que se esta
+byte pasoActual = 0;
+//Almacenara la coordenada actual de X
+byte bX = XX / 2;
+//Almacenara la coordenada actual de Y
+byte bY = YY / 2;
+//Almacenara la coordenada actual de Z
+byte bZ = 0;
+//true si en el mov anterios se cruzo una rampa
+bool bARampa = false;
+//Paso antes de mov de rampa
+byte bPassRampa = 255;
+//Da el valor a bZ; 0 = piso 0, 1 = 1° piso, 2 = 2° piso, -1 = 2°piso, -2 = 1° piso
+byte bPiso = 0;
+//Paso de Rampa
+byte brRampa = 255;
+//Posibilidad de Run de Rampa
+byte biI = 255;
+//Char que va a cambiar el run antes de rampa
+char cRampa = 'a';
+//Char que va a cambiar el run despues de la rampa
+char cRa = 'a';
 
 bool bVictimaDetectada = false;
 bool bInicio = true;
@@ -91,7 +139,7 @@ Encoder Enc2(17, 27);
 
 long oldPosition  = -999;
 
-int const90 = 3750;
+int const90 = 3725;
 
 const int const30 = 5500;
 
@@ -274,20 +322,24 @@ void setup() {
   digitalWrite(s3, LOW);
   //Serial.println("hola");
 
-  for (int iI = 0; iI < 40; iI++)
+  for (byte iI = 0; iI < ZZ; iI++)
   {
-    for (int iJ = 0; iJ < 40; iJ++)
+    for (byte iJ = 0; iJ < XX; iJ++)
     {
-      iPos[iI][iJ] = 9999;
+      for (byte iK = 0; iK < YY; iK++)
+      {
+        Pos[iI][iJ][iK] = 255;
+      }
     }
   }
-  for (int iI = 0; iI < 100; iI++)
+
+  for (byte iI = 0; iI < maxPasos; iI++)
   {
-    iPossibility[iI] = 9999;
-    for (int iJ = 0; iJ < 4; iJ++)
+    for (byte iJ = 0; iJ < 4; iJ++)
     {
-      iRun[iI][iJ] = 9999;
+      Run[iI][iJ] = 'a';
     }
+    Possibility[iI] = 255;
   }
 }
 
@@ -599,10 +651,25 @@ void Adelante()
   analogWrite(motDerA1, 210); //220  //240
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 185); //182  //192
+  analogWrite(motIzqE1, 190); //182  //192
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 180); //172  //192
+  analogWrite(motIzqA1, 190); //172  //192
+  analogWrite(motIzqA2, 0);
+}
+
+void AdelanteRampa()
+{
+  analogWrite(motDerE1, 210); //160  //190
+  analogWrite(motDerE2, 0);
+
+  analogWrite(motDerA1, 210); //220  //240
+  analogWrite(motDerA2, 0);
+
+  analogWrite(motIzqE1, 170); //182  //192
+  analogWrite(motIzqE2, 0);
+
+  analogWrite(motIzqA1, 170); //172  //192
   analogWrite(motIzqA2, 0);
 }
 
@@ -856,11 +923,18 @@ void Atras30()
 bool ParedDer()
 {
   bool Pared = true;
-  int Sharp = SharpDe.distance();
-  ////Serial.println(Sharp);
-  if (Sharp >= 18)
+  for (int iI = 0; iI < 2; iI ++)
   {
-    Pared = false;
+    int Sharp = SharpDe.distance();
+    ////Serial.println(Sharp);
+    int u1 = sonar3.ping_cm();
+    delay(30);
+    int u2 = sonar4.ping_cm();
+    delay(30);
+    if (Sharp >= 18 || (u1 == 0 || u1 == 0))
+    {
+      Pared = false;
+    }
   }
   return Pared;
 }
@@ -891,71 +965,48 @@ bool ParedEnf()
 }
 
 void RampaAbajoIzq()
-{ /*
-    //lcd.clear();
-    //lcd.print("RampaAbajoIzq");
-    int SharpDer = SharpDe.distance();
-    int SharpEnf = SharpEn.distance();
-    int SharpIzq = SharpIz.distance();
-    int Roll = 0;
-    if (SharpEnf < 19 && SharpDer < 18 && SharpIzq > 14)
+{
+  lcd.clear();
+  lcd.print("RampaAbajoIzq");
+  int Roll = 0;
+  if (ParedDer() && ParedEnf() && !ParedIzq())
+  {
+    lcd.print("entro");
+    IzquierdaM();
+    delay(1700);
+    Detenerse();
+    Roll = MPUR();
+    lcd.setCursor(0, 1);
+    if (Roll < -7)
     {
-     //lcd.print("entro");
-     IzquierdaM30();
-     delay(30);
-     Roll = MPUR();
-     lcd.setCursor(0, 1);
-     //lcd.print(Roll);
-     if (Roll < -7)
-     {
-       IzquierdaM();
-       delay(5000);
-       //lcd.clear();
-       Detenerse();
-       delay(30);
-       GiroIzq90();
-       delay(30);
-       Acomodo();
-       //delay(30);
-       GiroIzq90();
-       //delay(30);
-       Acomodo();
-       //delay(30);
-       //Acejarse();
-       //delay(80);
-       Adelante30();
-       //delay(30);
-       Reset();
-     }
-     else
-     {
-       if (Negro())
-       {
-         DerechaM30();
-         delay(30);
-         Adelante();
-         delay(30);
-         Detenerse();
-         //delay(30);
-         Acomodo();
-         //delay(30);
-       }
-       else
-       {
-         GiroDer90();
-         //delay(30);
-         Acomodo();
-         delay(30);
-         Adelante30();
-         //delay(30);
-         GiroIzq90();
-         //delay(30);
-         Acomodo();
-         //delay(30);
-       }
-     }
+      IzquierdaM();
+      delay(3000);
+      Detenerse();
+      GiroIzq90();
+      Acomodo();
+      GiroIzq90();
+      Acomodo();
     }
-  */
+    else
+    {
+      if (Negro())
+      {
+        DerechaM();
+        delay(1000);
+        Adelante();
+        Detenerse();
+        Acomodo();
+      }
+      else
+      {
+        GiroDer90();
+        Acomodo();
+        Adelante30();
+        GiroIzq90();
+        Acomodo();
+      }
+    }
+  }
 }
 
 bool HoyoNegro()
@@ -982,13 +1033,13 @@ void Detectar()
   int Therm1 = therm1.object();
   int Therm3 = therm3.object();
   int Therm4 = therm4.object(); //Derecha
-  Serial.println();
-  Serial.print("Izq Adelante: ");
-  Serial.println(Therm1);
-  Serial.print("Izq Atras: ");
-  Serial.println(Therm3);
-  Serial.print("Der Adelante: ");
-  Serial.println(Therm4);
+  //Serial.println();
+  //Serial.print("Izq Adelante: ");
+  //Serial.println(Therm1);
+  //Serial.print("Izq Atras: ");
+  //Serial.println(Therm3);
+  //Serial.print("Der Adelante: ");
+  //Serial.println(Therm4);
   //int Temp = 27;
   if ((Therm1 > CalibCalor ||  Therm3 > CalibCalor || Therm4 > CalibCalor) && bVictimaDetectada == false)
   {
@@ -1166,7 +1217,7 @@ void Revisiones()
   if (Hoyo == false)
   {
     //bool Rampa = RampaArriba();
-    RampaAbajoIzq();
+    //RampaAbajoIzq();
     delay(30);
     /*
       if (Rampa == false)
@@ -1353,290 +1404,578 @@ void Acejarse2()
   }
 }
 
-//Consigue numero de posibles moviemientos
-int getPossibility(bool bDir[])
+void RampaS() {}
+void RampaB() {}
+
+//Regresa cuantas posibilidades tiene de mov en numero y como booleano
+byte getPossibility(bool bDir[])
 {
-  int iReturn = 1;
+  byte bReturn = 1;
   bDir[3] = true;
 
   if (!ParedDer())
   {
-    iReturn++;
+    bReturn++;
     bDir[0] = true;
   }
   if (!ParedEnf())
   {
-    iReturn++;
+    bReturn++;
     bDir[1] = true;
   }
   if (!ParedIzq())
   {
-    iReturn++;
+    bReturn++;
     bDir[2] = true;
   }
-  return iReturn;
+  return bReturn;
 }
-//Llena las variables del algoritmo
+
+//LLena los datos de la posicion donde se encuentra
 void GetDatos()
 {
   bool bDir[4] = {false, false, false, false};
-  iPaso++;
-  iPasoActual = iPaso;
-  //Serial.print("iPaso: ");
-  //Serial.println(iPaso);
-  iPos[iX][iY] = iPaso;
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(iX);
-  lcd.print(iY);
-  lcd.setCursor(0, 1);
-  lcd.print(iPos[iX][iY]);
-  lcd.print("  ");
-  lcd.print(iDirecc);
-  //Serial.print("iX: ");
-  //Serial.println(iX);
-  //Serial.print("iY: ");
-  //Serial.println(iY);
-  //Serial.print("iPos: ");
-  //Serial.println(iPos[iX][iY]);
-  iPossibility[iPaso] = getPossibility(bDir);
-  //Serial.print("iPossibility: ");
-  //Serial.println(iPossibility[iPaso]);
-  //Serial.println("iDirecc: ");
-  //Serial.println(iDirecc);
-  //Serial.println("bDir");
-  //Serial.println(bDir[0]);
-  //Serial.println(bDir[1]);
-  //Serial.println(bDir[2]);
-  //Serial.println(bDir[3]);
-  for (int iI = 0; iI < iPossibility[iPaso]; iI++)
+  Paso++;
+  pasoActual = Paso;
+  Pos[bZ][bX][bY] = Paso;
+  lcd.print(" ");
+  lcd.print("Pas:");
+  lcd.print(Pos[bZ][bX][bY]);
+  Possibility[Paso] = getPossibility(bDir);
+  lcd.print(" ");
+  lcd.print(Possibility[Paso]);
+  for (byte iI = 0; iI < Possibility[Paso]; iI++)
   {
-    if (bDir[0] == true)
+    if (true == bDir[0])
     {
-      if (iDirecc == 1)
+      if (1 == Direcc)
       {
-        iRun[iPaso][iI] = ((iX + 1) * 100) + iY;
+        Run[Paso][iI] = 'x';
       }
-      else if (iDirecc == 2)
+      else if (2 == Direcc)
       {
-        iRun[iPaso][iI] = (iX * 100) + iY - 1;
+        Run[Paso][iI] = 'p';
       }
-      else if (iDirecc == 3)
+      else if (3 == Direcc)
       {
-        iRun[iPaso][iI] = (iX * 100) + iY + 1;
+        Run[Paso][iI] = 'y';
       }
-      else if (iDirecc == 4)
+      else if (4 == Direcc)
       {
-        iRun[iPaso][iI] = ((iX - 1) * 100) + iY;
+        Run[Paso][iI] = 'o';
       }
       bDir[0] = false;
     }
-
-    else if (bDir[1] == true)
+    else if (true == bDir[1])
     {
-      if (iDirecc == 1)
+      if (1 == Direcc)
       {
-        iRun[iPaso][iI] = (iX * 100) + iY + 1;
+        Run[Paso][iI] = 'y';
       }
-      else if (iDirecc == 2)
+      else if (2 == Direcc)
       {
-        iRun[iPaso][iI] = ((iX + 1) * 100) + iY;
+        Run[Paso][iI] = 'x';
       }
-      else if (iDirecc == 3)
+      else if (3 == Direcc)
       {
-        iRun[iPaso][iI] = ((iX - 1) * 100) + iY;
+        Run[Paso][iI] = 'o';
       }
-      else if (iDirecc == 4)
+      else if (4 == Direcc)
       {
-        iRun[iPaso][iI] = (iX * 100) + iY - 1;
+        Run[Paso][iI] = 'p';
       }
       bDir[1] = false;
     }
-
-    else if (bDir[2] == true)
+    else if (true == bDir[2])
     {
-      if (iDirecc == 1)
+      if (1 == Direcc)
       {
-        iRun[iPaso][iI] = ((iX - 1) * 100) + iY;
+        Run[Paso][iI] = 'o';
       }
-      else if (iDirecc == 2)
+      else if (2 == Direcc)
       {
-        iRun[iPaso][iI] = (iX * 100) + iY + 1;
+        Run[Paso][iI] = 'y';
       }
-      else if (iDirecc == 3)
+      else if (3 == Direcc)
       {
-        iRun[iPaso][iI] = (iX * 100) + iY - 1;
+        Run[Paso][iI] = 'p';
       }
-      else if (iDirecc == 4)
+      else if (4 == Direcc)
       {
-        iRun[iPaso][iI] = ((iX + 1) * 100) + iY;
+        Run[Paso][iI] = 'x';
       }
       bDir[2] = false;
     }
-
-    else if (bDir[3] == true)
+    else if (true == bDir[3])
     {
-      if (iDirecc == 1)
+      if (1 == Direcc)
       {
-        //Serial.println("ENTRO 1");
-        iRun[iPaso][iI] = (iX * 100) + iY - 1;
+        Run[Paso][iI] = 'p';
       }
-      else if (iDirecc == 2)
+      else if (2 == Direcc)
       {
-        //Serial.println("ENTRO 2");
-        iRun[iPaso][iI] = ((iX - 1) * 100) + iY;
+        Run[Paso][iI] = 'o';
       }
-      else if (iDirecc == 3)
+      else if (3 == Direcc)
       {
-        //Serial.println("ENTRO 3");
-        iRun[iPaso][iI] = ((iX + 1) * 100) + iY;
+        Run[Paso][iI] = 'x';
       }
-      else if (iDirecc == 4)
+      else if (4 == Direcc)
       {
-        //Serial.println("ENTRO 4");
-        iRun[iPaso][iI] = (iX * 100) + iY + 1;
+        Run[Paso][iI] = 'y';
       }
       bDir[3] = false;
     }
   }
-  //Serial.println("iRun 1: ");
-  //Serial.println(iRun[iPaso][0]);
-  //Serial.println("iRun 2: ");
-  //Serial.println(iRun[iPaso][1]);
-  //Serial.println("iRun 3: ");
-  //Serial.println(iRun[iPaso][2]);
-  //Serial.println("iRun 4: ");
-  //Serial.println(iRun[iPaso][3]);
+  if (true == bARampa)
+  {
+    if ('a' != Run[Paso][3])
+    {
+      Run[Paso][3] = cRa;
+    }
+    else if ('a' != Run[Paso][2])
+    {
+      Run[Paso][2] = cRa;
+    }
+    else if ('a' != Run[Paso][1])
+    {
+      Run[Paso][1] = cRa;
+    }
+    else if ('a' != Run[Paso][0])
+    {
+      Run[Paso][0] = cRa;
+    }
+    bARampa = false;
+  }
+  Serial.println("----Datos----");
+  Serial.print("bZ: ");
+  Serial.println(bZ);
+  Serial.print("bX: ");
+  Serial.println(bX);
+  Serial.print("bY: ");
+  Serial.println(bY);
+  Serial.print("Pos: ");
+  Serial.println(Pos[bZ][bX][bY]);
+  Serial.print("Possibility: ");
+  Serial.println(Possibility[Paso]);
+  Serial.print("Run 1: ");
+  Serial.println(Run[Paso][0]);
+  Serial.print("Run 2: ");
+  Serial.println(Run[Paso][1]);
+  Serial.print("Run 3: ");
+  Serial.println(Run[Paso][2]);
+  Serial.print("Run 4: ");
+  Serial.println(Run[Paso][3]);
 }
 
-//Regresa verdadero si ya se ha estado en la coordenada que se envia como paramtero
-bool BeenHere(int iCoord)
+/*Regresa true si ya se ha estado antes en el Run que se le manda
+  como parametro, cRun, y false si no
+*/
+bool BeenHere(char cRun, byte iPaso)
 {
+  //Variables que almacenan lo que se va a regresar, X, Y y Z del Paso que se investiga
   bool bReturn = false;
-  int X = iCoord / 100;
-  int Y = iCoord % 100;
-  if (iPos[X][Y] != 9999)
+  byte iX = 255;
+  byte iY = 255;
+  byte iZ = 255;
+
+  //Busca en todos los pasos el iPaso para conseguir X, Y y Z
+  for (byte iI = 0; iI < ZZ; iI++)
+  {
+    for (byte iJ = 0; iJ < XX; iJ++)
+    {
+      for (byte iK = 0; iK < YY; iK++)
+      {
+        if (iPaso == Pos[iI][iJ][iK])
+        {
+          iZ = iI;
+          iX = iJ;
+          iY = iK;
+        }
+        if (255 != iX)
+          break;
+      }
+      if (255 != iX)
+        break;
+    }
+    if (255 != iX)
+      break;
+  }
+  //Modifica X o Y dependiendo del cRun
+  if ('x' == cRun)
+  {
+    iX += 1;
+  }
+  else if ('y' == cRun)
+  {
+    iY += 1;
+  }
+  else if ('o' == cRun)
+  {
+    iX -= 1;
+  }
+  else if ('p' == cRun)
+  {
+    iY -= 1;
+  }
+  else if ('r' == cRun)
+  {
+    iZ -= 1;
+    iX -= 1;
+  }
+  else if ('s' == cRun)
+  {
+    iZ -= 1;
+    iX += 1;
+  }
+  else if ('t' == cRun)
+  {
+    iZ -= 1;
+    iY += 1;
+  }
+  else if ('u' == cRun)
+  {
+    iZ -= 1;
+    iY -= 1;
+  }
+  else if ('e' == cRun)
+  {
+    iZ += 1;
+    iY -= 1;
+  }
+  else if ('b' == cRun)
+  {
+    iZ += 1;
+    iX += 1;
+  }
+  else if ('d' == cRun)
+  {
+    iZ += 1;
+    iY += 1;
+  }
+  else if ('c' == cRun)
+  {
+    iZ += 1;
+    iX -= 1;
+  }
+  //Busca si ya se ha estado en esa coordenada
+  if (255 != Pos[iZ][iX][iY])
   {
     bReturn = true;
   }
   return bReturn;
 }
 
-void extractionPoint()
+//Consgiue el numero de paso del Run que se da como parametro
+byte getPass(char cRun, byte iPaso)
 {
-  lcd.setCursor(6, 1);
-  lcd.print("regresando");
-  moveUntil(0);
-  Detenerse();
-  lcd.clear();
-  lcd.print("ABGESCHLOSSEN");
-  lcd.setCursor(0, 1);
-  lcd.print("RONDA TERMINADA");
-  delay(30000);
-}
-
-/*
-  Busca a donde moverse recorriendo los irun, regresa el paso para accesar al lugar desconocido y la opcion del irun como un solo numero
-  Hay que desifrar el numero que se regresa con / y % entre 100, siendo el resultado de / el # de paso y el resultado de % la opcion
-  del irun
-*/
-int WhereToGo()
-{
-  //Serial.println();
-  int iCPaso = iPasoActual;
-  int iCX = iX;
-  int iCY = iY;
-  int iHere = 9999;
-  //Serial.print("iCPaso: ");
-  //Serial.println(iCPaso);
-  //Serial.println(iCX);
-  //Serial.println(iCY);
-  //Serial.print("iPossibility[iCPaso]: ");
-  //Serial.println(iPossibility[iCPaso]);
-  for (int iJ = iCPaso; iJ >= 0; iJ--)
+  byte bReturn = 255;
+  byte iX = 255;
+  byte iY = 255;
+  byte iZ = 255;
+  //Busca en todos los pasos el iPaso para conseguir X, Y y Z
+  for (byte iI = 0; iI < ZZ; iI++)
   {
-    for (int iI = 0; iI < iPossibility[iJ]; iI++)
+    for (byte iJ = 0; iJ < XX; iJ++)
     {
-      //Serial.print("iPossibility[iCPaso]: ");
-      //Serial.println(iPossibility[iCPaso]);
-      //Serial.print("iRun: ");
-      //Serial.print(iJ);
-      //Serial.print(" ");
-      //Serial.print(iI);
-      //Serial.print(": ");
-      //Serial.println(iRun[iJ][iI]);
-      bool bCheck = BeenHere(iRun[iJ][iI]);
-      if (bCheck == false)
+      for (byte iK = 0; iK < YY; iK++)
       {
-        //Serial.println("ENTRO BEEN HERE ");
-        iHere = iJ;
+        if (iPaso == Pos[iI][iJ][iK])
+        {
+          iZ = iI;
+          iX = iJ;
+          iY = iK;
+        }
+        if (255 != iX)
+          break;
       }
-      if (iHere != 9999)
-      {
-        //Serial.println("ENTRA BREAK");
+      if (255 != iX)
         break;
-      }
     }
-    if (iHere != 9999)
-    {
-      //Serial.println("ENTRA BREAK");
+    if (255 != iX)
       break;
-    }
   }
-  /*
-    Aqui pondriamos la función de regresar al inicio en caso que iHere continue siendo 0
-    habiendo salido de los dos for loop, es decir habiendo revisado todas las opciones de
-    movimiento
-  */
-  //Serial.print("iHere: ");
-  //Serial.println(iHere);
-  if (iHere == 9999)
+  //Modifica X o Y dependiendo del cRun
+  if ('x' == cRun)
   {
-    //Serial.println("entra extraction point");
-    extractionPoint();
+    iX += 1;
   }
-  //Serial.print("iReturn: ");
-  //Serial.println(iHere);
-  return iHere;
+  else if ('y' == cRun)
+  {
+    iY += 1;
+  }
+  else if ('o' == cRun)
+  {
+    iX -= 1;
+  }
+  else if ('p' == cRun)
+  {
+    iY -= 1;
+  }
+  else if ('r' == cRun)
+  {
+    iZ -= 1;
+    iX -= 1;
+  }
+  else if ('s' == cRun)
+  {
+    iZ -= 1;
+    iX += 1;
+  }
+  else if ('t' == cRun)
+  {
+    iZ -= 1;
+    iY += 1;
+  }
+  else if ('u' == cRun)
+  {
+    iZ -= 1;
+    iY -= 1;
+  }
+  else if ('e' == cRun)
+  {
+    iZ += 1;
+    iY -= 1;
+  }
+  else if ('b' == cRun)
+  {
+    iZ += 1;
+    iX += 1;
+  }
+  else if ('d' == cRun)
+  {
+    iZ += 1;
+    iY += 1;
+  }
+  else if ('c' == cRun)
+  {
+    iZ += 1;
+    iX -= 1;
+  }
+  bReturn = Pos[iZ][iX][iY];
+  return bReturn;
 }
 
-//regresa el paso de la coordenada que le des como parametro
-int getPass(int iGetPass)
+int getCoord(char cRun, byte iPaso)
 {
-  int iReturn;
-  int X = iGetPass / 100;
-  int Y = iGetPass % 100;
-  iReturn = iPos[X][Y];
+  int iReturn = 255;
+  byte iX = 255;
+  byte iY = 255;
+  byte iZ = 255;
+  //Busca en todos los pasos el iPaso para conseguir X, Y y Z
+  for (byte iI = 0; iI < ZZ; iI++)
+  {
+    for (byte iJ = 0; iJ < XX; iJ++)
+    {
+      for (byte iK = 0; iK < YY; iK++)
+      {
+        if (iPaso == Pos[iI][iJ][iK])
+        {
+          iZ = iI;
+          iX = iJ;
+          iY = iK;
+        }
+        if (255 != iX)
+          break;
+      }
+      if (255 != iX)
+        break;
+    }
+    if (255 != iX)
+      break;
+  }
+  //Modifica X o Y dependiendo del cRun
+  if ('x' == cRun)
+  {
+    iX += 1;
+  }
+  else if ('y' == cRun)
+  {
+    iY += 1;
+  }
+  else if ('o' == cRun)
+  {
+    iX -= 1;
+  }
+  else if ('p' == cRun)
+  {
+    iY -= 1;
+  }
+  else if ('r' == cRun)
+  {
+    iZ -= 1;
+    iX -= 1;
+  }
+  else if ('s' == cRun)
+  {
+    iZ -= 1;
+    iX += 1;
+  }
+  else if ('t' == cRun)
+  {
+    iZ -= 1;
+    iY += 1;
+  }
+  else if ('u' == cRun)
+  {
+    iZ -= 1;
+    iY -= 1;
+  }
+  else if ('e' == cRun)
+  {
+    iZ += 1;
+    iY -= 1;
+  }
+  else if ('b' == cRun)
+  {
+    iZ += 1;
+    iX += 1;
+  }
+  else if ('d' == cRun)
+  {
+    iZ += 1;
+    iY += 1;
+  }
+  else if ('c' == cRun)
+  {
+    iZ += 1;
+    iX -= 1;
+  }
+  iReturn = (iZ * 10000) + (iX * 100) + iY;
   return iReturn;
+}
+
+//Regresa true si se esta en una rampa
+bool Rampa()
+{
+  bool bReturn = false;
+  int iMPUP = MPUP();
+  if (iMPUP > 14 || iMPUP < -2)
+  {
+    bReturn = true;
+  }
+  return bReturn;
+}
+
+//Cruza la rampa, ACTUALIZAR bZ aqui!!
+void MovRampa()
+{
+  Serial.println("----Rampa----");
+  Serial.print("bZ: ");
+  Serial.println(bZ);
+  int iMPUP = MPUP();
+  //Si detecta que hay que subir la rampa
+  if (iMPUP > 14)
+  {
+    if ('x' == Run[brRampa][biI])
+    {
+      Run[brRampa][biI] = 'b';
+      cRa = 'r';
+    }
+    else if ('y' == Run[brRampa][biI])
+    {
+      Run[brRampa][biI] = 'd';
+      cRa = 'u';
+    }
+    else if ('o' == Run[brRampa][biI])
+    {
+      Run[brRampa][biI] = 'c';
+      cRa = 's';
+    }
+    else if ('p' == Run[brRampa][biI])
+    {
+      Run[brRampa][biI] = 'e';
+      cRa = 't';
+    }
+    while (iMPUP > 14)
+    {
+      RampaS();
+      iMPUP = MPUP();
+    }
+    Detenerse();
+    bPiso += 1;
+  }
+  else if (iMPUP < -2)
+  {
+    if ('x' == Run[brRampa][biI])
+    {
+      Run[brRampa][biI] = 's';
+      cRa = 'c';
+    }
+    else if ('y' == Run[brRampa][biI])
+    {
+      Run[brRampa][biI] = 't';
+      cRa = 'e';
+    }
+    else if ('o' == Run[brRampa][biI])
+    {
+      Run[brRampa][biI] = 'r';
+      cRa = 'b';
+    }
+    else if ('p' == Run[brRampa][biI])
+    {
+      Run[brRampa][biI] = 'u';
+      cRa = 'd';
+    }
+    while (iMPUP < -2)
+    {
+      RampaB();
+      iMPUP = MPUP();
+    }
+    Detenerse();
+    bPiso -= 1;
+  }
+  Serial.print("brRampa: ");
+  Serial.println(brRampa);
+  Serial.print("biI: ");
+  Serial.println(biI);
+  Serial.print("Run[brRampa][biI]: ");
+  Serial.println(Run[brRampa][biI]);
+  if (0 == bPiso)
+    bZ = 0;
+  else if (1 == bPiso)
+    bZ = 1;
+  else if (2 == bPiso)
+    bZ = 2;
+  else if (-1 == bPiso)
+    bZ = 2;
+  else if (-2 == bPiso)
+    bZ = 1;
+  Serial.print("bZ: ");
+  Serial.println(bZ);
 }
 
 //Se mueve de la coordenada actuar(iCoordAc) a la coordenada deseada(icCoord)
 void Move(int iCoordAc, int icCoord)
 {
-  //iCoordAc = tu coordenada actual
-  //icCoord = la coordenada a la cual quieres ir
-  //Serial.println();
-  //Serial.println("INICIA MOVE");
-  //Serial.print("iCoordAc: ");
-  //Serial.println(iCoordAc);
-  //Serial.println(icCoord);
-  //Serial.println(iDirecc);
-  int iCX = iX;
-  int iCY = iY;
+  //Copia de iCoordAc para la rampa
+  int CopCoordAc = iCoordAc;
+  //Copia de icCoord para los hoyos negros
+  int CopcCoord = icCoord;
+
+  //Se quita el dato del piso de la coordenada actual y a la que se quiere llegar
+  iCoordAc = iCoordAc % 10000;
+  icCoord = icCoord % 10000;
+
+  //Copias de X, Y y Z
+  byte bCX = bX;
+  byte bCY = bY;
+  byte bCZ = bZ;
+
+  //Busca a que dirección moverse actualiza la variable correcta de X oY y Direcc
   if (iCoordAc == icCoord - 100)
   {
-    //Serial.println("ENTRO IF #1");
-    if (iDirecc == 1)
+    if (Direcc == 1)
     {
       GiroDer90();
       Acomodo();
       Adelante30();
     }
-    else if (iDirecc == 2)
+    else if (Direcc == 2)
     {
       Adelante30();
     }
-    else if (iDirecc == 3)
+    else if (Direcc == 3)
     {
       GiroDer90();
       Acomodo();
@@ -1644,35 +1983,34 @@ void Move(int iCoordAc, int icCoord)
       Acomodo();
       Adelante30();
     }
-    else if (iDirecc == 4)
+    else if (Direcc == 4)
     {
       GiroIzq90();
       Acomodo();
       Adelante30();
     }
-    iX += 1;
-    iDirecc = 2;
+    bX += 1;
+    Direcc = 2;
   }
   else if (iCoordAc == icCoord - 1)
   {
-    //Serial.println("ENTRO IF #2");
-    if (iDirecc == 1)
+    if (Direcc == 1)
     {
       Adelante30();
     }
-    else if ( iDirecc == 2)
+    else if ( Direcc == 2)
     {
       GiroIzq90();
       Acomodo();
       Adelante30();
     }
-    else if (iDirecc == 3)
+    else if (Direcc == 3)
     {
       GiroDer90();
       Acomodo();
       Adelante30();
     }
-    else if (iDirecc == 4)
+    else if (Direcc == 4)
     {
       GiroDer90();
       Acomodo();
@@ -1680,20 +2018,18 @@ void Move(int iCoordAc, int icCoord)
       Acomodo();
       Adelante30();
     }
-    iY += 1;
-    iDirecc = 1;
+    bY += 1;
+    Direcc = 1;
   }
   else if (iCoordAc == icCoord + 100)
   {
-    //Serial.println("ENTRO IF #3");
-    if (iDirecc == 1)
+    if (Direcc == 1)
     {
       GiroIzq90();
       Acomodo();
       Adelante30();
-
     }
-    else if (iDirecc == 2)
+    else if (Direcc == 2)
     {
       GiroDer90();
       Acomodo();
@@ -1701,23 +2037,22 @@ void Move(int iCoordAc, int icCoord)
       Acomodo();
       Adelante30();
     }
-    else if (iDirecc == 3)
+    else if (Direcc == 3)
     {
       Adelante30();
     }
-    else if (iDirecc == 4)
+    else if (Direcc == 4)
     {
       GiroDer90();
       Acomodo();
       Adelante30();
     }
-    iX -= 1;
-    iDirecc = 3;
+    bX -= 1;
+    Direcc = 3;
   }
   else if (iCoordAc == icCoord + 1)
   {
-    //Serial.println("ENTRO IF #4");
-    if (iDirecc == 1)
+    if (Direcc == 1)
     {
       GiroDer90();
       Acomodo();
@@ -1725,47 +2060,57 @@ void Move(int iCoordAc, int icCoord)
       Acomodo();
       Adelante30();
     }
-    else if (iDirecc == 2)
+    else if (Direcc == 2)
     {
       GiroDer90();
       Acomodo();
       Adelante30();
     }
-    else if (iDirecc == 3)
+    else if (Direcc == 3)
     {
       GiroIzq90();
       Acomodo();
       Adelante30();
     }
-    else if (iDirecc == 4)
+    else if (Direcc == 4)
     {
       Adelante30();
     }
-    iY -= 1;
-    iDirecc = 4;
+    bY -= 1;
+    Direcc = 4;
   }
-  bool Hoyo = false;
-  Hoyo = HoyoNegro();
-  if (Hoyo == true)
+  //si esa nueva coordenada es un hoyo negro regresa y busca a donde moverse
+  if (HoyoNegro())
   {
+    Serial.println("----Entra HoyoNegro----");
     bool bListo = false;
     Atras30();
     Acomodo();
-    iX = iCX;
-    iY = iCY;
-    lcd.clear();
-    lcd.print(iX);
-    lcd.print(" ");
-    lcd.print(iY);
-    int iCPaso = iPos[iX][iY];
-    for (int iI = 0; iI < iPossibility[iCPaso]; iI++)
+    bX = bCX;
+    bY = bCY;
+    byte iCPaso = Pos[bZ][bX][bY];
+    Serial.print("bZ: ");
+    Serial.println(bZ);
+    Serial.print("bX: ");
+    Serial.println(bX);
+    Serial.print("bY: ");
+    Serial.println(bY);
+    Serial.print("Pos[bZ][bX][bY]= ");
+    Serial.println(Pos[bZ][bX][bY]);
+    for (byte iI = 0; iI < Possibility[iCPaso]; iI++)
     {
-      int iThis = iRun[iCPaso][iI];
-      if (iThis == icCoord)
+      Serial.print("icCoord: ");
+      Serial.println(icCoord);
+      int iThis = getCoord(Run[iCPaso][iI], iCPaso);
+      Serial.print("iThis #");
+      Serial.print(iI);
+      Serial.print(": ");
+      Serial.println(getCoord(Run[iCPaso][iI], iCPaso));
+      if (iThis == CopcCoord)
       {
-        for (int iJ = iI; iJ < 4; iJ++)
+        for (byte iJ = iI; iJ < 4; iJ++)
         {
-          iRun[iCPaso][iJ] = iRun[iCPaso][1 + iJ];
+          Run[iCPaso][iJ] = Run[iCPaso][1 + iJ];
           bListo = true;
         }
       }
@@ -1774,120 +2119,132 @@ void Move(int iCoordAc, int icCoord)
         break;
       }
     }
-    iRun[iCPaso][3] = 9999;
-    iPossibility[iCPaso] -= 1;
-    lcd.setCursor(0, 1);
-    lcd.print("Search");
-    iPasoActual = iCPaso;
+    Run[iCPaso][3] = 'a';
+    Possibility[iCPaso] -= 1;
+    pasoActual = iCPaso;
+    Serial.print("iCPaso: ");
+    Serial.println(iCPaso);
+    Serial.print("Run 1: ");
+    Serial.println(Run[iCPaso][0]);
+    Serial.print("Run 2: ");
+    Serial.println(Run[iCPaso][1]);
+    Serial.print("Run 3: ");
+    Serial.println(Run[iCPaso][2]);
+    Serial.print("Run 4: ");
+    Serial.println(Run[iCPaso][3]);
+    Serial.print("Possbility: ");
+    Serial.println(Possibility[iCPaso]);
     SearchRouteAndMove();
+  }
+  //Si esa nueva coordenada es la rampa, la cruza y actualiza bZ
+  else if (Rampa())
+  {
+    MovRampa();
+    lcd.clear();
+    lcd.print("Rampa");
+    delay(3000);
+    lcd.print("1Seg");
+    delay(1000);
+    lcd.clear();
+    bARampa = true;
   }
   Acomodo();
 }
 
-//Funcion que llama a la funcion de movimiento hasta llegar al paso de iHere
-void moveUntil(int iHere)
+
+//Se mueve hasta el paso que se tiene como parametro
+void moveUntil(byte bHere)
 {
-  lcd.setCursor(6, 0);
-  lcd.print(iHere);
-  //Serial.println();
-  //Serial.print("iHere: ");
-  //Serial.println(iHere);
-  int iCPaso = iPasoActual;
-  //Serial.print("iCPaso: ");
-  //Serial.println(iCPaso);
-
-  //Se mueve hasta llegar al paso iHere
-  if (iCPaso != iHere)
+  //copia del paso actual
+  byte bCPaso = pasoActual;
+  //Hasta no encontrarse en el paso deseado se sigue moviendo
+  while (bCPaso != bHere)
   {
-    while (iCPaso != iHere)
+    /*variables, paso más cercano, posible paso más cercano,
+      Paso antiguo, Paso, Coordenada Actual, Coordenada deseada, posible
+      coordenada deseada
+    */
+    byte bClose = 255;
+    byte bPosib = 255;
+    byte bPassAntiguo = 255;
+    int iPass = 255;
+    int iCoordAc = 255;
+    int icCoord = 255;
+    /*Primero revisa los Pasos del los Run de donde te encuentras
+      y escoge el Paso más cercano al bHere
+    */
+    for (byte iI = 0; iI < Possibility[bCPaso]; iI++)
     {
-      int iClose = 9999;
-      int iPosib = 9999;
-      int icCoord = 9999;
-      int iCI = 9999;
-      int iCoordAc = 9999;
-      int iPass = 9999;
-      int iCc = 9999;
-      int iPassAntiguo = 9999;
-      Serial.println();
-
-      for (int iI = 0; iI < iPossibility[iCPaso]; iI++)
+      bPosib = getPass(Run[bCPaso][iI], bCPaso);
+      iPass = bPosib - bHere;
+      if (iPass < 0)
       {
-        //Serial.print("iPossibility[iCPaso]: ");
-        //Serial.println(iPossibility[iCPaso]);
-        //Serial.print("iCPaso: ");
-        //Serial.println(iCPaso);
-        iPosib = getPass(iRun[iCPaso][iI]);
-        Serial.print("iPosib: ");
-        Serial.println(iPosib);
-        iPass = iPosib - iHere;
-        if (iPass < 0)
-        {
-          iPass *= -1;
-        }
-        Serial.print("iPass: ");
-        Serial.println(iPass);
-        Serial.print("iClose antes del if: ");
-        Serial.println(iClose);
-        iCc = iRun[iCPaso][iI];
-        Serial.print("iCc: ");
-        Serial.println(iCc);
-        lcd.setCursor(8, 0);
-        lcd.print(iPass);
-        if (iPass < iPassAntiguo)
-        {
-          iPassAntiguo = iPass;
-          Serial.println("ENTRO IF");
-          iClose = iPosib;
-          Serial.print("iClose: ");
-          Serial.println(iClose);
-          icCoord = iCc;
-          Serial.print("icCoord: ");
-          Serial.println(icCoord);
-          lcd.print(" ");
-          lcd.print(iClose);
-        }
-        //Serial.print("iPosib: ");
-        //Serial.println(iPosib);
-        //Serial.print("iPass: ");
-        //Serial.println(iPass);
+        iPass *= -1;
       }
-      iCoordAc = (iX * 100) + iY;
-      Serial.println(iCoordAc);
-      Serial.println(icCoord);
-      Move(iCoordAc, icCoord);
-      iCPaso = iClose;
-      lcd.setCursor(6, 1);
-      lcd.print("Paso: ");
-      lcd.print(iCPaso);
+      if (iPass < bPassAntiguo)
+      {
+        bPassAntiguo = iPass;
+        bClose = bPosib;
+        icCoord = getCoord(Run[bCPaso][iI], bCPaso);
+      }
     }
+    iCoordAc = (bZ * 10000) + (bX * 100) + bY;
+    Move(iCoordAc, icCoord);
+    bCPaso = bClose;
   }
 }
 
-//Se mueve a la coordenada desconocida
-void exploreNewWorlds(int iHere)
+//Regresa el punto de inicio
+void extractionPoint()
 {
-  //Serial.println("INICIA EXPLORE NEW WORLDS");
-  //Serial.print("iHere: ");
-  //Serial.println(iHere);
-  //Serial.print("iPossibility[iHere]: ");
-  //Serial.println(iPossibility[iHere]);
-  int iCounter = 0;
-  for (int iI = 0; iI < iPossibility[iHere]; iI++)
+  lcd.setCursor(6, 1);
+  lcd.print("regresando");
+  moveUntil(1);
+  Detenerse();
+  lcd.clear();
+  lcd.print("ABGESCHLOSSEN");
+  lcd.setCursor(0, 1);
+  lcd.print("RONDA TERMINADA");
+  delay(30000);
+}
+
+//Se mueve a la coordenada desconocida
+void exploreNewWorlds(byte bHere)
+{
+  Serial.println("----exploreNewWorlds----");
+  Serial.print("En Paso: ");
+  Serial.println(bHere);
+  byte iCounter = 0;
+  for (byte iI = 0; iI < Possibility[bHere]; iI++)
   {
     int iCoordAc = 9999;
     int icCoord = 9999;
-    bool bCheck = BeenHere(iRun[iHere][iI]);
+    bool bCheck = BeenHere(Run[bHere][iI], bHere);
     if (bCheck == false && iCounter == 0)
     {
-      icCoord = iRun[iHere][iI];
-      for (int iI = 0; iI < 40; iI++)
+      Serial.print("No ha estado en: ");
+      Serial.println(getCoord(Run[bHere][iI], bHere));
+      Serial.print("Del Paso: ");
+      Serial.println(bHere);
+      Serial.print("Posibilidad #= ");
+      Serial.println(iI);
+      icCoord = getCoord(Run[bHere][iI], bHere);
+      brRampa = bHere;
+      biI = iI;
+      for (byte iI = 0; iI < ZZ; iI++)
       {
-        for (int iJ = 0; iJ < 40; iJ++)
+        for (byte iJ = 0; iJ < XX; iJ++)
         {
-          if (iPos[iI][iJ] == iHere)
+          for (byte iK = 0; iK < YY; iK++)
           {
-            iCoordAc = (iI * 100) + iJ;
+            if (Pos[iI][iJ][iK] == bHere)
+            {
+              iCoordAc = (iI * 10000) + (iJ * 100) + iK;
+            }
+            if (iCoordAc != 9999)
+            {
+              break;
+            }
           }
           if (iCoordAc != 9999)
           {
@@ -1899,33 +2256,75 @@ void exploreNewWorlds(int iHere)
           break;
         }
       }
-      //Serial.print("iCoordAc: ");
-      //Serial.println(iCoordAc);
-      //Serial.print("icCoord: ");
-      //Serial.println(icCoord);
+      Serial.print("Coordenada Actual: ");
+      Serial.println(iCoordAc);
+      Serial.print("Coordenada Deseada: ");
+      Serial.println(icCoord);
       Move(iCoordAc, icCoord);
       iCounter++;
     }
   }
 }
 
-void  SearchRouteAndMove()
+//Busca el paso al cual llegar para despues moverse a la coordenada desconocida
+byte WhereToGo()
 {
-  int iData = WhereToGo();
-  //Serial.print("iData: ");
-  //Serial.println(iData);
-  moveUntil(iData);
-  exploreNewWorlds(iData);
+  //copia del paso actual, de x y de y
+  byte bCPaso = pasoActual;
+  byte bCX = bX;
+  byte bCY = bY;
+  //paso al cual llegar
+  byte bHere = 255;
+
+  //busca la coordendada desconocida por todos los Run concidos
+  for (byte iI = bCPaso; iI > 0; iI--)
+  {
+    for (byte iJ = 0; iJ < Possibility[iI]; iJ++)
+    {
+      if (!BeenHere(Run[iI][iJ], iI))
+      {
+        Serial.println("----WhereToGo----");
+        Serial.print("Paso: ");
+        Serial.println(iI);
+        Serial.print("Numero de Run: ");
+        Serial.println(iJ);
+        Serial.print("No ha estado en: ");
+        Serial.println(getCoord(Run[iI][iJ], iI));
+        bHere = iI;
+        lcd.setCursor(0, 1);
+        lcd.print(iI);
+      }
+      if (255 != bHere)
+        break;
+    }
+    if (255 != bHere)
+      break;
+  }
+  //Significa que se ha acabado de recorrer el laberinto
+  if (255 == bHere)
+  {
+    extractionPoint();
+  }
+  return bHere;
 }
 
+
+//Busca la ruta y se mueve hasta la posicion desconocida
+void SearchRouteAndMove()
+{
+  byte bData = WhereToGo();
+  moveUntil(bData);
+  exploreNewWorlds(bData);
+}
+
+//Funcion a llamar para completar el laberinto
 void Laberinto()
 {
   GetDatos();
   SearchRouteAndMove();
-  //Serial.println("--------------------------------------------------------------------");
-  //Serial.println("--------------------------------------------------------------------");
 }
 
+//Toma una lectura al inicio y calibra las victimas a +3
 void CalibrarCalor()
 {
   therm3.read();
@@ -1934,13 +2333,21 @@ void CalibrarCalor()
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   if (bInicio == true)
   {
     CalibrarCalor();
     bInicio = false;
   }
+  lcd.clear();
   lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print(bZ);
+  lcd.print(" ");
+  lcd.print(bX);
+  lcd.print(" ");
+  lcd.print(bY);
+  lcd.print(" ");
   Laberinto();
-
+  Serial.println("------------------------------------------");
+  Serial.println("------------------------------------------");
 }
