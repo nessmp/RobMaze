@@ -19,6 +19,8 @@ byte const YY = 40;
 byte const ZZ = 3;
 //Maximo de pasos posibles
 byte const maxPasos = 100;
+//Maximo de cuadros negros
+byte const maxNegros = 20;
 //Almacenara el numero de paso en la cordenada dictada por los corchetes
 byte Pos[ZZ][XX][YY];
 //Almacenara las posibilidades de movimiento en el paso del corchete
@@ -32,6 +34,10 @@ byte Possibility[maxPasos];
   u = (zz - 1) + xx + (yy - 1); e = (zz + 1) + xx + (yy - 1);
 */
 char Run[maxPasos][4];
+//Ubicación de cuadros negros
+int listaX[maxNegros];
+//Subindice para el areglos de listaX
+byte subNegro = 0;
 /*Dirección a la cual esta viendo el robot, donde 1 siempre es
   la dirección en donde empezo observando.
                 1
@@ -57,8 +63,6 @@ byte bZ = 0;
 bool bARampa = false;
 //Paso antes de mov de rampa
 byte bPassRampa = 255;
-//Da el valor a bZ; 0 = piso 0, 1 = 1° piso, 2 = 2° piso, -1 = 2°piso, -2 = 1° piso
-byte bPiso = 0;
 //Paso de Rampa
 byte brRampa = 255;
 //Posibilidad de Run de Rampa
@@ -343,9 +347,9 @@ void setup() {
   }
 }
 
-double MPUY()
+int MPUY()
 {
-  double iReturn;
+  int iReturn;
   do {
 
     // wait for MPU interrupt or extra packet(s) available
@@ -1404,8 +1408,10 @@ void Acejarse2()
   }
 }
 
-void RampaS() {}
-void RampaB() {}
+//Sube la rampa detectando si hay victima en ella
+void RampaS() {} //Usar MPU, MLX
+//Baja la rampa detectando si hay victima en ella
+void RampaB() {} //Usar MPU, MLX
 
 //Regresa cuantas posibilidades tiene de mov en numero y como booleano
 byte getPossibility(bool bDir[])
@@ -1438,12 +1444,7 @@ void GetDatos()
   Paso++;
   pasoActual = Paso;
   Pos[bZ][bX][bY] = Paso;
-  lcd.print(" ");
-  lcd.print("Pas:");
-  lcd.print(Pos[bZ][bX][bY]);
   Possibility[Paso] = getPossibility(bDir);
-  lcd.print(" ");
-  lcd.print(Possibility[Paso]);
   for (byte iI = 0; iI < Possibility[Paso]; iI++)
   {
     if (true == bDir[0])
@@ -1546,6 +1547,21 @@ void GetDatos()
       Run[Paso][0] = cRa;
     }
     bARampa = false;
+  }
+  for (byte iI = 0; iI < maxNegros; iI++)
+  {
+    for (byte iJ = 0; iJ < 4; iJ++)
+    {
+      int iCoord = getCoord(Run[Paso][iJ], Paso);
+      if (iCoord == listaX[iI])
+      {
+        for (byte iK = iJ; iK < 4; iK++)
+        {
+          Run[Paso][iK] = Run[Paso][1 + iK];
+        }
+        Run[Paso][3] = 'a';
+      }
+    }
   }
   Serial.println("----Datos----");
   Serial.print("bZ: ");
@@ -1893,8 +1909,9 @@ void MovRampa()
       iMPUP = MPUP();
     }
     Detenerse();
-    bPiso += 1;
+    bZ += 1;
   }
+  //Si esta bajando la rampa
   else if (iMPUP < -2)
   {
     if ('x' == Run[brRampa][biI])
@@ -1923,7 +1940,7 @@ void MovRampa()
       iMPUP = MPUP();
     }
     Detenerse();
-    bPiso -= 1;
+    bZ -= 1;
   }
   Serial.print("brRampa: ");
   Serial.println(brRampa);
@@ -1931,16 +1948,6 @@ void MovRampa()
   Serial.println(biI);
   Serial.print("Run[brRampa][biI]: ");
   Serial.println(Run[brRampa][biI]);
-  if (0 == bPiso)
-    bZ = 0;
-  else if (1 == bPiso)
-    bZ = 1;
-  else if (2 == bPiso)
-    bZ = 2;
-  else if (-1 == bPiso)
-    bZ = 2;
-  else if (-2 == bPiso)
-    bZ = 1;
   Serial.print("bZ: ");
   Serial.println(bZ);
 }
@@ -2082,6 +2089,8 @@ void Move(int iCoordAc, int icCoord)
   //si esa nueva coordenada es un hoyo negro regresa y busca a donde moverse
   if (HoyoNegro())
   {
+    listaX[subNegro] = CopcCoord;
+    subNegro += 1;
     Serial.println("----Entra HoyoNegro----");
     bool bListo = false;
     Atras30();
@@ -2140,12 +2149,6 @@ void Move(int iCoordAc, int icCoord)
   else if (Rampa())
   {
     MovRampa();
-    lcd.clear();
-    lcd.print("Rampa");
-    delay(3000);
-    lcd.print("1Seg");
-    delay(1000);
-    lcd.clear();
     bARampa = true;
   }
   Acomodo();
@@ -2197,14 +2200,8 @@ void moveUntil(byte bHere)
 //Regresa el punto de inicio
 void extractionPoint()
 {
-  lcd.setCursor(6, 1);
-  lcd.print("regresando");
   moveUntil(1);
   Detenerse();
-  lcd.clear();
-  lcd.print("ABGESCHLOSSEN");
-  lcd.setCursor(0, 1);
-  lcd.print("RONDA TERMINADA");
   delay(30000);
 }
 
@@ -2283,6 +2280,26 @@ byte WhereToGo()
     {
       if (!BeenHere(Run[iI][iJ], iI))
       {
+        bool Revision = false;
+        for (byte iK = 0; iK < maxNegros; iK++)
+        {
+          int coordenada = getCoord(Run[iI][iJ], iI);
+          if (listaX[iK] == coordenada)
+          {
+            Revision = true;
+          }
+        }
+        if (Revision == false)
+        {
+          bHere = iI;
+          Serial.println("----WhereToGo----");
+          Serial.print("Paso: ");
+          Serial.println(iI);
+          Serial.print("Numero de Run: ");
+          Serial.println(iJ);
+          Serial.print("No ha estado en: ");
+          Serial.println(getCoord(Run[iI][iJ], iI));
+        }
         Serial.println("----WhereToGo----");
         Serial.print("Paso: ");
         Serial.println(iI);
@@ -2290,9 +2307,6 @@ byte WhereToGo()
         Serial.println(iJ);
         Serial.print("No ha estado en: ");
         Serial.println(getCoord(Run[iI][iJ], iI));
-        bHere = iI;
-        lcd.setCursor(0, 1);
-        lcd.print(iI);
       }
       if (255 != bHere)
         break;
@@ -2324,29 +2338,8 @@ void Laberinto()
   SearchRouteAndMove();
 }
 
-//Toma una lectura al inicio y calibra las victimas a +3
-void CalibrarCalor()
-{
-  therm3.read();
-  int Therm3 = therm3.object();
-  CalibCalor = Therm3 + 3;
-}
-
 void loop() {
-  if (bInicio == true)
-  {
-    CalibrarCalor();
-    bInicio = false;
-  }
-  lcd.clear();
   lcd.backlight();
-  lcd.setCursor(0, 0);
-  lcd.print(bZ);
-  lcd.print(" ");
-  lcd.print(bX);
-  lcd.print(" ");
-  lcd.print(bY);
-  lcd.print(" ");
   Laberinto();
   Serial.println("------------------------------------------");
   Serial.println("------------------------------------------");
