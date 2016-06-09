@@ -16,7 +16,7 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *myMotor = AFMS.getMotor(2);
 
 
-byte irPin = A0;
+byte irPin = A3;
 
 void setup() {
   // put your setup code here, to run once:
@@ -66,9 +66,8 @@ void setup() {
 
 int distUlt()
 {
-  CurieIMU.readMotionSensor(ax, ay, az, gx, gy, gz);
-  int Trigger = 9;
-  int Echo = 8;
+  int Trigger = 3;
+  int Echo = 4;
   long distancia;
   long tiempo;
   // put your main code here, to run repeatedly:
@@ -176,6 +175,8 @@ int Sharp30()
   return accurateDistance;
 }
 void loop() {
+  Serial.println(distUlt());
+  /*
   Serial.println(Sharp30());
   delay(500);
   /*
