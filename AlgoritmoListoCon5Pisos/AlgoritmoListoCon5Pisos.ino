@@ -3,7 +3,7 @@ byte const XX = 40;
 //Maximo de arreglo de y
 byte const YY = 40;
 //Maximo de arreglos de z
-byte const ZZ = 5;
+byte const ZZ = 4;
 //Maximo de pasos posibles
 byte const maxPasos = 100;
 //Maximo de cuadros negros
@@ -64,7 +64,6 @@ bool bVictimaDetectada = false;
 void setup()
 {
   Serial.begin(9600);
-  
   for (byte iI = 0; iI < ZZ; iI++)
   {
     for (byte iJ = 0; iJ < XX; iJ++)
@@ -87,7 +86,7 @@ void setup()
 }
 
 //Calibrar la constante de calor
-void CalibrarCalor(){} //Usar MLX
+void CalibrarCalor() {} //Usar MLX
 
 //Funciones utilizadas en el algoritmo externas a el
 //Regresa true si hay una pared a la Derecha
