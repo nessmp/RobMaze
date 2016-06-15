@@ -4,23 +4,22 @@
 #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
 
+/*
 #if (SSD1306_LCDHEIGHT != 64)
 #error("Height incorrect, please fix Adafruit_SSD1306.h!");
 #endif
+*/
 
 void setup() {
-
-
-  // Set up the display
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Initialize with the I2C addr 0x3D if not working use 0x3C (for the 128x64)
   display.setTextColor(WHITE);
 }
-void loop() {
 
+void loop() {
   display.clearDisplay();
   display.setTextSize(3);
   display.setTextColor(WHITE);
-  display.setCursor(0, 20);
+  display.setCursor(0, 5);
   display.println("VICTIMA");
   display.display();
 
@@ -28,17 +27,14 @@ void loop() {
 
   display.clearDisplay();
   display.setTextSize(3);
-  display.(BLACK, WHITE);
+  display.setTextColor(BLACK, WHITE);
   display.setCursor(0, 20);
   display.println("VICTIMA");
   display.display();
   delay(500);
+  
   //setTextColor
-
-
-
   // draw scrolling text
-
   /*
     // text display tests
     display.setTextSize(1);
