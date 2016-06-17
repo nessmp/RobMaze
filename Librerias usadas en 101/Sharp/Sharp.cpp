@@ -1,5 +1,5 @@
-#include "Arduino.h"
 #include "Sharp.h"
+#include <Arduino.h>
 
 Sharp::Sharp()
 {
@@ -7,7 +7,7 @@ Sharp::Sharp()
   irPin = 0;
 }
 
-Sharp::Sharp(int irPin, int maxDistance)
+Sharp::Shapr(int irPin, int maxDistance)
 {
   this -> irPin = irPin;
   this -> maxDistance = maxDistance;
@@ -38,6 +38,7 @@ int Sharp::distance()
       _p++;
     }
   }
+
   int accurateDistance = _sum / _p;
 
   return accurateDistance;
@@ -45,21 +46,26 @@ int Sharp::distance()
 
 int Sharp::cm()
 {
-  int puntualDistance;
-  float voltFromRaw;
-  int raw = analogRead(irPin);
   if (30 == maxDistance)
   {
-    voltFromRaw = map(raw, 0, 1023, 0, 3300);
+    int raw = analogRead(irPin);
+    float voltFromRaw = map(raw, 0, 1023, 0, 3300); //Cambiar 5000 por 3300
+
+    int puntualDistance;
 
     puntualDistance = 27.728 * pow(voltFromRaw / 1000, -1.2045);
   }
 
   else if (80 == maxDistance)
   {
-    voltFromRaw = map(raw, 0, 1023, 0, 3300);
+
+    int raw = analogRead(irPin);
+    float voltFromRaw = map(raw, 0, 1023, 0, 3300); //Cambiar 5000 por 3300
+
+    int puntualDistance;
 
     puntualDistance = 11.83 * pow(voltFromRaw / 1000, -1.2045);
   }
+
   return puntualDistance;
 }

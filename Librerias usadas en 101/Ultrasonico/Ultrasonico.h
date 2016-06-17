@@ -8,7 +8,7 @@ class Ultrasonico
     public:
         /** Default constructor */
         Ultrasonico();
-        Ultrasonico(int iTrigger, int iEcho);
+        Ultrasonico(int iTrigger, int iEcho)
         /** Default destructor */
         virtual ~Ultrasonico();
         int distance();

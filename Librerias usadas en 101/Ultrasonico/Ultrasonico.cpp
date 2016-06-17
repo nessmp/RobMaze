@@ -3,8 +3,7 @@
 
 Ultrasonico::Ultrasonico()
 {
-    iTrigger = 0;
-    iEcho = 0;
+    //ctor
 }
 
 Ultrasonico::Ultrasonico(int iTrigger, int iEcho)
