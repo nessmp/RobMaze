@@ -959,9 +959,9 @@ bool ParedEnf()
 {
   bool Pared = true;
   int Sharp = SharpEn.distance();
-  ////Serial.print("Sharp: ");
+  //Serial.print(F("Sharp: "));
   ////Serial.println(Sharp);
-  if (Sharp > 10)
+  if (Sharp > 28)
   {
     Pared = false;
   }
@@ -2339,8 +2339,5 @@ void Laberinto()
 }
 
 void loop() {
-  lcd.backlight();
-  Laberinto();
-  Serial.println("------------------------------------------");
-  Serial.println("------------------------------------------");
+  Serial.println(pulseIn(11, LOW));
 }
