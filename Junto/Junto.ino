@@ -71,7 +71,7 @@ byte velMIA = 200; //velocidad para el motor de la izquierda atras
 void setup() {
   Serial.begin(9600);
 
-  oled.init(); //Inicializa OLED
+  oled.Init(); //Inicializa OLED
 
   ZXDer.init(); //Inicializa sensores ZX
   ZXIzq.init();
