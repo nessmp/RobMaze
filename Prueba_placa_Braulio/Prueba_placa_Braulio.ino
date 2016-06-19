@@ -21,15 +21,15 @@ Adafruit_DCMotor *MIE = MotIzqEnf.getMotor(3); //Apuntador al motor de la izquie
 Adafruit_DCMotor *MIA = MotIzqAtr.getMotor(4); //Apuntador al motor de la izquierda atras
 
 //Encoder
-byte PROGMEM pinEncDerA1 = 18;
-byte PROGMEM pinEncDerA2 = 19;
+byte PROGMEM pinEncDerA1 = 6;
+byte PROGMEM pinEncDerA2 = 5;
 Encoder EncDerA(pinEncDerA1, pinEncDerA2); //Encoder en los pines 18 y 19
-byte PROGMEM pinEncIzqE1 = 20;
-byte PROGMEM pinEncIzqE2 = 21;
+byte PROGMEM pinEncIzqE1 = 2;
+byte PROGMEM pinEncIzqE2 = 3;
 Encoder EncIzqE(pinEncIzqE1, pinEncIzqE2); //Encoder en los pines 18 y 19
 
 //Servo
-byte PROGMEM pinServo = 8;
+byte PROGMEM pinServo = 4;
 Servo tiraKits; //objeto del servo
 
 //MLX
@@ -56,8 +56,8 @@ Sharp SharpIzqAtr(pinSharpIzqAtr, 30); //Sharp de la Izquierda Atr en el pin 3 c
 byte PROGMEM pinTriggUltIzq = 2;
 byte PROGMEM pinEchoUltIzq = 3;
 Ultrasonico UltIzq(pinTriggUltIzq, pinEchoUltIzq); //Ult de la Izq, trigger en pin 2 y echo en pin 3
-byte PROGMEM pinTriggUltDer = 4;
-byte PROGMEM pinEchoUltDer = 5;
+byte PROGMEM pinTriggUltDer = 5;
+byte PROGMEM pinEchoUltDer = 6;
 Ultrasonico UltDer(pinTriggUltDer, pinEchoUltDer); //Ult de la Der, trigger en pin 4 y echo en pin 5
 
 byte dif = 0; //Diferencia para hacer cambios en motores
