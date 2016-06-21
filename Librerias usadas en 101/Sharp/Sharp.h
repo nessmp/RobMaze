@@ -1,7 +1,7 @@
 #ifndef SHARP_H
 #define SHARP_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 class Sharp
 {
@@ -17,8 +17,8 @@ class Sharp
     protected:
 
     private:
-        int irPin
-        int maxDistance
+        int irPin;
+        int maxDistance;
 };
 
 #endif // SHARP_H
