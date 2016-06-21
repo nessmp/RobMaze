@@ -53,11 +53,11 @@ byte PROGMEM pinSharpIzqAtr = 1;
 Sharp SharpIzqAtr(pinSharpIzqAtr, 30); //Sharp de la Izquierda Atr en el pin 3 con dist 30
 
 //Ultrasonico
-byte PROGMEM pinTriggUltIzq = 2;
-byte PROGMEM pinEchoUltIzq = 3;
+byte PROGMEM pinTriggUltIzq = 8;
+byte PROGMEM pinEchoUltIzq = 7;
 Ultrasonico UltIzq(pinTriggUltIzq, pinEchoUltIzq); //Ult de la Izq, trigger en pin 2 y echo en pin 3
-byte PROGMEM pinTriggUltDer = 5;
-byte PROGMEM pinEchoUltDer = 6;
+byte PROGMEM pinTriggUltDer = 10;
+byte PROGMEM pinEchoUltDer = 9;
 Ultrasonico UltDer(pinTriggUltDer, pinEchoUltDer); //Ult de la Der, trigger en pin 4 y echo en pin 5
 
 byte dif = 0; //Diferencia para hacer cambios en motores
@@ -66,7 +66,7 @@ byte velMDA = 200; //velocidad para el motor de la derecha atras
 byte velMIE = 65; //velocidad para el motor de la izquierda enfrente
 byte velMIA = 200; //velocidad para el motor de la izquierda atras
 
-byte PROGMEM out = 11; //pin del out del sensor de color
+byte out = 11; //pin del out del sensor de color
 
 void setup() {
   Serial.begin(9600);
@@ -230,7 +230,7 @@ void ultrasonicos()
   Serial.print("\t");
   Serial.print(UltDer.distance());
   Serial.print("\t");
-  Serial.print(dist2);
+  Serial.println(dist2);
 }
 
 void encoder()
@@ -265,13 +265,21 @@ void mlx()
 void loop() {
   //Llamar a la funcion(es) del sensor que se quiere probar
   /*
-    sharp();
-    color();
-    servo();
-    zx();
-    encoder();
-    motores();
-    ultrasonicos();
-    mlx();
+  Serial.print(analogRead(0));
+  Serial.print("\t");
+  Serial.print(analogRead(1));
+  Serial.print("\t");
+  Serial.print(analogRead(2));
+  Serial.print("\t");
+  Serial.println(analogRead(3));
+  delay(200);
   */
+  //sharp();
+  //color();
+  //servo();
+   //zx();
+  //encoder();
+  //motores();
+  ultrasonicos();
+  //mlx();
 }
