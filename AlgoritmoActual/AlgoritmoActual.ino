@@ -143,9 +143,9 @@ Encoder Enc2(17, 27);
 
 long oldPosition  = -999;
 
-int const90 = 3725;
+int const PROGMEM const90 = 3725;
 
-const int const30 = 5500;
+int const PROGMEM const30 = 6000;
 
 //////////////////
 //////CALOR///////
@@ -196,6 +196,16 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I
 ///ULTRASONICOS///
 //////////////////
 
+byte Trigger1 = 28;
+byte Echo1 = 26;
+
+NewPing sonar1(Trigger1, Echo1, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar1.ping_cm();
+
+byte Trigger2 = 38;
+byte Echo2 = 36;
+
+NewPing sonar2(Trigger2, Echo2, MAX_DISTANCE);  //llamar a la funcion para saber la distancia con sonar1.ping_cm();
+
 byte Trigger3 = 42;
 byte Echo3 = 40;
 
@@ -219,7 +229,7 @@ NewPing sonar8(Trigger8, Echo8, MAX_DISTANCE);  //llamar a la funcion para saber
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(115200);
+  Serial.begin(9600);
   //Serial.println("hola1");
 
   //MPU
@@ -345,6 +355,7 @@ void setup() {
     }
     Possibility[iI] = 255;
   }
+  lcd.backlight();
 }
 
 int MPUY()
@@ -631,6 +642,11 @@ bool Negro()
   return iReturn;
 }
 
+int velMDE = 180;
+int velMDA = 186;
+int velMIE = 162;
+int velMIA = 162;
+
 //MOTORES
 void Detenerse()
 {
@@ -649,16 +665,16 @@ void Detenerse()
 
 void Adelante()
 {
-  analogWrite(motDerE1, 210); //160  //190
+  analogWrite(motDerE1, velMDE); //210
   analogWrite(motDerE2, 0);
 
-  analogWrite(motDerA1, 210); //220  //240
+  analogWrite(motDerA1, velMDA); //210
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 190); //182  //192
+  analogWrite(motIzqE1, velMIE); //190
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 190); //172  //192
+  analogWrite(motIzqA1, velMIA); //190
   analogWrite(motIzqA2, 0);
 }
 
@@ -680,45 +696,45 @@ void AdelanteRampa()
 void Atras()
 {
   analogWrite(motDerE1, 0); //160  //190
-  analogWrite(motDerE2, 190);
+  analogWrite(motDerE2, velMDE);
 
   analogWrite(motDerA1, 0); //220  //240
-  analogWrite(motDerA2, 210);
+  analogWrite(motDerA2, velMDA);
 
   analogWrite(motIzqE1, 0); //182  //192
-  analogWrite(motIzqE2, 200);
+  analogWrite(motIzqE2, velMIE + 9);
 
   analogWrite(motIzqA1, 0); //172  //192
-  analogWrite(motIzqA2, 200);
+  analogWrite(motIzqA2, velMIA + 9);
 }
 
 void Izquierda()
 {
-  analogWrite(motDerE1, 220 + Dif);
+  analogWrite(motDerE1, velMDE); //210
   analogWrite(motDerE2, 0);
 
-  analogWrite(motDerA1, 220 + Dif);
+  analogWrite(motDerA1, velMDA); //210
   analogWrite(motDerA2, 0);
 
-  analogWrite(motIzqE1, 0);
-  analogWrite(motIzqE2, 182 + Dif);
+  analogWrite(motIzqE1, 0); //190
+  analogWrite(motIzqE2, velMIE);
 
-  analogWrite(motIzqA1, 0);
-  analogWrite(motIzqA2, 220 + Dif);
+  analogWrite(motIzqA1, 0); //190
+  analogWrite(motIzqA2, velMIA);
 }
 
 void Derecha()
 {
   analogWrite(motDerE1, 0);
-  analogWrite(motDerE2, 220 + Dif);
+  analogWrite(motDerE2, velMDE - (15 * velMDE / 100));
 
   analogWrite(motDerA1, 0);
-  analogWrite(motDerA2, 220 + Dif);
+  analogWrite(motDerA2, velMDA - (15 * velMDA / 100));
 
-  analogWrite(motIzqE1, 182 + Dif);
+  analogWrite(motIzqE1, velMIE - (15 * velMIE / 100));
   analogWrite(motIzqE2, 0);
 
-  analogWrite(motIzqA1, 220 + Dif);
+  analogWrite(motIzqA1, velMIA - (15 * velMIA / 100));
   analogWrite(motIzqA2, 0);
 }
 
@@ -880,6 +896,20 @@ void GiroIzq90()
   Detenerse();
 }
 
+void Adelante5()
+{
+  EncDerE.write(0);
+  int Enc = EncDerE.read();
+  int const5 = const30 / 6;
+
+  while (Enc < const5)
+  {
+    Adelante();
+    Enc = EncDerE.read();
+  }
+  Detenerse();
+}
+
 void Adelante10()
 {
   EncDerE.write(0);
@@ -930,12 +960,13 @@ bool ParedDer()
   for (int iI = 0; iI < 2; iI ++)
   {
     int Sharp = SharpDe.distance();
-    ////Serial.println(Sharp);
+    Serial.print(Sharp);
+    Serial.print("\t");
     int u1 = sonar3.ping_cm();
     delay(30);
     int u2 = sonar4.ping_cm();
     delay(30);
-    if (Sharp >= 18 || (u1 == 0 || u1 == 0))
+    if (Sharp >= 24)
     {
       Pared = false;
     }
@@ -959,9 +990,10 @@ bool ParedEnf()
 {
   bool Pared = true;
   int Sharp = SharpEn.distance();
-  //Serial.print(F("Sharp: "));
-  ////Serial.println(Sharp);
-  if (Sharp > 28)
+  Serial.print(F("Sharp: "));
+  Serial.print(Sharp);
+  Serial.print("\t");
+  if (Sharp > 50)
   {
     Pared = false;
   }
@@ -1077,15 +1109,17 @@ void Detectar()
 
 void Acomodo()
 {
-  delay(30);
+  //delay(30);
   Acejarse2();
-  delay(30);
+  //delay(30);
   Ultacomodo();
+  //delay(30);
+  AcejarseEnfrente2();
+  Evadir();
 }
 
 void AcejarseDerecha()
-{
-  int Dist = SharpDe.distance();
+{<
   delay(5);
   ////Serial.println("entro 1 if");
   Dist = SharpDe.distance();
@@ -1098,9 +1132,9 @@ void AcejarseDerecha()
       while (Dist < 8)
       {
         IzquierdaM30();
-        delay(90);
+        //delay(90);
         Dist = SharpDe.distance();
-        delay(10);
+        //delay(10);
         //Serial.print("1zq    "); //Serial.println(Dist);
       }
     }
@@ -1110,9 +1144,9 @@ void AcejarseDerecha()
       while (Dist > 8)
       {
         DerechaM30();
-        delay(90);
+        //delay(90);
         Dist = SharpDe.distance();
-        delay(10);
+        //delay(10);
         //Serial.print("der    "); //Serial.println(Dist);
       }
     }
@@ -1137,9 +1171,9 @@ void AcejarseIzquierda()
       while (Dist2 < 8)
       {
         DerechaM30();
-        delay(90);
+        //delay(90);
         Dist2 = SharpIz.distance();
-        delay(10);
+        //delay(10);
         //Serial.println(SharpIz.distance());
       }
     }
@@ -1149,9 +1183,9 @@ void AcejarseIzquierda()
       while (Dist2 > 8)
       {
         IzquierdaM30();
-        delay(90);
+        //delay(90);
         Dist2 = SharpIz.distance();
-        delay(10);
+        //delay(10);
         //Serial.println(SharpIz.distance());
       }
     }
@@ -1278,10 +1312,11 @@ void Calibracion()
 void UltIzq()
 {
   //lcd.clear();
-  delay(30);
+  //delay(30);
   int U1 = sonar7.ping_cm();
   delay(50);
   int U2 = sonar8.ping_cm();
+  delay(30);
   //lcd.print(U1);
   lcd.setCursor(0, 1);
   //lcd.print(U2);
@@ -1301,7 +1336,7 @@ void UltIzq()
       }
       Detenerse();
       Dif = 0;
-      delay(90);
+      //delay(90);
     }
     else if ((U1 - U2) > 0)
     {
@@ -1316,21 +1351,22 @@ void UltIzq()
       }
       Detenerse();
       Dif = 0;
-      delay(90);
+      //delay(90);
     }
 
 
-    delay(30);
+    //delay(30);
     U1 = sonar7.ping_cm();
     delay(30);
     U2 = sonar8.ping_cm();
+    delay(30);
   }
 }
 
 void UltDer()
 {
   //lcd.clear();
-  delay(30);
+  //delay(30);
   int U1 = sonar3.ping_cm();
   delay(30);
   int U2 = sonar4.ping_cm();
@@ -1357,7 +1393,7 @@ void UltDer()
       }
       Detenerse();
       Dif = 0;
-      delay(90);
+      //delay(90);
     }
     else if ((U1 - U2) > 0)
     {
@@ -1372,14 +1408,15 @@ void UltDer()
       }
       Detenerse();
       Dif = 0;
-      delay(90);
+      //delay(90);
     }
 
 
-    delay(30);
+    //delay(30);
     U1 = sonar3.ping_cm();
     delay(30);
     U2 = sonar4.ping_cm();
+    delay(30);
   }
 }
 
@@ -1409,7 +1446,22 @@ void Acejarse2()
 }
 
 //Sube la rampa detectando si hay victima en ella
-void RampaS() {} //Usar MPU, MLX
+void RampaS()
+{
+  int MPU = MPUP();
+  AdelanteRampa();
+  do
+  {
+    MPU = MPUP();
+    Serial.println(MPU);
+    if (MPU == 0 || MPU == 7)
+    {
+      MPU = 19;
+    }
+  } while (MPU > 18);
+  delay(400);
+  Detenerse();
+}
 //Baja la rampa detectando si hay victima en ella
 void RampaB() {} //Usar MPU, MLX
 
@@ -2202,6 +2254,7 @@ void extractionPoint()
 {
   moveUntil(1);
   Detenerse();
+  lcd.write("Fin");
   delay(30000);
 }
 
@@ -2338,6 +2391,73 @@ void Laberinto()
   SearchRouteAndMove();
 }
 
+void AcejarseEnfrente2()
+{
+  for (byte iI = 0; iI < 2; iI++)
+  {
+    byte Sharp = SharpEn.distance();
+    Serial.println(Sharp);
+    if (Sharp < 48 && Sharp > 20)
+    {
+      do {
+        Adelante5();
+        byte Sharp2 = SharpEn.distance();
+        if (Sharp2 > Sharp)
+        {
+          Atras();
+          delay(100);
+          Detenerse();
+        }
+        else
+        {
+          Adelante5();
+        }
+        Sharp = SharpEn.distance();
+      } while (Sharp < 48 && Sharp > 20);
+    }
+    else if (Sharp > 14 && Sharp < 21)
+    {
+      Atras();
+      delay(100);
+      Detenerse();
+      byte Sharp2 = SharpEn.distance();
+      if (Sharp2 > Sharp)
+      {
+        Adelante();
+        delay(100);
+        Detenerse();
+      }
+    }
+  }
+}
+
+void Evadir()
+{
+  for (byte iI = 0; iI < 2; iI++)
+  {
+    byte u1 = sonar1.ping_cm();
+    delay(50);
+    byte u2 = sonar2.ping_cm();
+    if (u1 != 0 && u2 == 0)
+    {
+      DerechaM();
+      delay(200);
+      Detenerse();
+    }
+    else if (u2 != 0 && u1 == 0)
+    {
+      IzquierdaM();
+      delay(200);
+      Detenerse();
+    }
+    else
+    {
+      iI = 2;
+    }
+  }
+}
+
+//3, 17, 18 y 19
 void loop() {
-  Serial.println(pulseIn(11, LOW));
+  Serial.println(MPUP());
 }
