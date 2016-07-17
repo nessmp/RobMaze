@@ -120,6 +120,8 @@ void Detectar() {} //Usar MLX
 void RampaS() {} //Usar MPU, MLX
 //Baja la rampa detectando si hay victima en ella
 void RampaB() {} //Usar MPU, MLX
+//Acomodoarse en la rampa para bajarla
+void AcomodoRampa() {} 
 
 //Regresa cuantas posibilidades tiene de mov en numero y como booleano
 byte getPossibility(bool bDir[])
@@ -148,24 +150,24 @@ byte getPossibility(bool bDir[])
 //LLena los datos de la posicion donde se encuentra
 void GetDatos()
 {
-  Serial.println("----Datos----");
+  //Serial.println("----Datos----");
   bool bDir[4] = {false, false, false, false};
   Paso++;
   pasoActual = Paso;
-  Serial.print("Paso: ");
-  Serial.println(Paso);
+  //Serial.print("Paso: ");
+  //Serial.println(Paso);
   Pos[bZ][bX][bY] = Paso;
-  Serial.print("bZ: ");
-  Serial.println(bZ);
-  Serial.print("bX: ");
-  Serial.println(bX);
-  Serial.print("bY: ");
-  Serial.println(bY);
-  Serial.print("Pos[bZ][bX][bY]: ");
-  Serial.println(Pos[bZ][bX][bY]);
+  //Serial.print("bZ: ");
+  //Serial.println(bZ);
+  //Serial.print("bX: ");
+  //Serial.println(bX);
+  //Serial.print("bY: ");
+  //Serial.println(bY);
+  //Serial.print("Pos[bZ][bX][bY]: ");
+  //Serial.println(Pos[bZ][bX][bY]);
   Possibility[Paso] = getPossibility(bDir);
-  Serial.print("Possibility: ");
-  Serial.println(Possibility[Paso]);
+  //Serial.print("Possibility: ");
+  //Serial.println(Possibility[Paso]);
   for (byte iI = 0; iI < Possibility[Paso]; iI++)
   {
     if (true == bDir[0])
@@ -284,25 +286,25 @@ void GetDatos()
       }
     }
   }
-  //Serial.println("----Datos----");
-  //Serial.print("bZ: ");
-  //Serial.println(bZ);
-  //Serial.print("bX: ");
-  //Serial.println(bX);
-  //Serial.print("bY: ");
-  //Serial.println(bY);
-  //Serial.print("Pos: ");
-  //Serial.println(Pos[bZ][bX][bY]);
-  //Serial.print("Possibility: ");
-  //Serial.println(Possibility[Paso]);
-  Serial.print("Run 1: ");
-  Serial.println(Run[Paso][0]);
-  Serial.print("Run 2: ");
-  Serial.println(Run[Paso][1]);
-  Serial.print("Run 3: ");
-  Serial.println(Run[Paso][2]);
-  Serial.print("Run 4: ");
-  Serial.println(Run[Paso][3]);
+  ////Serial.println("----Datos----");
+  ////Serial.print("bZ: ");
+  ////Serial.println(bZ);
+  ////Serial.print("bX: ");
+  ////Serial.println(bX);
+  ////Serial.print("bY: ");
+  ////Serial.println(bY);
+  ////Serial.print("Pos: ");
+  ////Serial.println(Pos[bZ][bX][bY]);
+  ////Serial.print("Possibility: ");
+  ////Serial.println(Possibility[Paso]);
+  //Serial.print("Run 1: ");
+  //Serial.println(Run[Paso][0]);
+  //Serial.print("Run 2: ");
+  //Serial.println(Run[Paso][1]);
+  //Serial.print("Run 3: ");
+  //Serial.println(Run[Paso][2]);
+  //Serial.print("Run 4: ");
+  //Serial.println(Run[Paso][3]);
 }
 
 /*Regresa true si ya se ha estado antes en el Run que se le manda
@@ -597,16 +599,16 @@ bool Rampa()
 //Cruza la rampa, ACTUALIZAR bZ aqui!!
 void MovRampa()
 {
-  Serial.println("----Rampa----");
-  Serial.print("brRampa, paso: ");
-  Serial.println(brRampa);
-  Serial.print("biI, run: ");
-  Serial.println(biI);
-  Serial.println("Run[brRampa][biI]");
-  Serial.print("De: ");
-  Serial.println(Run[brRampa][biI]);
-  //Serial.print("bZ: ");
-  //Serial.println(bZ);
+  //Serial.println("----Rampa----");
+  //Serial.print("brRampa, paso: ");
+  //Serial.println(brRampa);
+  //Serial.print("biI, run: ");
+  //Serial.println(biI);
+  //Serial.println("Run[brRampa][biI]");
+  //Serial.print("De: ");
+  //Serial.println(Run[brRampa][biI]);
+  ////Serial.print("bZ: ");
+  ////Serial.println(bZ);
   int iMPUP = MPUP();
   //Si detecta que hay que subir la rampa
   if (iMPUP > 4000)
@@ -682,18 +684,18 @@ void MovRampa()
     Detenerse();
     bZ -= 1;
   }
-  Serial.print("a: ");
-  Serial.println(Run[brRampa][biI]);
+  //Serial.print("a: ");
+  //Serial.println(Run[brRampa][biI]);
 }
 
 //Se mueve de la coordenada actuar(iCoordAc) a la coordenada deseada(icCoord)
 void Move(int iCoordAc, int icCoord)
 {
-  Serial.println("---Move---");
-  Serial.print("Coordenada Actual: ");
-  Serial.println(iCoordAc);
-  Serial.print("Coordenada deseada: ");
-  Serial.println(icCoord);
+  //Serial.println("---Move---");
+  //Serial.print("Coordenada Actual: ");
+  //Serial.println(iCoordAc);
+  //Serial.print("Coordenada deseada: ");
+  //Serial.println(icCoord);
   //Copia de iCoordAc para la rampa
   int CopCoordAc = iCoordAc;
   //Copia de icCoord para los hoyos negros
@@ -832,30 +834,30 @@ void Move(int iCoordAc, int icCoord)
   {
     listaX[subNegro] = CopcCoord;
     subNegro += 1;
-    //Serial.println("----Entra HoyoNegro----");
+    ////Serial.println("----Entra HoyoNegro----");
     bool bListo = false;
     Atras30();
     Acomodo();
     bX = bCX;
     bY = bCY;
     byte iCPaso = Pos[bZ][bX][bY];
-    //Serial.print("bZ: ");
-    //Serial.println(bZ);
-    //Serial.print("bX: ");
-    //Serial.println(bX);
-    //Serial.print("bY: ");
-    //Serial.println(bY);
-    //Serial.print("Pos[bZ][bX][bY]= ");
-    //Serial.println(Pos[bZ][bX][bY]);
+    ////Serial.print("bZ: ");
+    ////Serial.println(bZ);
+    ////Serial.print("bX: ");
+    ////Serial.println(bX);
+    ////Serial.print("bY: ");
+    ////Serial.println(bY);
+    ////Serial.print("Pos[bZ][bX][bY]= ");
+    ////Serial.println(Pos[bZ][bX][bY]);
     for (byte iI = 0; iI < Possibility[iCPaso]; iI++)
     {
-      //Serial.print("icCoord: ");
-      //Serial.println(icCoord);
+      ////Serial.print("icCoord: ");
+      ////Serial.println(icCoord);
       int iThis = getCoord(Run[iCPaso][iI], iCPaso);
-      //Serial.print("iThis #");
-      //Serial.print(iI);
-      //Serial.print(": ");
-      //Serial.println(getCoord(Run[iCPaso][iI], iCPaso));
+      ////Serial.print("iThis #");
+      ////Serial.print(iI);
+      ////Serial.print(": ");
+      ////Serial.println(getCoord(Run[iCPaso][iI], iCPaso));
       if (iThis == CopcCoord)
       {
         for (byte iJ = iI; iJ < 4; iJ++)
@@ -872,18 +874,18 @@ void Move(int iCoordAc, int icCoord)
     Run[iCPaso][3] = 'a';
     Possibility[iCPaso] -= 1;
     pasoActual = iCPaso;
-    //Serial.print("iCPaso: ");
-    //Serial.println(iCPaso);
-    //Serial.print("Run 1: ");
-    //Serial.println(Run[iCPaso][0]);
-    //Serial.print("Run 2: ");
-    //Serial.println(Run[iCPaso][1]);
-    //Serial.print("Run 3: ");
-    //Serial.println(Run[iCPaso][2]);
-    //Serial.print("Run 4: ");
-    //Serial.println(Run[iCPaso][3]);
-    //Serial.print("Possbility: ");
-    //Serial.println(Possibility[iCPaso]);
+    ////Serial.print("iCPaso: ");
+    ////Serial.println(iCPaso);
+    ////Serial.print("Run 1: ");
+    ////Serial.println(Run[iCPaso][0]);
+    ////Serial.print("Run 2: ");
+    ////Serial.println(Run[iCPaso][1]);
+    ////Serial.print("Run 3: ");
+    ////Serial.println(Run[iCPaso][2]);
+    ////Serial.print("Run 4: ");
+    ////Serial.println(Run[iCPaso][3]);
+    ////Serial.print("Possbility: ");
+    ////Serial.println(Possibility[iCPaso]);
     SearchRouteAndMove();
   }
   //Si esa nueva coordenada es la rampa, la cruza y actualiza bZ
@@ -899,9 +901,9 @@ void Move(int iCoordAc, int icCoord)
 //Se mueve hasta el paso que se tiene como parametro
 void moveUntil(byte bHere)
 {
-  Serial.println("---MoveUntil---");
-  Serial.print("Ir hasta el paso #");
-  Serial.println(bHere);
+  //Serial.println("---MoveUntil---");
+  //Serial.print("Ir hasta el paso #");
+  //Serial.println(bHere);
   byte counter = 0;
   //copia del paso actual
   byte bCPaso = pasoActual;
@@ -959,9 +961,9 @@ void extractionPoint()
 void exploreNewWorlds(byte bHere)
 {
   Explore = true;
-  Serial.println("----exploreNewWorlds----");
-  Serial.print("Se encuentra en Paso: ");
-  Serial.println(bHere);
+  //Serial.println("----exploreNewWorlds----");
+  //Serial.print("Se encuentra en Paso: ");
+  //Serial.println(bHere);
   byte iCounter = 0;
   for (byte iI = 0; iI < Possibility[bHere]; iI++)
   {
@@ -970,12 +972,12 @@ void exploreNewWorlds(byte bHere)
     bool bCheck = BeenHere(Run[bHere][iI], bHere);
     if (bCheck == false && iCounter == 0)
     {
-      Serial.print("No ha estado en: ");
-      Serial.println(getCoord(Run[bHere][iI], bHere));
-      Serial.print("Del Paso: ");
-      Serial.println(bHere);
-      Serial.print("Posibilidad #");
-      Serial.println(iI);
+      //Serial.print("No ha estado en: ");
+      //Serial.println(getCoord(Run[bHere][iI], bHere));
+      //Serial.print("Del Paso: ");
+      //Serial.println(bHere);
+      //Serial.print("Posibilidad #");
+      //Serial.println(iI);
       icCoord = getCoord(Run[bHere][iI], bHere);
       brRampa = bHere;
       biI = iI;
@@ -1004,10 +1006,10 @@ void exploreNewWorlds(byte bHere)
           break;
         }
       }
-      //Serial.print("Coordenada Actual: ");
-      //Serial.println(iCoordAc);
-      //Serial.print("Coordenada Deseada: ");
-      //Serial.println(icCoord);
+      ////Serial.print("Coordenada Actual: ");
+      ////Serial.println(iCoordAc);
+      ////Serial.print("Coordenada Deseada: ");
+      ////Serial.println(icCoord);
       Move(iCoordAc, icCoord);
       iCounter++;
     }
@@ -1018,7 +1020,7 @@ void exploreNewWorlds(byte bHere)
 //Busca el paso al cual llegar para despues moverse a la coordenada desconocida
 byte WhereToGo()
 {
-  Serial.println("---WhereToGo---");
+  //Serial.println("---WhereToGo---");
   //copia del paso actual, de x y de y
   byte bCPaso = pasoActual;
   byte bCX = bX;
@@ -1046,12 +1048,12 @@ byte WhereToGo()
         {
 
           bHere = iI;
-          Serial.print("No ha estado en un Run del paso #");
-          Serial.println(iI);
-          Serial.print("Numero de Run: ");
-          Serial.println(iJ);
-          Serial.print("Coordenada: ");
-          Serial.println(getCoord(Run[iI][iJ], iI));
+          //Serial.print("No ha estado en un Run del paso #");
+          //Serial.println(iI);
+          //Serial.print("Numero de Run: ");
+          //Serial.println(iJ);
+          //Serial.print("Coordenada: ");
+          //Serial.println(getCoord(Run[iI][iJ], iI));
         }
       }
       if (255 != bHere)
@@ -1072,7 +1074,7 @@ byte WhereToGo()
 //Busca la ruta y se mueve hasta la posicion desconocida
 void SearchRouteAndMove()
 {
-  Serial.println("---SearchAndMove---");
+  //Serial.println("---SearchAndMove---");
   byte bData = WhereToGo();
   moveUntil(bData);
   exploreNewWorlds(bData);
@@ -1081,7 +1083,7 @@ void SearchRouteAndMove()
 //Funcion a llamar para completar el laberinto
 void Laberinto()
 {
-  Serial.println("------Laberinto-------");
+  //Serial.println("------Laberinto-------");
   GetDatos();
   SearchRouteAndMove();
 }

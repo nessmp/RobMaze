@@ -317,7 +317,7 @@ void setup() {
   lcd.begin(16, 2);  // initialize the lcd for 16 chars 2 lines, turn on backlight
   lcd.noBacklight(); // finish with backlight on
   lcd.setCursor(0, 0); //Start at character 4 on line 0
-  //lcd.print("OLIVER 2.0");
+  lcd.print("OLIVER");
 
   //SERVO
   Dispensador.attach(pinservo, PulsoMinimo, PulsoMaximo);
@@ -1119,10 +1119,10 @@ void Acomodo()
 }
 
 void AcejarseDerecha()
-{<
+{
   delay(5);
   ////Serial.println("entro 1 if");
-  Dist = SharpDe.distance();
+  int Dist = SharpDe.distance();
   //Serial.print("antes    "); //Serial.println(Dist);
 
   while (Dist != 8 ) {
@@ -2204,6 +2204,13 @@ void Move(int iCoordAc, int icCoord)
     bARampa = true;
   }
   Acomodo();
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(bZ);
+  lcd.print(" ");
+  lcd.print(bX);
+  lcd.print(" ");
+  lcd.print(bY);
 }
 
 
@@ -2277,6 +2284,13 @@ void exploreNewWorlds(byte bHere)
       Serial.print("Del Paso: ");
       Serial.println(bHere);
       Serial.print("Posibilidad #= ");
+      Serial.println(iI);
+      lcd.setCursor(7, 1);
+      lcd.print("c ");
+      lcd.print(getCoord(Run[bHere][iI], bHere));
+      Serial.print("Del Paso: ");
+      Serial.println(bHere);
+      Serial.print("Posibilidad #");
       Serial.println(iI);
       icCoord = getCoord(Run[bHere][iI], bHere);
       brRampa = bHere;
@@ -2380,6 +2394,9 @@ byte WhereToGo()
 void SearchRouteAndMove()
 {
   byte bData = WhereToGo();
+  lcd.setCursor(0, 1);
+  lcd.print("ir #");
+  lcd.print(bData);
   moveUntil(bData);
   exploreNewWorlds(bData);
 }
@@ -2459,5 +2476,5 @@ void Evadir()
 
 //3, 17, 18 y 19
 void loop() {
-  Serial.println(MPUP());
+  Laberinto();
 }
