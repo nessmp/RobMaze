@@ -1,2 +1,2 @@
 # RobMaze
-Programacion y archivos para robot de la competencia Rescue Maze 2016
+Repositorio del equipo representativo de México "Roborregos Delta" para la competencia Robocup Rescue Maze Jr. 2015
