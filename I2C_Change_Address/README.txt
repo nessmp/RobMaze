@@ -1,0 +1,1 @@
+Esto sirve para los MLX90614, no todos los sensores permiten cambiar la dirección I2C con la que trabajan por medio de código

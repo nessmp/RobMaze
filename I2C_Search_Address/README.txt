@@ -1,0 +1,1 @@
+Debe funcionar para cualquier sensor que trabaje mediante I2C, de preferencia tener solo un sensor conectado

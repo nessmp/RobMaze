@@ -1,0 +1,1 @@
+Falta actualizar y subir las piezas del robot utilizado en el Nacional (Oliver) y el del mundial (Braulio) y de la inombrable (Rasputia)
